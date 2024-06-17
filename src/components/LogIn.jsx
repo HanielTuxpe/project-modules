@@ -1,10 +1,11 @@
+// src/components/Login.js
 import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, Link } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
-const Registro = ({ onRegister }) => {
+const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
@@ -12,35 +13,29 @@ const Registro = ({ onRegister }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validación de campos vacíos
         if (!username.trim() || !password.trim()) {
             toast.warning('Por favor, complete todos los campos.');
             return;
         }
 
-        // Frontend: Antes de la solicitud
-        console.log('Enviando datos:', { username, password });
-
         try {
-            const response = await axios.post('http://localhost:3001/register', {
+            const response = await axios.post('http://localhost:3001/login', {
                 username,
                 password,
             });
 
-            if (response.status === 201) {
-                toast.success(response.data.message);
-                onRegister(username);
+            if (response.status === 200) {
+                toast.success('Inicio de sesión exitoso');
+                onLogin(username);
                 navigate('/mis-rutas');
-            } else if (response.status === 400) {
-                toast.warning(response.data.message);
             } else {
-                toast.warning('Hubo un problema al registrar el usuario');
+                toast.warning(response.data.message);
             }
         } catch (error) {
             if (error.response && error.response.status === 400) {
                 toast.warning(error.response.data.message);
             } else {
-                toast.error('Error al registrar usuario');
+                toast.error('Error al iniciar sesión');
             }
         }
     };
@@ -56,7 +51,7 @@ const Registro = ({ onRegister }) => {
                 }}
             >
                 <Typography component="h1" variant="h5">
-                    Registro
+                    Iniciar Sesión
                 </Typography>
                 <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
                     <TextField
@@ -92,12 +87,21 @@ const Registro = ({ onRegister }) => {
                         color="primary"
                         sx={{ mt: 3, mb: 2 }}
                     >
-                        Registrarse
+                        Iniciar Sesión
                     </Button>
+                    <Typography variant="body2">
+                        <Link href="/forgot-password" sx={{ mr: 1 }}>
+                            ¿Olvidaste tu contraseña?
+                        </Link>
+                        o
+                        <Link href="/" sx={{ ml: 1 }}>
+                            Regístrate
+                        </Link>
+                    </Typography>
                 </Box>
             </Box>
         </Container>
     );
 };
 
-export default Registro;
+export default Login;

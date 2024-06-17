@@ -1,49 +1,71 @@
 // src/App.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Registro from './components/SignUp';
+import Login from './components/LogIn';
 import BuscarRuta from './components/RouteSearch';
-import Ruta from './components/Route';
+import ForgotPassword from './components/ForgotPassword'; // Importa el nuevo componente
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Container from '@mui/material/Container';
+import Box from '@mui/material/Box';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 const App = () => {
     const [usuario, setUsuario] = useState(null);
-    const [rutas, setRutas] = useState([]);
+
+    useEffect(() => {
+        const savedUser = localStorage.getItem('usuario');
+        if (savedUser) {
+            setUsuario(savedUser);
+        }
+    }, []);
 
     const handleRegister = (username) => {
         setUsuario(username);
+        localStorage.setItem('usuario', username);
     };
 
-    const handleBuscar = (direccion) => {
-        // Simulando la búsqueda de rutas
-        const rutasDisponibles = [
-            { direccion: 'Centro', ruta: 'Ruta 1, Ruta 2' },
-            { direccion: 'Mercado', ruta: 'Ruta 3, Ruta 4' },
-            // Añadir más rutas simuladas según sea necesario
-        ];
+    const handleLogin = (username) => {
+        setUsuario(username);
+        localStorage.setItem('usuario', username);
+    };
 
-        const rutasEncontradas = rutasDisponibles
-            .filter(r => r.direccion.toLowerCase().includes(direccion.toLowerCase()))
-            .map(r => r.ruta);
-
-        setRutas(rutasEncontradas);
+    const handleLogout = () => {
+        setUsuario(null);
+        localStorage.removeItem('usuario');
     };
 
     return (
-        <div className="App">
-            {!usuario ? (
-                <Registro onRegister={handleRegister} />
-            ) : (
-                <div>
-                    <h1>Bienvenido, {usuario}</h1>
-                    <BuscarRuta onBuscar={handleBuscar} />
-                    {rutas.length > 0 ? (
-                        rutas.map((ruta, index) => <Ruta key={index} ruta={ruta} />)
-                    ) : (
-                        <p>No se encontraron rutas</p>
-                    )}
-                </div>
-            )}
-        </div>
+        <Router>
+            <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                <Header usuario={usuario} onLogout={handleLogout} />
+                <Container component="main" sx={{ mt: 8, mb: 2 }}>
+                    <Routes>
+                        <Route
+                            path="/"
+                            element={usuario ? <Navigate to="/mis-rutas" /> : <Registro onRegister={handleRegister} />}
+                        />
+                        <Route
+                            path="/login"
+                            element={usuario ? <Navigate to="/mis-rutas" /> : <Login onLogin={handleLogin} />}
+                        />
+                        <Route
+                            path="/forgot-password"
+                            element={<ForgotPassword />} // Nueva ruta para recuperar contraseña
+                        />
+                        <Route
+                            path="/mis-rutas"
+                            element={usuario ? <BuscarRuta /> : <Navigate to="/" />}
+                        />
+                    </Routes>
+                </Container>
+                <Footer />
+                <ToastContainer />
+            </Box>
+        </Router>
     );
 };
 
