@@ -7,24 +7,29 @@ import { useNavigate } from 'react-router-dom';
 const Registro = ({ onRegister }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Validación de campos vacíos
-        if (!username.trim() || !password.trim()) {
+        if (!username.trim() || !password.trim() || !email.trim()) {
             toast.warning('Por favor, complete todos los campos.');
             return;
         }
 
-        // Frontend: Antes de la solicitud
-        console.log('Enviando datos:', { username, password });
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            toast.warning('Por favor, ingresa un correo electrónico válido.');
+            return;
+        }
 
         try {
             const response = await axios.post('http://localhost:3001/register', {
                 username,
                 password,
+                email
             });
 
             if (response.status === 201) {
@@ -71,6 +76,19 @@ const Registro = ({ onRegister }) => {
                         autoFocus
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label="Correo Electrónico"
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
                     <TextField
                         variant="outlined"
