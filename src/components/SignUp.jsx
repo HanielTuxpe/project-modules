@@ -26,7 +26,7 @@ const Registro = ({ onRegister }) => {
         }
 
         try {
-            const response = await axios.post('http://localhost:3001/register', {
+            const response = await axios.post('https://rutas-huejutla-server.onrender.com/register', {
                 username,
                 password,
                 email
@@ -57,7 +57,7 @@ const Registro = ({ onRegister }) => {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    mt: 8,
+                    mt: 2,
                 }}
             >
                 <Typography component="h1" variant="h5">

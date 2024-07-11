@@ -5,9 +5,11 @@ import Typography from '@mui/material/Typography';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import { Box, Button, IconButton } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useNavigate } from 'react-router-dom';
 
-const Header = ({ usuario, onLogout }) => {
+const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
     const navigate = useNavigate();
 
     const handleLoginClick = () => {
@@ -20,7 +22,7 @@ const Header = ({ usuario, onLogout }) => {
     };
 
     return (
-        <AppBar position="static">
+        <AppBar position="static" sx={{mb: 2}}>
             <Toolbar>
                 <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
                     <DirectionsBusIcon sx={{ mr: 2 }} />
@@ -28,6 +30,9 @@ const Header = ({ usuario, onLogout }) => {
                         Tus Rutas Huejutla
                     </Typography>
                 </Box>
+                <IconButton color="inherit" onClick={toggleDarkMode}>
+                    {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+                </IconButton>
                 {usuario ? (
                     <IconButton color="inherit" onClick={handleLogoutClick}>
                         <ExitToAppIcon />

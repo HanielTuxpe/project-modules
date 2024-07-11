@@ -8,6 +8,9 @@ const ForgotPassword = () => {
     const [codigo, setCodigo] = useState('');
     const [nombreUsuario, setNombreUsuario] = useState('');
     const [isEmailSent, setIsEmailSent] = useState(false);
+    const [isCodeVerified, setIsCodeVerified] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
+    const [token, setToken] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -24,7 +27,7 @@ const ForgotPassword = () => {
         }
 
         try {
-            const response = await axios.post('http://localhost:3001/forgot-password', {
+            const response = await axios.post('https://rutas-huejutla-server.onrender.com/forgot-password', {
                 email,
             });
 
@@ -32,7 +35,7 @@ const ForgotPassword = () => {
                 setNombreUsuario(response.data.username);
                 setIsEmailSent(true);
                 toast.success('Código de recuperación enviado. Por favor, revise su bandeja de entrada.');
-            } else {
+            } else if (response.status === 400) {
                 toast.warning(response.data.message);
             }
         } catch (error) {
@@ -46,8 +49,47 @@ const ForgotPassword = () => {
 
     const handleVerify = async (e) => {
         e.preventDefault();
-        // Lógica para verificar el código aquí
-        toast.success('Código verificado correctamente.');
+
+        try {
+            const response = await axios.post('https://rutas-huejutla-server.onrender.com/verify-code', {
+                code: codigo,
+            });
+
+            if (response.status === 200) {
+                setIsCodeVerified(true);
+                toast.success('Código verificado correctamente.');
+                setToken(response.data.token);
+            } else {
+                toast.warning(response.data.message);
+            }
+        } catch (error) {
+            toast.error('Error al verificar el código.');
+        }
+    };
+
+    const handleResetPassword = async (e) => {
+        e.preventDefault();
+
+        if (!newPassword.trim()) {
+            toast.warning('Por favor, ingrese su nueva contraseña.');
+            return;
+        }
+
+        try {
+            const response = await axios.post('https://rutas-huejutla-server.onrender.com/reset-password', {
+                code: token,
+                newPassword,
+            });
+
+            if (response.status === 200) {
+                toast.success('Contraseña restablecida correctamente.');
+            } else {
+                toast.warning(response.data);
+            }
+        } catch (error) {
+            toast.error('Error al restablecer la contraseña.');
+            console.log(error)
+        }
     };
 
     return (
@@ -87,7 +129,7 @@ const ForgotPassword = () => {
                             Enviar Correo de Recuperación
                         </Button>
                     </Box>
-                ) : (
+                ) : !isCodeVerified ? (
                     <Box component="form" onSubmit={handleVerify} sx={{ mt: 3 }}>
                         <Typography component="p" variant="body1">
                             Usuario vinculado: {nombreUsuario}
@@ -112,6 +154,31 @@ const ForgotPassword = () => {
                             sx={{ mt: 3, mb: 2 }}
                         >
                             Verificar Código
+                        </Button>
+                    </Box>
+                ) : (
+                    <Box component="form" onSubmit={handleResetPassword} sx={{ mt: 3 }}>
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            fullWidth
+                            id="newPassword"
+                            label="Nueva Contraseña"
+                            type="password"
+                            name="newPassword"
+                            autoComplete="new-password"
+                            autoFocus
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            color="primary"
+                            sx={{ mt: 3, mb: 2 }}
+                        >
+                            Restablecer Contraseña
                         </Button>
                     </Box>
                 )}

@@ -1,18 +1,19 @@
-// src/theme.js
 import { createTheme } from '@mui/material/styles';
 
-const theme = createTheme({
-    palette: {
-        primary: {
-            main: '#1976d2', // Azul principal
+const getTheme = (darkMode) =>
+    createTheme({
+        palette: {
+            mode: darkMode ? 'dark' : 'light',
+            primary: {
+                main: '#1976d2', // Azul principal
+            },
+            secondary: {
+                main: '#ff9800', // Naranja secundario
+            },
         },
-        secondary: {
-            main: '#ff9800', // Naranja secundario
+        typography: {
+            fontFamily: 'Arial, sans-serif',
         },
-    },
-    typography: {
-        fontFamily: 'Arial, sans-serif',
-    },
-});
+    });
 
-export default theme;
+export default getTheme;
