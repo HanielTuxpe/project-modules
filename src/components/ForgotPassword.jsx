@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ const ForgotPassword = () => {
     const [isCodeVerified, setIsCodeVerified] = useState(false);
     const [newPassword, setNewPassword] = useState('');
     const [token, setToken] = useState('');
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -76,13 +78,15 @@ const ForgotPassword = () => {
         }
 
         try {
+            console.log(token)
             const response = await axios.post('https://rutas-huejutla-server.onrender.com/reset-password', {
-                code: token,
+                token: token,
                 newPassword,
             });
 
             if (response.status === 200) {
                 toast.success('Contraseña restablecida correctamente.');
+                navigate('/login');
             } else {
                 toast.warning(response.data);
             }
