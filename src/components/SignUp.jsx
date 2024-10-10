@@ -47,6 +47,7 @@ const Registro = ({ onRegister }) => {
             } else {
                 toast.error('Error al registrar usuario');
             }
+            console.log(error)
         }
     };
 

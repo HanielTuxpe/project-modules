@@ -17,7 +17,7 @@ const Footer = () => {
             }}
         >
             <Typography variant="body1">
-                Copyright TuxTech 2024
+                ©Copyright JENDYB 2024
             </Typography>
         </Box>
     );
