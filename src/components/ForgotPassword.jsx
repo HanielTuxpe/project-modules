@@ -29,7 +29,7 @@ const ForgotPassword = () => {
         }
 
         try {
-            const response = await axios.post('https://rutas-huejutla-server.onrender.com/forgot-password', {
+            const response = await axios.post('https://prj-server.onrender.com/forgot-password', {
                 email,
             });
 
@@ -53,7 +53,7 @@ const ForgotPassword = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post('https://rutas-huejutla-server.onrender.com/verify-code', {
+            const response = await axios.post('https://prj-server.onrender.com/verify-code', {
                 code: codigo,
             });
 
@@ -79,7 +79,7 @@ const ForgotPassword = () => {
 
         try {
             console.log(token)
-            const response = await axios.post('https://rutas-huejutla-server.onrender.com/reset-password', {
+            const response = await axios.post('https://prj-server.onrender.com/reset-password', {
                 token: token,
                 newPassword,
             });

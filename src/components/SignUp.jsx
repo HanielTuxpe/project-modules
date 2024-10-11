@@ -26,7 +26,7 @@ const Registro = ({ onRegister }) => {
         }
 
         try {
-            const response = await axios.post('https://rutas-huejutla-server.onrender.com/register', {
+            const response = await axios.post('https://prj-server.onrender.com/register', {
                 username,
                 password,
                 email

@@ -19,7 +19,7 @@ const Login = ({ onLogin }) => {
         }
 
         try {
-            const response = await axios.post('https://rutas-huejutla-server.onrender.com/login', {
+            const response = await axios.post('https://prj-server.onrender.com/login', {
                 username,
                 password,
             });

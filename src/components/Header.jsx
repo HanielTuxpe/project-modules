@@ -9,9 +9,11 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/uthh.png';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
     const navigate = useNavigate();
+    const isMobile = useMediaQuery('(max-width: 600px)'); // Detecta si es un dispositivo móvil
 
     const handleLoginClick = () => {
         navigate('/login');
@@ -34,7 +36,7 @@ const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
                 <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
                     <img src={logo} alt="My Icon" style={{ width: 32, height: 32, marginRight: 16 }} />
                     <Typography variant="h6" component="div">
-                        PORTAL DIGITAL DE ATENCIÓN INTEGRAL A ESTUDIANTES DE LA UTHH
+                        {isMobile ? 'PODAI' : 'PORTAL DIGITAL DE ATENCIÓN INTEGRAL A ESTUDIANTES DE LA UTHH'} {/* Cambia el texto si es móvil */}
                     </Typography>
                 </Box>
                 <IconButton color="inherit" onClick={toggleDarkMode}>
