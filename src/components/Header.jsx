@@ -8,6 +8,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/uthh.png';
 
 const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
     const navigate = useNavigate();
@@ -22,12 +23,18 @@ const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
     };
 
     return (
-        <AppBar position="static" sx={{mb: 2}}>
+        <AppBar position="static"
+            sx={{
+                mb: 2,
+                backgroundColor: '#923',
+                color: '#fff',
+            }}
+        >
             <Toolbar>
                 <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-                    <DirectionsBusIcon sx={{ mr: 2 }} />
+                    <img src={logo} alt="My Icon" style={{ width: 32, height: 32, marginRight: 16 }} />
                     <Typography variant="h6" component="div">
-                        Tus Rutas Huejutla
+                        PORTAL DIGITAL DE ATENCIÓN INTEGRAL A ESTUDIANTES DE LA UTHH
                     </Typography>
                 </Box>
                 <IconButton color="inherit" onClick={toggleDarkMode}>

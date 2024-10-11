@@ -4,7 +4,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import Registro from './components/SignUp';
 import Login from './components/LogIn';
 import BuscarRuta from './components/RouteSearch';
-import ForgotPassword from './components/ForgotPassword'; // Importa el nuevo componente
+import ForgotPassword from './components/ForgotPassword';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Container from '@mui/material/Container';
@@ -59,18 +59,18 @@ const App = () => {
                         <Routes>
                             <Route
                                 path="/"
-                                element={usuario ? <Navigate to="/mis-rutas" /> : <Registro onRegister={handleRegister} />}
+                                element={usuario ? <Navigate to="/index" /> : <Registro onRegister={handleRegister} />}
                             />
                             <Route
                                 path="/login"
-                                element={usuario ? <Navigate to="/mis-rutas" /> : <Login onLogin={handleLogin} />}
+                                element={usuario ? <Navigate to="/index" /> : <Login onLogin={handleLogin} />}
                             />
                             <Route
                                 path="/forgot-password"
                                 element={<ForgotPassword />} // Nueva ruta para recuperar contraseña
                             />
                             <Route
-                                path="/mis-rutas"
+                                path="/index"
                                 element={usuario ? <BuscarRuta /> : <Navigate to="/" />}
                             />
                         </Routes>

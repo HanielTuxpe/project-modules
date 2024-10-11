@@ -27,7 +27,7 @@ const Login = ({ onLogin }) => {
             if (response.status === 200) {
                 toast.success('Inicio de sesión exitoso');
                 onLogin(username);
-                navigate('/mis-rutas');
+                navigate('/index');
             } else {
                 toast.warning(response.data.message);
             }
