@@ -4,6 +4,7 @@ import { CssBaseline, ThemeProvider, Box, Container } from '@mui/material';
 
 import Registro from './components/SignUp';
 import Login from './components/LogIn';
+import Crud from './components/Crud';
 import BuscarRuta from './components/RouteSearch';
 import ForgotPassword from './components/ForgotPassword';
 import Header from './components/Header';
@@ -72,6 +73,11 @@ const App = () => {
                                 path="/index"
                                 element={usuario ? <BuscarRuta /> : <Navigate to="/" />}
                             />
+                             <Route
+                                path="/Crud"
+                                element={usuario ? <Crud darkMode={darkMode}/> : <Navigate to="/" />}
+                            />
+                           
                         </Routes>
                     </Container>
 
