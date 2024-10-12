@@ -118,7 +118,7 @@ function SideMenu() {
             >
                 <List>
                     <ListItem>
-                        <ListItemText primary="NEXTRO ABLE" style={{ color: '#ffffff' }} />
+                        <ListItemText primary="ADMINISTRADOR" style={{ color: '#ffffff' }} />
                     </ListItem>
                     <ListItem>
                         <ListItemText primary="40+ Ready to Use from Plugins" style={{ color: '#ffffff' }} />
@@ -129,7 +129,7 @@ function SideMenu() {
                         <ListItemIcon>
                             <TableChart style={{ color: '#c2c2c2' }} />
                         </ListItemIcon>
-                        <StyledListItemText primary="Bootstrap Table" />
+                        <StyledListItemText primary="INFORMACION DE LA EMPRESA" />
                     </ListItem>
 
                     <ListItem button>
