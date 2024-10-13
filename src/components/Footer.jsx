@@ -16,10 +16,10 @@ const Footer = () => {
                 textAlign: 'center',
                 backgroundColor: (theme) =>
                     theme.palette.mode === 'light' ? theme.palette.grey[400] : theme.palette.grey[900],
-                position: 'fixed', // Fijo en la parte inferior
+                position:'fixed', /* Botón posicionado en la parte inferior */
+                bottom: 0,         /* Fijado a la parte inferior del contenedor */
                 left: 0,
                 right: 0,
-                bottom: 0, // Asegura que esté en la parte inferior
             }}
         >
             <Typography variant={isMobile ? 'body2' : 'body1'}> {/* Cambia el tamaño del texto según el dispositivo */}
