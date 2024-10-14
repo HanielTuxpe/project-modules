@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Box, Typography } from '@mui/material';
 import banner from '../assets/banner.png';
 import { useMediaQuery } from '@mui/material';
+import MenuPincipal from './menu'; // Importa politicas
+
 
 const Index = () => {
     const [darkMode, setDarkMode] = useState(false);
@@ -26,6 +28,7 @@ const Index = () => {
     }, []);
 
     return (
+
         <Container
             sx={{
                 display: 'flex',
@@ -35,6 +38,7 @@ const Index = () => {
                 maxWidth: '100vw', // Para asegurarse que no exceda el ancho de la ventana
             }}
         >
+            <MenuPincipal></MenuPincipal>
             <Box
                 sx={{
                     display: 'flex',

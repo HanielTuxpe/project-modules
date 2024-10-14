@@ -3,11 +3,11 @@ import { Box, Typography, List, ListItem, ListItemText, IconButton, TextField, B
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
-const API_URL = 'http://localhost:3001/politicas'; // Cambia por la URL de tu API
+const API_URL = 'http://localhost:3001/terminos'; // Cambia por la URL de tu API
 
-const PoliticasPrivacidad = () => {
+const Terminos = () => {
     const [items, setItems] = useState([]);
-    const [newPolicy, setNewPolicy] = useState('');
+    const [newTerm, setNewTerm] = useState('');
     const [sections, setSections] = useState([]);
     const [newSectionTitle, setNewSectionTitle] = useState('');
     const [newSectionDescription, setNewSectionDescription] = useState('');
@@ -16,62 +16,66 @@ const PoliticasPrivacidad = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editingIndex, setEditingIndex] = useState(null);
     const [editingSectionIndex, setEditingSectionIndex] = useState(null);
-    const [editingListItemIndex, setEditingListItemIndex] = useState(null); // Nuevo estado para editar el ítem
-    const [editingPolicyId, setEditingPolicyId] = useState(null);
+    const [editingListItemIndex, setEditingListItemIndex] = useState(null);
+    const [editingTermId, setEditingTermId] = useState(null);
 
     useEffect(() => {
-        const fetchPolicies = async () => {
+        const fetchTerms = async () => {
             try {
                 const response = await fetch(API_URL);
                 const data = await response.json();
                 if (Array.isArray(data)) {
                     setItems(data);
-                    console.log('La respuesta de la API', data);
                 } else {
                     console.error('La respuesta de la API no es un arreglo:', data);
                 }
             } catch (error) {
-                console.error('Error al cargar políticas:', error);
+                console.error('Error al cargar términos:', error);
             }
         };
 
-        fetchPolicies();
+        fetchTerms();
     }, []);
 
-    const addPolicy = async () => {
-        if (newPolicy.trim() === '' || sections.length === 0) {
-            alert('Por favor, ingresa un nombre para la política y agrega al menos una sección.');
-            return;
-        }
+    const addTerm = async () => {
+        try {
+            if (newTerm.trim() === '' || sections.length === 0) {
+                alert('Por favor, ingresa un nombre para el término y agrega al menos una sección.');
+                return;
+            }
 
-        const newPolicyObj = { titulo_politica: newPolicy, secciones: sections };
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newPolicyObj),
-        });
+            const newTermObj = { titulo_termino: newTerm, secciones: sections };
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newTermObj),
+            });
 
-        if (response.ok) {
-            const createdPolicy = await response.json();
-            setItems((prevItems) => [...prevItems, createdPolicy]);
+            if (!response.ok) {
+                throw new Error(`Error en la respuesta: ${response.status} ${response.statusText}`);
+            }
+
+            const createdTerm = await response.json();
+            setItems((prevItems) => [...prevItems, createdTerm]);
             clearForm();
-        } else {
-            alert('Error al agregar la política.');
+        } catch (error) {
+            console.error('Error al agregar el término:', error);
+            alert('Ocurrió un error al agregar el término. Verifica la consola para más detalles.');
         }
     };
 
-    const deletePolicy = async (index) => {
-        const policyToDelete = items[index];
-        const response = await fetch(`${API_URL}/${policyToDelete._id}`, {
+    const deleteTerm = async (index) => {
+        const termToDelete = items[index];
+        const response = await fetch(`${API_URL}/${termToDelete._id}`, {
             method: 'DELETE',
         });
 
         if (response.ok) {
             setItems((prevItems) => prevItems.filter((_, i) => i !== index));
         } else {
-            alert('Error al eliminar la política.');
+            alert('Error al eliminar el término.');
         }
     };
 
@@ -107,7 +111,7 @@ const PoliticasPrivacidad = () => {
         const section = sections[index];
         setNewSectionTitle(section.titulo_seccion);
         setNewSectionDescription(section.description);
-        setNewSectionList(section.list); // Actualizar con la lista de la sección editada
+        setNewSectionList(section.list);
         setEditingSectionIndex(index);
     };
 
@@ -119,13 +123,11 @@ const PoliticasPrivacidad = () => {
 
         if (editingSectionIndex !== null) {
             if (editingListItemIndex !== null) {
-                // Si está editando un ítem, lo actualiza
                 const updatedList = [...newSectionList];
                 updatedList[editingListItemIndex] = newListItem;
                 setNewSectionList(updatedList);
-                setEditingListItemIndex(null); // Resetear el índice de edición
+                setEditingListItemIndex(null);
             } else {
-                // Si no está editando, lo agrega
                 setNewSectionList((prevList) => [...prevList, newListItem]);
             }
             setNewListItem('');
@@ -142,32 +144,32 @@ const PoliticasPrivacidad = () => {
     const editListItem = (index) => {
         const listItem = newSectionList[index];
         setNewListItem(listItem);
-        setEditingListItemIndex(index); // Guardar el índice del ítem que se está editando
+        setEditingListItemIndex(index);
     };
 
-    const editPolicy = (index) => {
+    const editTerm = (index) => {
         setIsEditing(true);
         setEditingIndex(index);
-        const policy = items[index];
+        const term = items[index];
 
-        if (policy) {
-            setNewPolicy(policy.titulo_politica);
-            setSections(policy.secciones);
-            setEditingPolicyId(policy._id);
+        if (term) {
+            setNewTerm(term.titulo_termino);  // Cambiar a título del término
+            setSections(term.secciones);
+            setEditingTermId(term._id);
         }
     };
 
-    const updatePolicy = async () => {
-        if (editingPolicyId === null) return;
+    const updateTerm = async () => {
+        if (editingTermId === null) return;
 
         try {
-            const response = await fetch(`${API_URL}/${editingPolicyId}`, {
-                method: 'PATCH', // Asegúrate de usar PATCH ya que esa es la ruta correcta en tu backend
+            const response = await fetch(`${API_URL}/${editingTermId}`, {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    titulo_politica: newPolicy,  // Cambiamos el campo a 'name' para que coincida con lo que espera la API
+                    titulo_termino: newTerm,  // Asegúrate de usar el campo correcto
                     secciones: sections,
                 }),
             });
@@ -176,33 +178,32 @@ const PoliticasPrivacidad = () => {
                 throw new Error(`Error: ${response.statusText}`);
             }
 
-            const updatedPolicy = await response.json();
+            const updatedTerm = await response.json();
             const updatedItems = items.map((item, index) =>
-                index === editingIndex ? updatedPolicy : item
+                index === editingIndex ? updatedTerm : item
             );
 
             setItems(updatedItems);
             clearForm();
         } catch (error) {
-            console.error('Error al actualizar la política:', error);
+            console.error('Error al actualizar el término:', error);
         }
     };
 
-
     const saveChanges = async () => {
         if (isEditing) {
-            await updatePolicy();
+            await updateTerm();
         } else {
-            await addPolicy();
+            await addTerm();
         }
     };
 
     const clearForm = () => {
-        setNewPolicy('');
+        setNewTerm('');
         setSections([]);
         setIsEditing(false);
         setEditingIndex(null);
-        setEditingPolicyId(null);
+        setEditingTermId(null);
     };
 
     const clearSectionForm = () => {
@@ -210,7 +211,6 @@ const PoliticasPrivacidad = () => {
         setNewSectionDescription('');
         setNewSectionList([]);
     };
-
 
     return (
         <Box
@@ -233,16 +233,16 @@ const PoliticasPrivacidad = () => {
                 >
                     <CardContent>
                         <Typography variant="h5" color="primary" gutterBottom>
-                            Políticas de Privacidad
+                            Términos y Condiciones
                         </Typography>
                         <List>
-                            {items.map((policy, index) => (
-                                <ListItem key={policy._id} alignItems="flex-start">
+                            {items.map((term, index) => (
+                                <ListItem key={term._id} alignItems="flex-start">
                                     <ListItemText
-                                        primary={policy.titulo_politica} // Usar el campo correcto
+                                        primary={term.titulo_termino} // Usar el campo correcto
                                         secondary={
                                             <Box>
-                                                {policy.secciones && policy.secciones.map((section) => (
+                                                {term.secciones && term.secciones.map((section) => (
                                                     <Box key={section._id} mb={2}>
                                                         <Typography variant="subtitle1" color="textSecondary">
                                                             Sección: {section.titulo_seccion}
@@ -262,10 +262,10 @@ const PoliticasPrivacidad = () => {
                                             </Box>
                                         }
                                     />
-                                    <IconButton onClick={() => editPolicy(index)}>
+                                    <IconButton onClick={() => editTerm(index)}>
                                         <EditIcon color="primary" />
                                     </IconButton>
-                                    <IconButton onClick={() => deletePolicy(index)}>
+                                    <IconButton onClick={() => deleteTerm(index)}>
                                         <DeleteIcon color="error" />
                                     </IconButton>
                                 </ListItem>
@@ -286,75 +286,71 @@ const PoliticasPrivacidad = () => {
                 >
                     <CardContent>
                         <Typography variant="h5" color="primary" gutterBottom>
-                            {isEditing ? 'Editar Política' : 'Agregar Nueva Política'}
+                            {isEditing ? 'Editar Término' : 'Agregar Nuevo Término'}
                         </Typography>
                         <TextField
-                            fullWidth
+                            label="Título del Término"
                             variant="outlined"
-                            label="Nombre de la Política"
-                            value={newPolicy}
-                            onChange={(e) => setNewPolicy(e.target.value)}
+                            value={newTerm}
+                            onChange={(e) => setNewTerm(e.target.value)}
+                            fullWidth
+                            sx={{ marginBottom: '20px' }}
                         />
-                        <Typography variant="h6" color="primary" mt={2}>
+                        <Button variant="contained" color="primary" onClick={saveChanges}>
+                            {isEditing ? 'Actualizar Término' : 'Agregar Término'}
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                {/* Secciones */}
+                <Card
+                    sx={{
+                        borderRadius: '16px',
+                        boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                        marginTop: '20px',
+                    }}
+                >
+                    <CardContent>
+                        <Typography variant="h5" color="primary" gutterBottom>
                             Secciones
                         </Typography>
                         <TextField
-                            fullWidth
-                            variant="outlined"
                             label="Título de la Sección"
+                            variant="outlined"
                             value={newSectionTitle}
                             onChange={(e) => setNewSectionTitle(e.target.value)}
-                            margin="normal"
+                            fullWidth
+                            sx={{ marginBottom: '10px' }}
                         />
                         <TextField
-                            fullWidth
+                            label="Descripción de la Sección"
                             variant="outlined"
-                            label="Descripción"
                             value={newSectionDescription}
                             onChange={(e) => setNewSectionDescription(e.target.value)}
-                            margin="normal"
+                            fullWidth
+                            sx={{ marginBottom: '10px' }}
                         />
                         <TextField
-                            fullWidth
+                            label="Ítem de Lista"
                             variant="outlined"
-                            label="Ítem de la lista"
                             value={newListItem}
                             onChange={(e) => setNewListItem(e.target.value)}
-                            margin="normal"
+                            fullWidth
+                            sx={{ marginBottom: '10px' }}
                         />
-                        <List dense>
-                            {newSectionList.map((listItem, index) => (
-                                <ListItem key={index}>
-                                    <ListItemText primary={listItem} />
-                                    <IconButton onClick={() => editListItem(index)}>
-                                        <EditIcon color="primary" />
-                                    </IconButton>
-                                    <IconButton onClick={() => deleteListItem(index)}>
-                                        <DeleteIcon color="error" />
-                                    </IconButton>
-                                </ListItem>
-                            ))}
-                        </List>
-
-                        {/* Botón condicional para actualizar o agregar un ítem */}
-                        <Button
-                            onClick={addListItem}
-                            variant="contained"
-                            sx={{ backgroundColor: 'green', '&:hover': { backgroundColor: 'darkgreen' } }}  // Botón verde con hover
-                        >
-                            {editingListItemIndex !== null ? 'Actualizar Ítem' : 'Agregar Ítem'}
+                        <Button variant="contained" color="secondary" onClick={addListItem}>
+                            Agregar Ítem
                         </Button>
-
-                        <Button onClick={addSection} variant="contained" color="secondary" sx={{ ml: 2 }}>
+                        <Button variant="contained" color="primary" onClick={addSection}>
                             {editingSectionIndex !== null ? 'Actualizar Sección' : 'Agregar Sección'}
                         </Button>
 
-                        <List>
+                        <List sx={{ marginTop: '20px' }}>
                             {sections.map((section, index) => (
                                 <ListItem key={index}>
                                     <ListItemText
                                         primary={section.titulo_seccion}
-                                        secondary={section.description}
+                                        secondary={`Descripción: ${section.description}`}
                                     />
                                     <IconButton onClick={() => editSection(index)}>
                                         <EditIcon color="primary" />
@@ -365,17 +361,25 @@ const PoliticasPrivacidad = () => {
                                 </ListItem>
                             ))}
                         </List>
-                        <Button onClick={saveChanges} variant="contained" color="primary" sx={{ mt: 2 }}>
-                            {isEditing ? 'Actualizar Política' : 'Agregar Política'}
-                        </Button>
-                    </CardContent>
 
+                        <List>
+                            {newSectionList.map((item, index) => (
+                                <ListItem key={index}>
+                                    <ListItemText primary={item} />
+                                    <IconButton onClick={() => editListItem(index)}>
+                                        <EditIcon color="primary" />
+                                    </IconButton>
+                                    <IconButton onClick={() => deleteListItem(index)}>
+                                        <DeleteIcon color="error" />
+                                    </IconButton>
+                                </ListItem>
+                            ))}
+                        </List>
+                    </CardContent>
                 </Card>
             </Box>
         </Box>
-
-
     );
 };
 
-export default PoliticasPrivacidad;
+export default Terminos;
