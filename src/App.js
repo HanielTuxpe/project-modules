@@ -5,10 +5,12 @@ import { CssBaseline, ThemeProvider, Box, Container } from '@mui/material';
 import Registro from './components/SignUp';
 import Login from './components/LogIn';
 import Crud from './components/Crud';
-import BuscarRuta from './components/RouteSearch';
+import BuscarRuta from './components/Index';
 import ForgotPassword from './components/ForgotPassword';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import Index from './components/Index';
+
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import getTheme from './theme';
@@ -59,6 +61,10 @@ const App = () => {
                         <Routes>
                             <Route
                                 path="/"
+                                element={usuario ? <Navigate to="/index" /> : <Index />}
+                            />
+                            <Route
+                                path="/SignUp"
                                 element={usuario ? <Navigate to="/index" /> : <Registro onRegister={handleRegister} />}
                             />
                             <Route
@@ -73,11 +79,11 @@ const App = () => {
                                 path="/index"
                                 element={usuario ? <BuscarRuta /> : <Navigate to="/" />}
                             />
-                             <Route
+                            <Route
                                 path="/Crud"
-                                element={usuario ? <Crud darkMode={darkMode}/> : <Navigate to="/" />}
+                                element={usuario ? <Crud darkMode={darkMode} /> : <Navigate to="/" />}
                             />
-                           
+
                         </Routes>
                     </Container>
 

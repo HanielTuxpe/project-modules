@@ -1,6 +1,7 @@
 import React from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';  // Importa el componente Link
 import { useMediaQuery } from '@mui/material';
 
 const Footer = () => {
@@ -13,16 +14,40 @@ const Footer = () => {
                 py: 3,
                 px: 2,
                 mt: 'auto',
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 textAlign: 'center',
-                backgroundColor: (theme) =>
-                    theme.palette.mode === 'light' ? theme.palette.grey[400] : theme.palette.grey[900],
-                position:'fixed', /* Botón posicionado en la parte inferior */
-                bottom: 0,         /* Fijado a la parte inferior del contenedor */
+                backgroundColor: '#921F45',
+                color: '#fff',
+                bottom: 0,       
                 left: 0,
                 right: 0,
             }}
         >
-            <Typography variant={isMobile ? 'body2' : 'body1'}> {/* Cambia el tamaño del texto según el dispositivo */}
+            <Box 
+                sx={{ 
+                    display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row',
+                    justifyContent: 'space-between',
+                    gap: 2 
+                }}
+            >
+                <Link href="/privacy-policy" sx={{ color: '#fff', textDecoration: 'none' }}>
+                    Política de Privacidad
+                </Link>
+                <Link href="/terms-conditions" sx={{ color: '#fff', textDecoration: 'none' }}>
+                    Términos y Condiciones
+                </Link>
+                <Link href="/legal-disclaimer" sx={{ color: '#fff', textDecoration: 'none' }}>
+                    Deslinde Legal
+                </Link>
+                <Link href="/about" sx={{ color: '#fff', textDecoration: 'none' }}>
+                    Acerca de...
+                </Link>
+            </Box>
+            <Typography variant={isMobile ? 'body2' : 'body1'}>
                 Universidad Tecnológica de la Huasteca Hidalguense
             </Typography>
         </Box>
