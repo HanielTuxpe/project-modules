@@ -1,4 +1,5 @@
 import { createTheme } from '@mui/material/styles';
+import '@fontsource/roboto-condensed/900.css';  // Extra-negrita
 
 const getTheme = (darkMode) =>
     createTheme({
@@ -8,7 +9,11 @@ const getTheme = (darkMode) =>
                 main: '#1976d2', // Azul principal
             },
             secondary: {
-                main: '#ff9800', // Naranja secundario
+                main: '#D9D9D9', // Naranja secundario
+            },
+            background: {
+                default: '#D9D9D9', // Color de fondo general
+                paper: '#ffffff', // Color de fondo de los componentes de papel (opcional)
             },
             shadows: {
                 light: '6px 4px 6px rgba(0, 0, 0, 0.3)', // Sombra para el modo claro
@@ -16,8 +21,9 @@ const getTheme = (darkMode) =>
             },
         },
         typography: {
-            fontFamily: 'Arial, sans-serif',
-        },
+            fontFamily: 'Roboto Condensed',
+            fontWeightBold: 900,
+        },        
     });
 
 export default getTheme;
