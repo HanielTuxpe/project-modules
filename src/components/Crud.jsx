@@ -1,7 +1,5 @@
-import React, { useState, useMemo ,useEffect} from 'react';
-import { Box, Typography, Tabs, Tab, Fade, TextField, IconButton, Button, List, ListItem, ListItemText, Avatar, Tooltip } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React, { useState, useMemo } from 'react';
+import { Box, Tabs, Tab, Fade } from '@mui/material';
 import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
 
 
@@ -9,6 +7,7 @@ import MenuPrincipal from './menu'; // Importa tu menú
 import PerfilEmpresa from './PerfilEmpresa'; // Importa perfil de la empresa
 import PoliticasPrivacidad from './PoliticasPrivacidad'; // Importa Politicas
 import TerminosCondiciones from './TerminosCondiciones'; // Importa TerminosCondiciones
+import DeslindeLegal from './DeslindeLegal'; // Importa DeslindeLegal
 
 // Colores personalizados
 const wineRed = '#8B0000'; // Rojo vino
@@ -20,7 +19,7 @@ const MainContainer = styled(Box)(({ theme }) => ({
   flexDirection: 'column',
   alignItems: 'center',
   padding: theme.spacing(2),
-  
+
   color: theme.palette.text.primary, // Texto dinámico
 borderRadius:'5%',
 
@@ -76,12 +75,12 @@ const EmpresaApp = ({ darkMode }) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <MainContainer>
+      <MainContainer >
         {/* Menú principal */}
         <MenuPrincipal />
 
         {/* Menú horizontal centrado */}
-        <Box display="flex" justifyContent="center" alignItems="center" mb={4}>
+        <Box display="flex" justifyContent="center" alignItems="center" mb={4} >
           <Tabs
             value={selectedTab}
             onChange={handleTabChange}
@@ -116,78 +115,5 @@ const EmpresaApp = ({ darkMode }) => {
   );
 };
 
-
-// Componente para deslinde legal
-const DeslindeLegal = () => {
-  const [items, setItems] = useState(['Deslinde 1', 'Deslinde 2']);
-  const [newItem, setNewItem] = useState('');
-  const [editIndex, setEditIndex] = useState(null);
-  const [editValue, setEditValue] = useState('');
-
-  const addItem = () => {
-    if (newItem.trim()) {
-      setItems([...items, newItem]);
-      setNewItem('');
-    }
-  };
-
-  const deleteItem = (index) => {
-    const updatedItems = items.filter((_, i) => i !== index);
-    setItems(updatedItems);
-  };
-
-  const startEdit = (index) => {
-    setEditIndex(index);
-    setEditValue(items[index]);
-  };
-
-  const confirmEdit = () => {
-    if (editValue.trim()) {
-      const updatedItems = items.map((item, index) =>
-        index === editIndex ? editValue : item
-      );
-      setItems(updatedItems);
-      setEditIndex(null);
-      setEditValue('');
-    }
-  };
-
-  return (
-    <Box>
-      <Typography variant="h5" align="center" color="primary">
-        Deslinde Legal
-      </Typography>
-      <List>
-        {items.map((item, index) => (
-          <ListItem key={index}>
-            <ListItemText primary={item} />
-            <IconButton onClick={() => startEdit(index)}>
-              <EditIcon color="primary" />
-            </IconButton>
-            <IconButton onClick={() => deleteItem(index)}>
-              <DeleteIcon color="error" />
-            </IconButton>
-          </ListItem>
-        ))}
-      </List>
-      <Box display="flex" mt={2}>
-        <TextField
-          value={editIndex !== null ? editValue : newItem}
-          onChange={(e) => (editIndex !== null ? setEditValue(e.target.value) : setNewItem(e.target.value))}
-          label={editIndex !== null ? "Editar deslinde" : "Nuevo deslinde"}
-          fullWidth
-        />
-        <Button
-          onClick={editIndex !== null ? confirmEdit : addItem}
-          color="primary"
-          variant="contained"
-          sx={{ ml: 2 }}
-        >
-          {editIndex !== null ? "Confirmar" : "Agregar"}
-        </Button>
-      </Box>
-    </Box>
-  );
-};
 
 export default EmpresaApp;

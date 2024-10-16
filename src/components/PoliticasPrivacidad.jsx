@@ -289,72 +289,34 @@ const PoliticasPrivacidad = () => {
                             {isEditing ? 'Editar Política' : 'Agregar Nueva Política'}
                         </Typography>
                         <TextField
-                            fullWidth
+                            label="Título de la Política"
                             variant="outlined"
-                            label="Nombre de la Política"
                             value={newPolicy}
                             onChange={(e) => setNewPolicy(e.target.value)}
-                        />
-                        <Typography variant="h6" color="primary" mt={2}>
-                            Secciones
-                        </Typography>
-                        <TextField
                             fullWidth
-                            variant="outlined"
-                            label="Título de la Sección"
-                            value={newSectionTitle}
-                            onChange={(e) => setNewSectionTitle(e.target.value)}
-                            margin="normal"
+                            sx={{ marginBottom: '20px' }}
                         />
-                        <TextField
-                            fullWidth
-                            variant="outlined"
-                            label="Descripción"
-                            value={newSectionDescription}
-                            onChange={(e) => setNewSectionDescription(e.target.value)}
-                            margin="normal"
-                        />
-                        <TextField
-                            fullWidth
-                            variant="outlined"
-                            label="Ítem de la lista"
-                            value={newListItem}
-                            onChange={(e) => setNewListItem(e.target.value)}
-                            margin="normal"
-                        />
-                        <List dense>
-                            {newSectionList.map((listItem, index) => (
-                                <ListItem key={index}>
-                                    <ListItemText primary={listItem} />
-                                    <IconButton onClick={() => editListItem(index)}>
-                                        <EditIcon color="primary" />
-                                    </IconButton>
-                                    <IconButton onClick={() => deleteListItem(index)}>
-                                        <DeleteIcon color="error" />
-                                    </IconButton>
-                                </ListItem>
-                            ))}
-                        </List>
-
-                        {/* Botón condicional para actualizar o agregar un ítem */}
-                        <Button
-                            onClick={addListItem}
-                            variant="contained"
-                            sx={{ backgroundColor: 'green', '&:hover': { backgroundColor: 'darkgreen' } }}  // Botón verde con hover
-                        >
-                            {editingListItemIndex !== null ? 'Actualizar Ítem' : 'Agregar Ítem'}
+                        <Button variant="contained" color="primary" onClick={saveChanges}>
+                            {isEditing ? 'Actualizar Política' : 'Agregar Política'}
                         </Button>
+                    </CardContent>
+                </Card>
 
-                        <Button onClick={addSection} variant="contained" color="secondary" sx={{ ml: 2 }}>
-                            {editingSectionIndex !== null ? 'Actualizar Sección' : 'Agregar Sección'}
-                        </Button>
-
-                        <List>
+                {/* Secciones */}
+                <Card
+                    sx={{
+                        borderRadius: '16px',
+                        boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                        marginTop: '20px',
+                    }}
+                >
+                    <CardContent>
+                        <List sx={{ marginTop: '20px' }}>
                             {sections.map((section, index) => (
                                 <ListItem key={index}>
                                     <ListItemText
                                         primary={section.titulo_seccion}
-                                        secondary={section.description}
+                                        secondary={`Descripción: ${section.description}`}
                                     />
                                     <IconButton onClick={() => editSection(index)}>
                                         <EditIcon color="primary" />
@@ -365,17 +327,61 @@ const PoliticasPrivacidad = () => {
                                 </ListItem>
                             ))}
                         </List>
-                        <Button onClick={saveChanges} variant="contained" color="primary" sx={{ mt: 2 }}>
-                            {isEditing ? 'Actualizar Política' : 'Agregar Política'}
-                        </Button>
-                    </CardContent>
+                        <Typography variant="h5" color="primary" gutterBottom>
+                            Secciones
+                        </Typography>
+                        <TextField
+                            label="Título de la Sección"
+                            variant="outlined"
+                            value={newSectionTitle}
+                            onChange={(e) => setNewSectionTitle(e.target.value)}
+                            fullWidth
+                            sx={{ marginBottom: '10px' }}
+                        />
+                        <TextField
+                            label="Descripción de la Sección"
+                            variant="outlined"
+                            value={newSectionDescription}
+                            onChange={(e) => setNewSectionDescription(e.target.value)}
+                            fullWidth
+                            sx={{ marginBottom: '10px' }}
+                        />
+                        <List>
+                            {newSectionList.map((item, index) => (
+                                <ListItem key={index}>
+                                    <ListItemText primary={item} />
+                                    <IconButton onClick={() => editListItem(index)}>
+                                        <EditIcon color="primary" />
+                                    </IconButton>
+                                    <IconButton onClick={() => deleteListItem(index)}>
+                                        <DeleteIcon color="error" />
+                                    </IconButton>
+                                </ListItem>
+                            ))}
+                        </List>
+                        <TextField
+                            label="Ítem de Lista"
+                            variant="outlined"
+                            value={newListItem}
+                            onChange={(e) => setNewListItem(e.target.value)}
+                            fullWidth
+                            sx={{ marginBottom: '10px' }}
+                        />
 
+                        <Button variant="contained" color="secondary" onClick={addListItem}>
+                            Agregar Ítem
+                        </Button>
+                        <Button variant="contained" color="primary" onClick={addSection} sx={{ marginLeft: '10px' }}>
+                            {editingSectionIndex !== null ? 'Actualizar Sección' : 'Agregar Sección'}
+                        </Button>
+
+
+                    </CardContent>
                 </Card>
             </Box>
         </Box>
-
-
     );
+
 };
 
 export default PoliticasPrivacidad;

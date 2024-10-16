@@ -3,11 +3,11 @@ import { Box, Typography, List, ListItem, ListItemText, IconButton, TextField, B
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
-const API_URL = 'http://localhost:3001/terminos'; // Cambia por la URL de tu API
+const API_URL = 'http://localhost:3001/deslinde'; // Cambia por la URL de tu API
 
-const Terminos = () => {
+const DeslindeLegal = () => {
     const [items, setItems] = useState([]);
-    const [newTerm, setNewTerm] = useState('');
+    const [newDeslinde, setNewDeslinde] = useState('');
     const [sections, setSections] = useState([]);
     const [newSectionTitle, setNewSectionTitle] = useState('');
     const [newSectionDescription, setNewSectionDescription] = useState('');
@@ -16,66 +16,62 @@ const Terminos = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editingIndex, setEditingIndex] = useState(null);
     const [editingSectionIndex, setEditingSectionIndex] = useState(null);
-    const [editingListItemIndex, setEditingListItemIndex] = useState(null);
-    const [editingTermId, setEditingTermId] = useState(null);
+    const [editingListItemIndex, setEditingListItemIndex] = useState(null); // Nuevo estado para editar el ítem
+    const [editingDeslindeId, setEditingDeslindeId] = useState(null);
 
     useEffect(() => {
-        const fetchTerms = async () => {
+        const fetchDeslindes = async () => {
             try {
                 const response = await fetch(API_URL);
                 const data = await response.json();
                 if (Array.isArray(data)) {
                     setItems(data);
+                    console.log('La respuesta de la API', data);
                 } else {
                     console.error('La respuesta de la API no es un arreglo:', data);
                 }
             } catch (error) {
-                console.error('Error al cargar términos:', error);
+                console.error('Error al cargar deslindes:', error);
             }
         };
 
-        fetchTerms();
+        fetchDeslindes();
     }, []);
 
-    const addTerm = async () => {
-        try {
-            if (newTerm.trim() === '' || sections.length === 0) {
-                alert('Por favor, ingresa un nombre para el término y agrega al menos una sección.');
-                return;
-            }
+    const addDeslinde = async () => {
+        if (newDeslinde.trim() === '' || sections.length === 0) {
+            alert('Por favor, ingresa un nombre para el deslinde y agrega al menos una sección.');
+            return;
+        }
 
-            const newTermObj = { titulo_termino: newTerm, secciones: sections };
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newTermObj),
-            });
+        const newDeslindeObj = { titulo_deslinde: newDeslinde, secciones: sections };
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newDeslindeObj),
+        });
 
-            if (!response.ok) {
-                throw new Error(`Error en la respuesta: ${response.status} ${response.statusText}`);
-            }
-
-            const createdTerm = await response.json();
-            setItems((prevItems) => [...prevItems, createdTerm]);
+        if (response.ok) {
+            const createdDeslinde = await response.json();
+            setItems((prevItems) => [...prevItems, createdDeslinde]);
             clearForm();
-        } catch (error) {
-            console.error('Error al agregar el término:', error);
-            alert('Ocurrió un error al agregar el término. Verifica la consola para más detalles.');
+        } else {
+            alert('Error al agregar el deslinde.');
         }
     };
 
-    const deleteTerm = async (index) => {
-        const termToDelete = items[index];
-        const response = await fetch(`${API_URL}/${termToDelete._id}`, {
+    const deleteDeslinde = async (index) => {
+        const deslindeToDelete = items[index];
+        const response = await fetch(`${API_URL}/${deslindeToDelete._id}`, {
             method: 'DELETE',
         });
 
         if (response.ok) {
             setItems((prevItems) => prevItems.filter((_, i) => i !== index));
         } else {
-            alert('Error al eliminar el término.');
+            alert('Error al eliminar el deslinde.');
         }
     };
 
@@ -111,7 +107,7 @@ const Terminos = () => {
         const section = sections[index];
         setNewSectionTitle(section.titulo_seccion);
         setNewSectionDescription(section.description);
-        setNewSectionList(section.list);
+        setNewSectionList(section.list); // Actualizar con la lista de la sección editada
         setEditingSectionIndex(index);
     };
 
@@ -123,11 +119,13 @@ const Terminos = () => {
 
         if (editingSectionIndex !== null) {
             if (editingListItemIndex !== null) {
+                // Si está editando un ítem, lo actualiza
                 const updatedList = [...newSectionList];
                 updatedList[editingListItemIndex] = newListItem;
                 setNewSectionList(updatedList);
-                setEditingListItemIndex(null);
+                setEditingListItemIndex(null); // Resetear el índice de edición
             } else {
+                // Si no está editando, lo agrega
                 setNewSectionList((prevList) => [...prevList, newListItem]);
             }
             setNewListItem('');
@@ -144,32 +142,32 @@ const Terminos = () => {
     const editListItem = (index) => {
         const listItem = newSectionList[index];
         setNewListItem(listItem);
-        setEditingListItemIndex(index);
+        setEditingListItemIndex(index); // Guardar el índice del ítem que se está editando
     };
 
-    const editTerm = (index) => {
+    const editDeslinde = (index) => {
         setIsEditing(true);
         setEditingIndex(index);
-        const term = items[index];
+        const deslinde = items[index];
 
-        if (term) {
-            setNewTerm(term.titulo_termino);  // Cambiar a título del término
-            setSections(term.secciones);
-            setEditingTermId(term._id);
+        if (deslinde) {
+            setNewDeslinde(deslinde.titulo_deslinde);
+            setSections(deslinde.secciones);
+            setEditingDeslindeId(deslinde._id);
         }
     };
 
-    const updateTerm = async () => {
-        if (editingTermId === null) return;
+    const updateDeslinde = async () => {
+        if (editingDeslindeId === null) return;
 
         try {
-            const response = await fetch(`${API_URL}/${editingTermId}`, {
-                method: 'PATCH',
+            const response = await fetch(`${API_URL}/${editingDeslindeId}`, {
+                method: 'PATCH', // Asegúrate de usar PATCH ya que esa es la ruta correcta en tu backend
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    titulo_termino: newTerm,  // Asegúrate de usar el campo correcto
+                    titulo_deslinde: newDeslinde,
                     secciones: sections,
                 }),
             });
@@ -178,32 +176,32 @@ const Terminos = () => {
                 throw new Error(`Error: ${response.statusText}`);
             }
 
-            const updatedTerm = await response.json();
+            const updatedDeslinde = await response.json();
             const updatedItems = items.map((item, index) =>
-                index === editingIndex ? updatedTerm : item
+                index === editingIndex ? updatedDeslinde : item
             );
 
             setItems(updatedItems);
             clearForm();
         } catch (error) {
-            console.error('Error al actualizar el término:', error);
+            console.error('Error al actualizar el deslinde:', error);
         }
     };
 
     const saveChanges = async () => {
         if (isEditing) {
-            await updateTerm();
+            await updateDeslinde();
         } else {
-            await addTerm();
+            await addDeslinde();
         }
     };
 
     const clearForm = () => {
-        setNewTerm('');
+        setNewDeslinde('');
         setSections([]);
         setIsEditing(false);
         setEditingIndex(null);
-        setEditingTermId(null);
+        setEditingDeslindeId(null);
     };
 
     const clearSectionForm = () => {
@@ -233,16 +231,16 @@ const Terminos = () => {
                 >
                     <CardContent>
                         <Typography variant="h5" color="primary" gutterBottom>
-                            Términos y Condiciones
+                            Deslinde Legal
                         </Typography>
                         <List>
-                            {items.map((term, index) => (
-                                <ListItem key={term._id} alignItems="flex-start">
+                            {items.map((deslinde, index) => (
+                                <ListItem key={deslinde._id} alignItems="flex-start">
                                     <ListItemText
-                                        primary={term.titulo_termino} // Usar el campo correcto
+                                        primary={deslinde.titulo_deslinde} // Usar el campo correcto
                                         secondary={
                                             <Box>
-                                                {term.secciones && term.secciones.map((section) => (
+                                                {deslinde.secciones && deslinde.secciones.map((section) => (
                                                     <Box key={section._id} mb={2}>
                                                         <Typography variant="subtitle1" color="textSecondary">
                                                             Sección: {section.titulo_seccion}
@@ -262,10 +260,10 @@ const Terminos = () => {
                                             </Box>
                                         }
                                     />
-                                    <IconButton onClick={() => editTerm(index)}>
+                                    <IconButton onClick={() => editDeslinde(index)}>
                                         <EditIcon color="primary" />
                                     </IconButton>
-                                    <IconButton onClick={() => deleteTerm(index)}>
+                                    <IconButton onClick={() => deleteDeslinde(index)}>
                                         <DeleteIcon color="error" />
                                     </IconButton>
                                 </ListItem>
@@ -286,18 +284,18 @@ const Terminos = () => {
                 >
                     <CardContent>
                         <Typography variant="h5" color="primary" gutterBottom>
-                            {isEditing ? 'Editar Término' : 'Agregar Nuevo Término'}
+                            {isEditing ? 'Editar Deslinde' : 'Agregar Nuevo Deslinde'}
                         </Typography>
                         <TextField
-                            label="Título del Término"
+                            label="Título del Deslinde"
                             variant="outlined"
-                            value={newTerm}
-                            onChange={(e) => setNewTerm(e.target.value)}
+                            value={newDeslinde}
+                            onChange={(e) => setNewDeslinde(e.target.value)}
                             fullWidth
                             sx={{ marginBottom: '20px' }}
                         />
                         <Button variant="contained" color="primary" onClick={saveChanges}>
-                            {isEditing ? 'Actualizar Término' : 'Agregar Término'}
+                            {isEditing ? 'Actualizar Deslinde' : 'Agregar Deslinde'}
                         </Button>
                     </CardContent>
                 </Card>
@@ -346,14 +344,6 @@ const Terminos = () => {
                             fullWidth
                             sx={{ marginBottom: '10px' }}
                         />
-                        <TextField
-                            label="Ítem de Lista"
-                            variant="outlined"
-                            value={newListItem}
-                            onChange={(e) => setNewListItem(e.target.value)}
-                            fullWidth
-                            sx={{ marginBottom: '10px' }}
-                        />
                         <List>
                             {newSectionList.map((item, index) => (
                                 <ListItem key={index}>
@@ -367,14 +357,21 @@ const Terminos = () => {
                                 </ListItem>
                             ))}
                         </List>
+                        <TextField
+                            label="Ítem de Lista"
+                            variant="outlined"
+                            value={newListItem}
+                            onChange={(e) => setNewListItem(e.target.value)}
+                            fullWidth
+                            sx={{ marginBottom: '10px' }}
+                        />
+
                         <Button variant="contained" color="secondary" onClick={addListItem}>
                             Agregar Ítem
                         </Button>
-                        <Button variant="contained" color="primary" onClick={addSection}>
+                        <Button variant="contained" color="primary" onClick={addSection} sx={{ marginLeft: '10px' }}>
                             {editingSectionIndex !== null ? 'Actualizar Sección' : 'Agregar Sección'}
                         </Button>
-
-
 
 
                     </CardContent>
@@ -382,6 +379,7 @@ const Terminos = () => {
             </Box>
         </Box>
     );
+
 };
 
-export default Terminos;
+export default DeslindeLegal;
