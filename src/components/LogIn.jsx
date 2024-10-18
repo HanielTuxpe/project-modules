@@ -7,10 +7,12 @@ import { useNavigate } from 'react-router-dom';
 import banner from '../assets/banner-login.png'
 import { useMediaQuery } from '@mui/material';
 import { blue } from '@mui/material/colors';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [recaptchaToken, setRecaptchaToken] = useState(null); // Captura del token
     const navigate = useNavigate();
     const isMobile = useMediaQuery('(max-width: 600px)');
 
@@ -22,26 +24,40 @@ const Login = ({ onLogin }) => {
             return;
         }
 
+        if (!recaptchaToken) {
+            toast.warning('La validación de reCAPTCHA es necesaria.');
+            return;
+        }
+
+        // Validar reCAPTCHA
         try {
-            const response = await axios.post('https://prj-server.onrender.com/login', {
-                username,
-                password,
+            const recaptchaResponse = await axios.post('http://localhost:3001/validate-recaptcha', {
+                recaptchaToken
             });
 
-            if (response.status === 200) {
+            // Si el reCAPTCHA es exitoso, proceder a validar las credenciales de usuario
+            const loginResponse = await axios.post('http://localhost:3001/login', {
+                username,
+                password
+            });
+
+            if (loginResponse.status === 200) {
                 toast.success('Inicio de sesión exitoso');
                 onLogin(username);
                 navigate('/index');
             } else {
-                toast.warning(response.data.message);
+                toast.warning(loginResponse.data.message);
             }
+
         } catch (error) {
-            if (error.response && error.response.status === 400) {
-                toast.warning(error.response.data.message);
-            } else {
-                toast.error('Error al iniciar sesión');
-            }
+            toast.error('Error en el proceso de inicio de sesión.');
         }
+    };
+
+    // Callback para cuando reCAPTCHA es exitoso
+    const onRecaptchaChange = (token) => {
+        console.log("Token reCAPTCHA:", token);
+        setRecaptchaToken(token);
     };
 
     return (
@@ -147,6 +163,10 @@ const Login = ({ onLogin }) => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
+                         <ReCAPTCHA
+                            sitekey={"6Le3YWUqAAAAAAsmFo9W0iT84R3qyVKtLuPJ9hhr"}
+                            onChange={onRecaptchaChange} // Callback para actualizar el token
+                        />
                         <Button
                             type="submit"
                             fullWidth
@@ -156,6 +176,7 @@ const Login = ({ onLogin }) => {
                         >
                             Acceder
                         </Button>
+                       
                         <Typography variant="body2" align="center">
                             <Link href="/forgot-password" sx={{ mr: 1 }}>
                                 ¿Olvidaste tu contraseña?
