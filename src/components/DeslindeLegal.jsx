@@ -3,11 +3,11 @@ import { Box, Typography, List, ListItem, ListItemText, IconButton, TextField, B
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
-const API_URL = 'http://localhost:3001/politicas'; // Cambia por la URL de tu API
+const API_URL = 'http://localhost:3001/deslinde'; // Cambia por la URL de tu API
 
-const PoliticasPrivacidad = () => {
+const DeslindeLegal = () => {
     const [items, setItems] = useState([]);
-    const [newPolicy, setNewPolicy] = useState('');
+    const [newDeslinde, setNewDeslinde] = useState('');
     const [sections, setSections] = useState([]);
     const [newSectionTitle, setNewSectionTitle] = useState('');
     const [newSectionDescription, setNewSectionDescription] = useState('');
@@ -17,10 +17,10 @@ const PoliticasPrivacidad = () => {
     const [editingIndex, setEditingIndex] = useState(null);
     const [editingSectionIndex, setEditingSectionIndex] = useState(null);
     const [editingListItemIndex, setEditingListItemIndex] = useState(null); // Nuevo estado para editar el ítem
-    const [editingPolicyId, setEditingPolicyId] = useState(null);
+    const [editingDeslindeId, setEditingDeslindeId] = useState(null);
 
     useEffect(() => {
-        const fetchPolicies = async () => {
+        const fetchDeslindes = async () => {
             try {
                 const response = await fetch(API_URL);
                 const data = await response.json();
@@ -31,47 +31,47 @@ const PoliticasPrivacidad = () => {
                     console.error('La respuesta de la API no es un arreglo:', data);
                 }
             } catch (error) {
-                console.error('Error al cargar políticas:', error);
+                console.error('Error al cargar deslindes:', error);
             }
         };
 
-        fetchPolicies();
+        fetchDeslindes();
     }, []);
 
-    const addPolicy = async () => {
-        if (newPolicy.trim() === '' || sections.length === 0) {
-            alert('Por favor, ingresa un nombre para la política y agrega al menos una sección.');
+    const addDeslinde = async () => {
+        if (newDeslinde.trim() === '' || sections.length === 0) {
+            alert('Por favor, ingresa un nombre para el deslinde y agrega al menos una sección.');
             return;
         }
 
-        const newPolicyObj = { titulo_politica: newPolicy, secciones: sections };
+        const newDeslindeObj = { titulo_deslinde: newDeslinde, secciones: sections };
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(newPolicyObj),
+            body: JSON.stringify(newDeslindeObj),
         });
 
         if (response.ok) {
-            const createdPolicy = await response.json();
-            setItems((prevItems) => [...prevItems, createdPolicy]);
+            const createdDeslinde = await response.json();
+            setItems((prevItems) => [...prevItems, createdDeslinde]);
             clearForm();
         } else {
-            alert('Error al agregar la política.');
+            alert('Error al agregar el deslinde.');
         }
     };
 
-    const deletePolicy = async (index) => {
-        const policyToDelete = items[index];
-        const response = await fetch(`${API_URL}/${policyToDelete._id}`, {
+    const deleteDeslinde = async (index) => {
+        const deslindeToDelete = items[index];
+        const response = await fetch(`${API_URL}/${deslindeToDelete._id}`, {
             method: 'DELETE',
         });
 
         if (response.ok) {
             setItems((prevItems) => prevItems.filter((_, i) => i !== index));
         } else {
-            alert('Error al eliminar la política.');
+            alert('Error al eliminar el deslinde.');
         }
     };
 
@@ -145,29 +145,29 @@ const PoliticasPrivacidad = () => {
         setEditingListItemIndex(index); // Guardar el índice del ítem que se está editando
     };
 
-    const editPolicy = (index) => {
+    const editDeslinde = (index) => {
         setIsEditing(true);
         setEditingIndex(index);
-        const policy = items[index];
+        const deslinde = items[index];
 
-        if (policy) {
-            setNewPolicy(policy.titulo_politica);
-            setSections(policy.secciones);
-            setEditingPolicyId(policy._id);
+        if (deslinde) {
+            setNewDeslinde(deslinde.titulo_deslinde);
+            setSections(deslinde.secciones);
+            setEditingDeslindeId(deslinde._id);
         }
     };
 
-    const updatePolicy = async () => {
-        if (editingPolicyId === null) return;
+    const updateDeslinde = async () => {
+        if (editingDeslindeId === null) return;
 
         try {
-            const response = await fetch(`${API_URL}/${editingPolicyId}`, {
+            const response = await fetch(`${API_URL}/${editingDeslindeId}`, {
                 method: 'PATCH', // Asegúrate de usar PATCH ya que esa es la ruta correcta en tu backend
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    titulo_politica: newPolicy,  // Cambiamos el campo a 'name' para que coincida con lo que espera la API
+                    titulo_deslinde: newDeslinde,
                     secciones: sections,
                 }),
             });
@@ -176,33 +176,32 @@ const PoliticasPrivacidad = () => {
                 throw new Error(`Error: ${response.statusText}`);
             }
 
-            const updatedPolicy = await response.json();
+            const updatedDeslinde = await response.json();
             const updatedItems = items.map((item, index) =>
-                index === editingIndex ? updatedPolicy : item
+                index === editingIndex ? updatedDeslinde : item
             );
 
             setItems(updatedItems);
             clearForm();
         } catch (error) {
-            console.error('Error al actualizar la política:', error);
+            console.error('Error al actualizar el deslinde:', error);
         }
     };
 
-
     const saveChanges = async () => {
         if (isEditing) {
-            await updatePolicy();
+            await updateDeslinde();
         } else {
-            await addPolicy();
+            await addDeslinde();
         }
     };
 
     const clearForm = () => {
-        setNewPolicy('');
+        setNewDeslinde('');
         setSections([]);
         setIsEditing(false);
         setEditingIndex(null);
-        setEditingPolicyId(null);
+        setEditingDeslindeId(null);
     };
 
     const clearSectionForm = () => {
@@ -210,7 +209,6 @@ const PoliticasPrivacidad = () => {
         setNewSectionDescription('');
         setNewSectionList([]);
     };
-
 
     return (
         <Box
@@ -233,16 +231,16 @@ const PoliticasPrivacidad = () => {
                 >
                     <CardContent>
                         <Typography variant="h5" color="primary" gutterBottom>
-                            Políticas de Privacidad
+                            Deslinde Legal
                         </Typography>
                         <List>
-                            {items.map((policy, index) => (
-                                <ListItem key={policy._id} alignItems="flex-start">
+                            {items.map((deslinde, index) => (
+                                <ListItem key={deslinde._id} alignItems="flex-start">
                                     <ListItemText
-                                        primary={policy.titulo_politica} // Usar el campo correcto
+                                        primary={deslinde.titulo_deslinde} // Usar el campo correcto
                                         secondary={
                                             <Box>
-                                                {policy.secciones && policy.secciones.map((section) => (
+                                                {deslinde.secciones && deslinde.secciones.map((section) => (
                                                     <Box key={section._id} mb={2}>
                                                         <Typography variant="subtitle1" color="textSecondary">
                                                             Sección: {section.titulo_seccion}
@@ -262,10 +260,10 @@ const PoliticasPrivacidad = () => {
                                             </Box>
                                         }
                                     />
-                                    <IconButton onClick={() => editPolicy(index)}>
+                                    <IconButton onClick={() => editDeslinde(index)}>
                                         <EditIcon color="primary" />
                                     </IconButton>
-                                    <IconButton onClick={() => deletePolicy(index)}>
+                                    <IconButton onClick={() => deleteDeslinde(index)}>
                                         <DeleteIcon color="error" />
                                     </IconButton>
                                 </ListItem>
@@ -286,18 +284,18 @@ const PoliticasPrivacidad = () => {
                 >
                     <CardContent>
                         <Typography variant="h5" color="primary" gutterBottom>
-                            {isEditing ? 'Editar Política' : 'Agregar Nueva Política'}
+                            {isEditing ? 'Editar Deslinde' : 'Agregar Nuevo Deslinde'}
                         </Typography>
                         <TextField
-                            label="Título de la Política"
+                            label="Título del Deslinde"
                             variant="outlined"
-                            value={newPolicy}
-                            onChange={(e) => setNewPolicy(e.target.value)}
+                            value={newDeslinde}
+                            onChange={(e) => setNewDeslinde(e.target.value)}
                             fullWidth
                             sx={{ marginBottom: '20px' }}
                         />
                         <Button variant="contained" color="primary" onClick={saveChanges}>
-                            {isEditing ? 'Actualizar Política' : 'Agregar Política'}
+                            {isEditing ? 'Actualizar Deslinde' : 'Agregar Deslinde'}
                         </Button>
                     </CardContent>
                 </Card>
@@ -384,4 +382,4 @@ const PoliticasPrivacidad = () => {
 
 };
 
-export default PoliticasPrivacidad;
+export default DeslindeLegal;

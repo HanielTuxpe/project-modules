@@ -134,7 +134,7 @@ const PerfilEmpresa = () => {
     }
   
     return (
-      <Box sx={{ padding: 2, marginBottom: '20%' }}>
+      <Box sx={{ padding: 2 }}>
         <Box display="flex" justifyContent="center" alignItems="center" height="100%">
           <Typography variant="h4" color="primary" gutterBottom>
             {isEditingNombre ? (
