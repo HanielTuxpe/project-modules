@@ -46,21 +46,24 @@ const Login = ({ onLogin }) => {
 
     return (
         <Container
-            maxWidth="md"
+            maxWidth= {false}
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
                 width: '100%',
-                backgroundColor: '#DDA15E', 
+                color: '#fff',
             }}
         >
             <Box
+                maxWidth="md"
                 sx={{ 
                     display: 'flex',
                     flexDirection: isMobile ? 'column' : 'row',
-                    alignItems: 'center',
                     boxShadow: '0 4px 10px rgba(0, 0, 0, 0.8)',
                     borderRadius: 2,
+                    maxWidth: '100%',
+                    marginLeft: '0 !important', 
+                    marginRight: '0 !important',
                 }}
             >
                 {/* Banner Izquierdo */}
@@ -71,15 +74,15 @@ const Login = ({ onLogin }) => {
                         justifyContent: 'center',
                         width: '100%',
                         alignItems: 'center',
+                        backgroundColor: '#921F45',
                     }}
                 >
                     <img
                         src={banner}
                         alt="Banner PODAI"
                         style={{
-                            maxWidth: '200hv',
-                            height: 'auto',
                             borderRadius: 10,
+                            maxHeight: 'auto'
                         }}
                     />
                 </Box>
@@ -91,7 +94,7 @@ const Login = ({ onLogin }) => {
                         flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        backgroundColor: '#DDA15E', // color de fondo del login (similar al amarillo)
+                        background: '#BC955B',
                         height: '50%',
                         width: '50%',
                         padding: 4,
@@ -101,7 +104,7 @@ const Login = ({ onLogin }) => {
                     <Typography component="h1" variant="h5">
                         Acceder al Sistema
                     </Typography>
-                    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+                    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, color: '#fff', }}>
                         <TextField
                             variant="outlined"
                             margin="normal"
@@ -118,7 +121,7 @@ const Login = ({ onLogin }) => {
                             <option value="student">Estudiante</option>
                             <option value="teacher">Docente</option>
                         </TextField>
-                        <TextField
+                        <TextField  sx={{ mt: 3, color: '#fff', }}
                             variant="outlined"
                             margin="normal"
                             required
@@ -131,7 +134,7 @@ const Login = ({ onLogin }) => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
-                        <TextField
+                        <TextField  sx={{ mt: 3, color: '#fff', }}
                             variant="outlined"
                             margin="normal"
                             required
