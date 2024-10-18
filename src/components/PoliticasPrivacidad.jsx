@@ -18,8 +18,72 @@ const PoliticasPrivacidad = () => {
     const [editingSectionIndex, setEditingSectionIndex] = useState(null);
     const [editingListItemIndex, setEditingListItemIndex] = useState(null); // Nuevo estado para editar el ítem
     const [editingPolicyId, setEditingPolicyId] = useState(null);
+    const [politicasArchivos, setPoliticasArchivos] = useState([]);
+
+    const [file, setFile] = useState(null); // Guardar el archivo seleccionado
+
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]); // Capturar el archivo seleccionado
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('archivo', file); // Agregar el archivo al FormData
+
+        try {
+            // Enviar el archivo al backend usando fetch
+            const response = await fetch(`${API_URL}/Archivo`, {
+                method: 'POST',
+                body: formData, // El cuerpo de la petición es el FormData con el archivo
+            });
+
+            if (response.ok) {
+                alert('Archivo subido con éxito');
+                setFile(null);
+            } else {
+                alert('Error al subir el archivo');
+            }
+        } catch (error) {
+            console.error('Error al subir el archivo:', error);
+            alert('Error al subir el archivo');
+        }
+    };
+
+    const handleDownload = (archivoBase64, nombreArchivo) => {
+        // Crear un enlace temporal
+        const link = document.createElement('a');
+        link.href = `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${archivoBase64}`;
+        link.download = nombreArchivo;
+
+        // Agregar el enlace al DOM y hacer clic en él para iniciar la descarga
+        document.body.appendChild(link);
+        link.click();
+
+        // Limpiar el enlace del DOM
+        document.body.removeChild(link);
+    };
+
+
 
     useEffect(() => {
+
+        const fetchPoliticasConArchivo = async () => {
+            try {
+                const response = await fetch(`${API_URL}/ConArchivo`);
+                if (!response.ok) {
+                    throw new Error('Error al obtener las políticas');
+                }
+
+                const politicas = await response.json();
+                setPoliticasArchivos(politicas);
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+
         const fetchPolicies = async () => {
             try {
                 const response = await fetch(API_URL);
@@ -34,6 +98,8 @@ const PoliticasPrivacidad = () => {
                 console.error('Error al cargar políticas:', error);
             }
         };
+
+        fetchPoliticasConArchivo();
 
         fetchPolicies();
     }, []);
@@ -212,6 +278,8 @@ const PoliticasPrivacidad = () => {
     };
 
 
+
+
     return (
         <Box
             sx={{
@@ -277,6 +345,49 @@ const PoliticasPrivacidad = () => {
 
             {/* Segundo Box */}
             <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                <Card
+                    sx={{
+                        borderRadius: '16px',
+                        boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                        transition: 'all 0.3s ease-in-out',
+                        padding: '20px',
+                    }}
+                >
+                    <Typography variant="h5" color="primary" gutterBottom>
+                        Agregar Archivo De Políticas
+                    </Typography>
+                    <form onSubmit={handleSubmit}>
+                        <TextField
+                            type="file"
+                            variant="outlined"
+                            fullWidth
+                            onChange={handleFileChange} // Cambia el manejador del archivo
+                            sx={{ marginBottom: '20px' }}
+                        />
+                        <Button variant="contained" color="primary" type="submit">
+                            Subir Archivo
+                        </Button>
+
+                    </form>
+
+                    <div>
+                        {politicasArchivos.map((archivo) => (
+                            <Card key={archivo.id} sx={{ marginBottom: '20px', padding: '20px' }}>
+                                <Typography variant="h6">{archivo.nombre}</Typography>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => handleDownload(archivo.archivo, `${archivo.nombre}.pdf`)} // Cambia la extensión según sea necesario
+                                >
+                                    Descargar Archivo
+                                </Button>
+                            </Card>
+                        ))}
+                    </div>
+
+
+
+                </Card>
                 <Card
                     sx={{
                         borderRadius: '16px',
