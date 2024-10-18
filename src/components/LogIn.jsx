@@ -4,11 +4,15 @@ import { TextField, Button, Container, Typography, Box, Link } from '@mui/materi
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import banner from '../assets/banner-login.png'
+import { useMediaQuery } from '@mui/material';
+import { blue } from '@mui/material/colors';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const isMobile = useMediaQuery('(max-width: 600px)');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -41,67 +45,125 @@ const Login = ({ onLogin }) => {
     };
 
     return (
-        <Container maxWidth="sm">
+        <Container
+            maxWidth="md"
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                backgroundColor: '#DDA15E', 
+            }}
+        >
             <Box
-                sx={{
+                sx={{ 
                     display: 'flex',
-                    flexDirection: 'column',
+                    flexDirection: isMobile ? 'column' : 'row',
                     alignItems: 'center',
-                    mt: 8,
+                    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.8)',
+                    borderRadius: 2,
                 }}
             >
-                <Typography component="h1" variant="h5">
-                    Iniciar Sesión
-                </Typography>
-                <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-                    <TextField
-                        variant="outlined"
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="username"
-                        label="Usuario"
-                        name="username"
-                        autoComplete="username"
-                        autoFocus
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                {/* Banner Izquierdo */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        width: '100%',
+                        alignItems: 'center',
+                    }}
+                >
+                    <img
+                        src={banner}
+                        alt="Banner PODAI"
+                        style={{
+                            maxWidth: '200hv',
+                            height: 'auto',
+                            borderRadius: 10,
+                        }}
                     />
-                    <TextField
-                        variant="outlined"
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="password"
-                        label="Contraseña"
-                        type="password"
-                        id="password"
-                        autoComplete="current-password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        sx={{ mt: 3, mb: 2 }}
-                    >
-                        Iniciar Sesión
-                    </Button>
-                    <Typography variant="body2">
-                        <Link href="/forgot-password" sx={{ mr: 1 }}>
-                            ¿Olvidaste tu contraseña?
-                        </Link>
-                        o
-                        <Link href="/" sx={{ ml: 1 }}>
-                            Regístrate
-                        </Link>
+                </Box>
+
+                {/* Formulario de Inicio de Sesión Derecho */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: '#DDA15E', // color de fondo del login (similar al amarillo)
+                        height: '50%',
+                        width: '50%',
+                        padding: 4,
+                        borderRadius: '0 8px 8px 0',
+                    }}
+                >
+                    <Typography component="h1" variant="h5">
+                        Acceder al Sistema
                     </Typography>
+                    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="userType"
+                            label="Elige un tipo de usuario"
+                            name="userType"
+                            select
+                            SelectProps={{
+                                native: true,
+                            }}
+                        >
+                            <option value="student">Estudiante</option>
+                            <option value="teacher">Docente</option>
+                        </TextField>
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="username"
+                            label="Usuario"
+                            name="username"
+                            autoComplete="username"
+                            autoFocus
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="password"
+                            label="Contraseña"
+                            type="password"
+                            id="password"
+                            autoComplete="current-password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            color="primary"
+                            sx={{ mt: 3, mb: 2 }}
+                        >
+                            Acceder
+                        </Button>
+                        <Typography variant="body2" align="center">
+                            <Link href="/forgot-password" sx={{ mr: 1 }}>
+                                ¿Olvidaste tu contraseña?
+                            </Link>
+                        </Typography>
+                    </Box>
                 </Box>
             </Box>
         </Container>
     );
+
 };
 
 export default Login;
