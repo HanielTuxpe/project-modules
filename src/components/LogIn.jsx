@@ -31,12 +31,12 @@ const Login = ({ onLogin }) => {
 
         // Validar reCAPTCHA
         try {
-            const recaptchaResponse = await axios.post('http://localhost:3001/validate-recaptcha', {
+            const recaptchaResponse = await axios.post('https://prj-server.onrender.com/validate-recaptcha', {
                 recaptchaToken
             });
 
             // Si el reCAPTCHA es exitoso, proceder a validar las credenciales de usuario
-            const loginResponse = await axios.post('http://localhost:3001/login', {
+            const loginResponse = await axios.post('https://prj-server.onrender.com/login', {
                 username,
                 password
             });

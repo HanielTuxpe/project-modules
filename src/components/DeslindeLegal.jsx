@@ -3,7 +3,7 @@ import { Box, Typography, List, ListItem, ListItemText, IconButton, TextField, B
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
-const API_URL = 'http://localhost:3001/deslinde'; // Cambia por la URL de tu API
+const API_URL = 'https://prj-server.onrender.com/deslinde'; // Cambia por la URL de tu API
 
 const DeslindeLegal = () => {
     const [items, setItems] = useState([]);

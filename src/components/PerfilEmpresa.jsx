@@ -22,7 +22,7 @@ const PerfilEmpresa = () => {
     // Función para cargar los datos de la empresa con la API GET
     const cargarDatosEmpresa = async () => {
       try {
-        const response = await fetch('http://localhost:3001/InformacionEmpresa');
+        const response = await fetch('https://prj-server.onrender.com/InformacionEmpresa');
         const data = await response.json();
   
         if (response.ok && data.length > 0) {
@@ -54,7 +54,7 @@ const PerfilEmpresa = () => {
     // Función para manejar la actualización (PATCH) de la empresa
     const actualizarEmpresa = async (campo, valor) => {
       try {
-        const response = await fetch(`http://localhost:3001/informacionEmpresa/${empresaId}`, {
+        const response = await fetch(`https://prj-server.onrender.com/informacionEmpresa/${empresaId}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
