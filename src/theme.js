@@ -6,10 +6,7 @@ const getTheme = (darkMode) =>
         palette: {
             mode: darkMode ? 'dark' : 'light',
             primary: {
-                main: '#1976d2', // Azul principal
-            },
-            secondary: {
-                main: '#D9D9D9', // Naranja secundario
+                main: '#921F45',
             },
             background: {
                 default: '#D9D9D9', // Color de fondo general
@@ -23,7 +20,10 @@ const getTheme = (darkMode) =>
         typography: {
             fontFamily: 'Roboto Condensed',
             fontWeightBold: 900,
-        },        
+            allVariants: {
+                color: '#ffffff', // Establece el color blanco para todo el texto
+            },
+        }, 
     });
 
 export default getTheme;
