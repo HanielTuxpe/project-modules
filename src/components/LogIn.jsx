@@ -7,7 +7,12 @@ import { useNavigate } from 'react-router-dom';
 import banner from '../assets/banner-login.png'
 import { useMediaQuery } from '@mui/material';
 import { blue } from '@mui/material/colors';
+<<<<<<< Updated upstream
 import ReCAPTCHA from 'react-google-recaptcha';
+=======
+import ReCAPTCHA from 'react-google-recaptcha'
+import{.eve}
+>>>>>>> Stashed changes
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
@@ -163,10 +168,14 @@ const Login = ({ onLogin }) => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
+<<<<<<< Updated upstream
                          <ReCAPTCHA
                             sitekey={"6Le3YWUqAAAAAAsmFo9W0iT84R3qyVKtLuPJ9hhr"}
                             onChange={onRecaptchaChange} // Callback para actualizar el token
                         />
+=======
+
+>>>>>>> Stashed changes
                         <Button
                             type="submit"
                             fullWidth
@@ -176,7 +185,11 @@ const Login = ({ onLogin }) => {
                         >
                             Acceder
                         </Button>
+<<<<<<< Updated upstream
                        
+=======
+                        <ReCAPTCHA sitekey={env.REACT_APP_SITE_KEY} />
+>>>>>>> Stashed changes
                         <Typography variant="body2" align="center">
                             <Link href="/forgot-password" sx={{ mr: 1 }}>
                                 ¿Olvidaste tu contraseña?
