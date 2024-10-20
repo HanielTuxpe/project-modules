@@ -190,7 +190,7 @@ const Login = ({ onLogin }) => {
                                 ¿Olvidaste tu contraseña?
                             </Link>
                             O &nbsp;
-                            <Link href="/forgot-password" sx={{ mr: 1, fontSize: 18, color: '#fff' }}>
+                            <Link href="/SignUp" sx={{ mr: 1, fontSize: 18, color: '#fff' }}>
                                 Regístrate
                             </Link>
                         </Typography>
