@@ -9,8 +9,11 @@ const getTheme = (darkMode) =>
                 main: '#921F45',
             },
             background: {
-                default: '#D9D9D9', // Color de fondo general
-                paper: '#ffffff', // Color de fondo de los componentes de papel (opcional)
+                default: darkMode ? '#000000' : '#D9D9D9', // Color de fondo general para ambos modos
+                paper: '#ffffff', // Color de fondo de los componentes de papel en modo claro
+            },
+            text: {
+                primary: '#ffffff', // Establecer el color del texto en blanco para ambos modos
             },
             shadows: {
                 light: '6px 4px 6px rgba(0, 0, 0, 0.3)', // Sombra para el modo claro
@@ -20,9 +23,6 @@ const getTheme = (darkMode) =>
         typography: {
             fontFamily: 'Roboto Condensed',
             fontWeightBold: 900,
-            allVariants: {
-                color: '#ffffff', // Establece el color blanco para todo el texto
-            },
         }, 
     });
 

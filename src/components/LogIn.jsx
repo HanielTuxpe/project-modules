@@ -1,19 +1,22 @@
 // src/components/Login.js
 import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Box, Link } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, Link, IconButton } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import banner from '../assets/banner-login.png'
+import banner from '../assets/banner-login.png';
 import { useMediaQuery } from '@mui/material';
 import ReCAPTCHA from 'react-google-recaptcha';
-
+import { iniciarSesion } from './SessionService'; // Importa el servicio de sesión
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [userType, setUserType] = useState('Student');
     const [recaptchaToken, setRecaptchaToken] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const isMobile = useMediaQuery('(max-width: 600px)');
 
@@ -32,7 +35,7 @@ const Login = ({ onLogin }) => {
 
         try {
             // Validar reCAPTCHA
-            const recaptchaResponse = await axios.post('https://prj-server.onrender.com/validate-recaptcha', {
+            await axios.post('https://prj-server.onrender.com/validate-recaptcha', {
                 recaptchaToken,
             });
 
@@ -45,25 +48,29 @@ const Login = ({ onLogin }) => {
 
             if (loginResponse.status === 200) {
                 toast.success(loginResponse.data.message);
+                // Llama a la función iniciarSesion para establecer la cookie
+                iniciarSesion(userType); // Aquí se establece la cookie
                 onLogin(username);
                 navigate('/index');
                 setRecaptchaToken(null);
             }
         } catch (error) {
             if (error.response) {
-                // Verificar si el error tiene una respuesta del servidor y mostrar el mensaje adecuado
                 const errorMessage = error.response.data.message || 'Error en el proceso de inicio de sesión.';
                 toast.warning(errorMessage);
             } else {
                 toast.error('Error en el proceso de inicio de sesión.');
             }
         }
-
     };
 
     // Callback para cuando reCAPTCHA es exitoso
     const onRecaptchaChange = (token) => {
         setRecaptchaToken(token);
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
     };
 
     return (
@@ -158,19 +165,28 @@ const Login = ({ onLogin }) => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="password"
-                            label="Contraseña"
-                            type="password"
-                            id="password"
-                            autoComplete="current-password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
+                        <Box sx={{ position: 'relative' }}>
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                name="password"
+                                label="Contraseña"
+                                type={showPassword ? 'text' : 'password'} // Cambia el tipo según el estado
+                                id="password"
+                                autoComplete="current-password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                            <IconButton
+                                color="inherit"
+                                onClick={togglePasswordVisibility} // Pasar la función como referencia
+                                sx={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}
+                            >
+                                {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                            </IconButton>
+                        </Box>
                         <ReCAPTCHA
                             sitekey="6Le3YWUqAAAAAAsmFo9W0iT84R3qyVKtLuPJ9hhr"
                             onChange={onRecaptchaChange} // Callback para actualizar el token
