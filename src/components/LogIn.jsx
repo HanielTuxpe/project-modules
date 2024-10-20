@@ -179,8 +179,12 @@ const Login = ({ onLogin }) => {
                         </Button>
                        
                         <Typography variant="body2" align="center">
-                            <Link href="/forgot-password" sx={{ mr: 1 }}>
+                            <Link href="/forgot-password" sx={{ mr: 1, fontSize: 18, color: '#fff'}}>
                                 ¿Olvidaste tu contraseña?
+                            </Link>
+                            O &nbsp;
+                            <Link href="/forgot-password" sx={{ mr: 1, fontSize: 18, color: '#fff'}}>
+                                Regístrate
                             </Link>
                         </Typography>
                     </Box>

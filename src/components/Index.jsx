@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Box, Typography } from '@mui/material';
 import banner from '../assets/banner.png';
 import { useMediaQuery } from '@mui/material';
-import MenuPincipal from './menu'; // Importa politicas
+import MenuPincipal from './Admin/menu'; // Importa politicas
 
 
 const Index = () => {

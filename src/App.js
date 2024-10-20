@@ -4,7 +4,7 @@ import { CssBaseline, ThemeProvider, Box, Container } from '@mui/material';
 
 import Registro from './components/SignUp';
 import Login from './components/LogIn';
-import Crud from './components/Crud';
+import Crud from './components/Admin/Crud';
 import BuscarRuta from './components/Index';
 import ForgotPassword from './components/ForgotPassword';
 import Header from './components/Header';
