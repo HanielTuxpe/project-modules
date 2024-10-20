@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, IconButton } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import banner from '../assets/banner-login.png'; // Reemplaza con la imagen correcta del registro
 import { useMediaQuery } from '@mui/material';
 import zxcvbn from 'zxcvbn';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 const Registro = ({ onRegister }) => {
     const [username, setUsername] = useState('');
@@ -14,6 +16,8 @@ const Registro = ({ onRegister }) => {
     const [email, setEmail] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
     const [isRegistered, setIsRegistered] = useState(false);
+    const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Estado para mostrar/ocultar confirmación de contraseña
     const navigate = useNavigate();
     const isMobile = useMediaQuery('(max-width: 600px)');
 
@@ -55,7 +59,6 @@ const Registro = ({ onRegister }) => {
             if (response.status === 201) {
                 toast.success(response.data.message);
                 setIsRegistered(true);
-                onRegister(username);
             } else if (response.status === 400) {
                 toast.warning(response.data.message);
             } else {
@@ -82,7 +85,8 @@ const Registro = ({ onRegister }) => {
 
             if (response.status === 200) {
                 toast.success('Código verificado correctamente');
-                navigate('/dashboard');
+                onRegister(username);
+                navigate('/index');
             } else {
                 toast.warning('Código incorrecto');
             }
@@ -90,6 +94,14 @@ const Registro = ({ onRegister }) => {
             toast.error('Error al verificar el código');
             console.log(error);
         }
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(!showConfirmPassword);
     };
 
     return (
@@ -187,11 +199,18 @@ const Registro = ({ onRegister }) => {
                                     fullWidth
                                     name="password"
                                     label="Contraseña"
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'}
                                     id="password"
                                     autoComplete="current-password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    InputProps={{
+                                        endAdornment: (
+                                            <IconButton onClick={togglePasswordVisibility} edge="end">
+                                                {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                            </IconButton>
+                                        )
+                                    }}
                                 />
                                 <TextField
                                     variant="outlined"
@@ -200,10 +219,17 @@ const Registro = ({ onRegister }) => {
                                     fullWidth
                                     name="confirmPassword"
                                     label="Confirmar Contraseña"
-                                    type="password"
+                                    type={showConfirmPassword ? 'text' : 'password'}
                                     id="confirmPassword"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
+                                    InputProps={{
+                                        endAdornment: (
+                                            <IconButton onClick={toggleConfirmPasswordVisibility} edge="end">
+                                                {showConfirmPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                            </IconButton>
+                                        )
+                                    }}
                                 />
                                 <Typography variant="body2" color="text.secondary">
                                     {passwordStrength.score === 0 && 'Muy débil'}

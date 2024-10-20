@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import banner from '../assets/banner-login.png';
 import { useMediaQuery } from '@mui/material';
 import ReCAPTCHA from 'react-google-recaptcha';
-import { iniciarSesion } from './SessionService'; // Importa el servicio de sesión
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
@@ -48,8 +47,6 @@ const Login = ({ onLogin }) => {
 
             if (loginResponse.status === 200) {
                 toast.success(loginResponse.data.message);
-                // Llama a la función iniciarSesion para establecer la cookie
-                iniciarSesion(userType); // Aquí se establece la cookie
                 onLogin(username);
                 navigate('/index');
                 setRecaptchaToken(null);
