@@ -6,14 +6,14 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import banner from '../assets/banner-login.png'
 import { useMediaQuery } from '@mui/material';
-import { blue } from '@mui/material/colors';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [recaptchaToken, setRecaptchaToken] = useState(null); // Captura del token
+    const [userType, setUserType] = useState('Student');
+    const [recaptchaToken, setRecaptchaToken] = useState(null);
     const navigate = useNavigate();
     const isMobile = useMediaQuery('(max-width: 600px)');
 
@@ -30,29 +30,35 @@ const Login = ({ onLogin }) => {
             return;
         }
 
-        // Validar reCAPTCHA
         try {
+            // Validar reCAPTCHA
             const recaptchaResponse = await axios.post('https://prj-server.onrender.com/validate-recaptcha', {
-                recaptchaToken
+                recaptchaToken,
             });
 
             // Si el reCAPTCHA es exitoso, proceder a validar las credenciales de usuario
             const loginResponse = await axios.post('https://prj-server.onrender.com/login', {
                 username,
-                password
+                password,
+                type: userType,
             });
 
             if (loginResponse.status === 200) {
-                toast.success('Inicio de sesión exitoso');
+                toast.success(loginResponse.data.message);
                 onLogin(username);
                 navigate('/index');
-            } else {
-                toast.warning(loginResponse.data.message);
+                setRecaptchaToken(null);
             }
-
         } catch (error) {
-            toast.error('Error en el proceso de inicio de sesión.');
+            if (error.response) {
+                // Verificar si el error tiene una respuesta del servidor y mostrar el mensaje adecuado
+                const errorMessage = error.response.data.message || 'Error en el proceso de inicio de sesión.';
+                toast.warning(errorMessage);
+            } else {
+                toast.error('Error en el proceso de inicio de sesión.');
+            }
         }
+
     };
 
     // Callback para cuando reCAPTCHA es exitoso
@@ -62,7 +68,7 @@ const Login = ({ onLogin }) => {
 
     return (
         <Container
-            maxWidth= {false}
+            maxWidth={false}
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -72,13 +78,13 @@ const Login = ({ onLogin }) => {
         >
             <Box
                 maxWidth="md"
-                sx={{ 
+                sx={{
                     display: 'flex',
                     flexDirection: isMobile ? 'column' : 'row',
                     boxShadow: '0 4px 10px rgba(0, 0, 0, 0.8)',
                     borderRadius: 2,
                     maxWidth: '100%',
-                    marginLeft: '0 !important', 
+                    marginLeft: '0 !important',
                     marginRight: '0 !important',
                 }}
             >
@@ -98,7 +104,7 @@ const Login = ({ onLogin }) => {
                         alt="Banner PODAI"
                         style={{
                             borderRadius: 10,
-                            maxHeight: 'auto'
+                            maxHeight: 'auto',
                         }}
                     />
                 </Box>
@@ -120,7 +126,7 @@ const Login = ({ onLogin }) => {
                     <Typography component="h1" variant="h5">
                         Acceder al Sistema
                     </Typography>
-                    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, color: '#fff', }}>
+                    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, color: '#fff' }}>
                         <TextField
                             variant="outlined"
                             margin="normal"
@@ -133,11 +139,13 @@ const Login = ({ onLogin }) => {
                             SelectProps={{
                                 native: true,
                             }}
+                            value={userType} // Actualizamos el valor del estado
+                            onChange={(e) => setUserType(e.target.value)} // Control del estado
                         >
-                            <option value="student">Estudiante</option>
-                            <option value="teacher">Docente</option>
+                            <option value="Student">Estudiante</option>
+                            <option value="Admin">Admin</option>
                         </TextField>
-                        <TextField  sx={{ mt: 3, color: '#fff', }}
+                        <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -150,7 +158,7 @@ const Login = ({ onLogin }) => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
-                        <TextField  sx={{ mt: 3, color: '#fff', }}
+                        <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -163,8 +171,8 @@ const Login = ({ onLogin }) => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
-                         <ReCAPTCHA
-                            sitekey={"6Le3YWUqAAAAAAsmFo9W0iT84R3qyVKtLuPJ9hhr"}
+                        <ReCAPTCHA
+                            sitekey="6Le3YWUqAAAAAAsmFo9W0iT84R3qyVKtLuPJ9hhr"
                             onChange={onRecaptchaChange} // Callback para actualizar el token
                         />
                         <Button
@@ -176,13 +184,13 @@ const Login = ({ onLogin }) => {
                         >
                             Acceder
                         </Button>
-                       
+
                         <Typography variant="body2" align="center">
-                            <Link href="/forgot-password" sx={{ mr: 1, fontSize: 18, color: '#fff'}}>
+                            <Link href="/forgot-password" sx={{ mr: 1, fontSize: 18, color: '#fff' }}>
                                 ¿Olvidaste tu contraseña?
                             </Link>
                             O &nbsp;
-                            <Link href="/forgot-password" sx={{ mr: 1, fontSize: 18, color: '#fff'}}>
+                            <Link href="/forgot-password" sx={{ mr: 1, fontSize: 18, color: '#fff' }}>
                                 Regístrate
                             </Link>
                         </Typography>
@@ -191,7 +199,6 @@ const Login = ({ onLogin }) => {
             </Box>
         </Container>
     );
-
 };
 
 export default Login;

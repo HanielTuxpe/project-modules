@@ -59,9 +59,6 @@ const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
                 {usuario ? (
                     <IconButton color="inherit" onClick={handleLogoutClick}>
                         <ExitToAppIcon />
-                        <Typography variant="button" sx={{ ml: 1 }}>
-                            Cerrar Sesión
-                        </Typography>
                     </IconButton>
                 ) : (
                     <IconButton color="inherit" onClick={handleLoginClick}>
