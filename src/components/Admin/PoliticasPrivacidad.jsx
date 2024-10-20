@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Box, Typography, List, ListItem, ListItemText, IconButton, TextField, Button, Card, CardContent } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import { toast } from 'react-toastify';
 
-const API_URL = 'https://prj-server.onrender.com/politicas'; // Cambia por la URL de tu API
+const API_URL = 'http://localhost:3001/politicas'; // Cambia por la URL de tu API
 
 const PoliticasPrivacidad = () => {
     const [items, setItems] = useState([]);
@@ -19,6 +20,7 @@ const PoliticasPrivacidad = () => {
     const [editingListItemIndex, setEditingListItemIndex] = useState(null); // Nuevo estado para editar el ítem
     const [editingPolicyId, setEditingPolicyId] = useState(null);
     const [politicasArchivos, setPoliticasArchivos] = useState([]);
+    const [mostrarArchivos, setMostrarArchivos] = useState(true);
 
     const [file, setFile] = useState(null); // Guardar el archivo seleccionado
 
@@ -34,21 +36,21 @@ const PoliticasPrivacidad = () => {
 
         try {
             // Enviar el archivo al backend usando fetch
-            const response = await fetch(`${API_URL}/Archivo`, {
+            const response = await fetch(`${API_URL}/subirArchivo`, {
                 method: 'POST',
                 body: formData, // El cuerpo de la petición es el FormData con el archivo
             });
 
             if (response.ok) {
-                alert('Archivo subido con éxito');
+                toast.success('Archivo subido con éxito');
                 setFile(null);
             } else {
-                alert('Error al subir el archivo');
+                toast.warning('Error al subir el archivo');
             }
         } catch (error) {
-            console.error('Error al subir el archivo:', error);
-            alert('Error al subir el archivo');
+            toast.warning('Error al subir el archivo');
         }
+
     };
 
     const handleDownload = (archivoBase64, nombreArchivo) => {
@@ -65,22 +67,20 @@ const PoliticasPrivacidad = () => {
         document.body.removeChild(link);
     };
 
-
-
     useEffect(() => {
 
         const fetchPoliticasConArchivo = async () => {
             try {
                 const response = await fetch(`${API_URL}/ConArchivo`);
                 if (!response.ok) {
-                    throw new Error('Error al obtener las políticas');
+                    toast.warning('Error al obtener las políticas');
                 }
 
                 const politicas = await response.json();
                 setPoliticasArchivos(politicas);
 
             } catch (error) {
-                console.error('Error:', error);
+                toast.warning('Error');
             }
         };
 
@@ -90,14 +90,12 @@ const PoliticasPrivacidad = () => {
                 const data = await response.json();
                 if (Array.isArray(data)) {
                     setItems(data);
-                    console.log('La respuesta de la API', data);
-                } else {
-                    console.error('La respuesta de la API no es un arreglo:', data);
                 }
             } catch (error) {
-                console.error('Error al cargar políticas:', error);
+                toast.warning('Error al cargar políticas');
             }
         };
+
 
         fetchPoliticasConArchivo();
 
@@ -106,7 +104,7 @@ const PoliticasPrivacidad = () => {
 
     const addPolicy = async () => {
         if (newPolicy.trim() === '' || sections.length === 0) {
-            alert('Por favor, ingresa un nombre para la política y agrega al menos una sección.');
+            toast.warning('Por favor, ingresa un nombre para la política y agrega al menos una sección.');
             return;
         }
 
@@ -124,7 +122,7 @@ const PoliticasPrivacidad = () => {
             setItems((prevItems) => [...prevItems, createdPolicy]);
             clearForm();
         } else {
-            alert('Error al agregar la política.');
+            toast.warning('Error al agregar la política.');
         }
     };
 
@@ -137,13 +135,13 @@ const PoliticasPrivacidad = () => {
         if (response.ok) {
             setItems((prevItems) => prevItems.filter((_, i) => i !== index));
         } else {
-            alert('Error al eliminar la política.');
+            toast.warning('Error al eliminar la política.');
         }
     };
 
     const addSection = async () => {
         if (newSectionTitle.trim() === '' || newSectionDescription.trim() === '') {
-            alert('Por favor, ingresa un título y una descripción para la sección.');
+            toast.warning('Por favor, ingresa un título y una descripción para la sección.');
             return;
         }
 
@@ -179,25 +177,22 @@ const PoliticasPrivacidad = () => {
 
     const addListItem = () => {
         if (newListItem.trim() === '') {
-            alert('Por favor, ingresa un ítem para la lista.');
+            toast.warning('Por favor, ingresa un ítem para la lista.');
             return;
         }
 
-        if (editingSectionIndex !== null) {
-            if (editingListItemIndex !== null) {
-                // Si está editando un ítem, lo actualiza
-                const updatedList = [...newSectionList];
-                updatedList[editingListItemIndex] = newListItem;
-                setNewSectionList(updatedList);
-                setEditingListItemIndex(null); // Resetear el índice de edición
-            } else {
-                // Si no está editando, lo agrega
-                setNewSectionList((prevList) => [...prevList, newListItem]);
-            }
-            setNewListItem('');
+        if (editingListItemIndex !== null) {
+            // Si está editando un ítem, lo actualiza
+            const updatedList = [...newSectionList];
+            updatedList[editingListItemIndex] = newListItem;
+            setNewSectionList(updatedList);
+            setEditingListItemIndex(null); // Resetear el índice de edición
         } else {
-            alert('No puedes agregar ítems si no estás editando una sección.');
+            // Si no está editando, lo agrega
+            setNewSectionList((prevList) => [...prevList, newListItem]);
         }
+        setNewListItem('');
+
     };
 
     const deleteListItem = (index) => {
@@ -250,10 +245,9 @@ const PoliticasPrivacidad = () => {
             setItems(updatedItems);
             clearForm();
         } catch (error) {
-            console.error('Error al actualizar la política:', error);
+            toast.warning('Error al actualizar la política');
         }
     };
-
 
     const saveChanges = async () => {
         if (isEditing) {
@@ -277,221 +271,282 @@ const PoliticasPrivacidad = () => {
         setNewSectionList([]);
     };
 
-
-
+    const toggleVista = () => {
+        setMostrarArchivos(!mostrarArchivos);
+    };
 
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '20px',
-                minHeight: '100vh',
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word',
-            }}
-        >
-            {/* Primer Box */}
-            <Box sx={{ flex: 1, overflowY: 'auto' }}>
-                <Card
-                    sx={{
-                        borderRadius: '16px',
-                        boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
-                    }}
-                >
-                    <CardContent>
-                        <Typography variant="h5" color="primary" gutterBottom>
-                            Políticas de Privacidad
-                        </Typography>
-                        <List>
-                            {items.map((policy, index) => (
-                                <ListItem key={policy._id} alignItems="flex-start">
-                                    <ListItemText
-                                        primary={policy.titulo_politica} // Usar el campo correcto
-                                        secondary={
-                                            <Box>
-                                                {policy.secciones && policy.secciones.map((section) => (
-                                                    <Box key={section._id} mb={2}>
-                                                        <Typography variant="subtitle1" color="textSecondary">
-                                                            Sección: {section.titulo_seccion}
-                                                        </Typography>
-                                                        <Typography variant="body2" color="textSecondary">
-                                                            Descripción: {section.description}
-                                                        </Typography>
-                                                        <List dense>
-                                                            {section.list && section.list.map((listItem, listItemIndex) => (
-                                                                <ListItem key={listItemIndex}>
-                                                                    <ListItemText primary={listItem} />
-                                                                </ListItem>
-                                                            ))}
-                                                        </List>
-                                                    </Box>
-                                                ))}
-                                            </Box>
-                                        }
+        <Box>
+            <Button variant="contained" onClick={toggleVista}>
+                {mostrarArchivos ? 'Ver Archivos' : 'Ver Políticas Resumidas'}
+            </Button>
+
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '20px',
+                    minHeight: '100vh',
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                }}
+            >
+
+
+                {mostrarArchivos ? (
+                    <>
+
+                        {/* Sección para agregar/editar políticas */}
+                        <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                            <Card
+                                sx={{
+                                    borderRadius: '16px',
+                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                                    transition: 'all 0.3s ease-in-out',
+                                }}
+                            >
+                                <CardContent>
+                                    <Typography variant="h5" color="primary" gutterBottom>
+                                        {isEditing ? 'Editar Política' : 'Agregar Nueva Política'}
+                                    </Typography>
+                                    <TextField
+                                        label="Título de la Política"
+                                        variant="outlined"
+                                        value={newPolicy}
+                                        onChange={(e) => setNewPolicy(e.target.value)}
+                                        fullWidth
+                                        sx={{ marginBottom: '20px' }}
                                     />
-                                    <IconButton onClick={() => editPolicy(index)}>
-                                        <EditIcon color="primary" />
-                                    </IconButton>
-                                    <IconButton onClick={() => deletePolicy(index)}>
-                                        <DeleteIcon color="error" />
-                                    </IconButton>
-                                </ListItem>
-                            ))}
-                        </List>
-                    </CardContent>
-                </Card>
-            </Box>
-
-            {/* Segundo Box */}
-            <Box sx={{ flex: 1, overflowY: 'auto' }}>
-                <Card
-                    sx={{
-                        borderRadius: '16px',
-                        boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
-                        transition: 'all 0.3s ease-in-out',
-                        padding: '20px',
-                    }}
-                >
-                    <Typography variant="h5" color="primary" gutterBottom>
-                        Agregar Archivo De Políticas
-                    </Typography>
-                    <form onSubmit={handleSubmit}>
-                        <TextField
-                            type="file"
-                            variant="outlined"
-                            fullWidth
-                            onChange={handleFileChange} // Cambia el manejador del archivo
-                            sx={{ marginBottom: '20px' }}
-                        />
-                        <Button variant="contained" color="primary" type="submit">
-                            Subir Archivo
-                        </Button>
-
-                    </form>
-
-                    <div>
-                        {politicasArchivos.map((archivo) => (
-                            <Card key={archivo.id} sx={{ marginBottom: '20px', padding: '20px' }}>
-                                <Typography variant="h6">{archivo.nombre}</Typography>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => handleDownload(archivo.archivo, `${archivo.nombre}.pdf`)} // Cambia la extensión según sea necesario
-                                >
-                                    Descargar Archivo
-                                </Button>
+                                    <Button variant="contained" color="primary" onClick={saveChanges}>
+                                        {isEditing ? 'Actualizar Política' : 'Agregar Política'}
+                                    </Button>
+                                </CardContent>
                             </Card>
-                        ))}
-                    </div>
 
-
-
-                </Card>
-                <Card
-                    sx={{
-                        borderRadius: '16px',
-                        boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
-                        transition: 'all 0.3s ease-in-out',
-                    }}
-                >
-                    <CardContent>
-                        <Typography variant="h5" color="primary" gutterBottom>
-                            {isEditing ? 'Editar Política' : 'Agregar Nueva Política'}
-                        </Typography>
-                        <TextField
-                            label="Título de la Política"
-                            variant="outlined"
-                            value={newPolicy}
-                            onChange={(e) => setNewPolicy(e.target.value)}
-                            fullWidth
-                            sx={{ marginBottom: '20px' }}
-                        />
-                        <Button variant="contained" color="primary" onClick={saveChanges}>
-                            {isEditing ? 'Actualizar Política' : 'Agregar Política'}
-                        </Button>
-                    </CardContent>
-                </Card>
-
-                {/* Secciones */}
-                <Card
-                    sx={{
-                        borderRadius: '16px',
-                        boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
-                        marginTop: '20px',
-                    }}
-                >
-                    <CardContent>
-                        <List sx={{ marginTop: '20px' }}>
-                            {sections.map((section, index) => (
-                                <ListItem key={index}>
-                                    <ListItemText
-                                        primary={section.titulo_seccion}
-                                        secondary={`Descripción: ${section.description}`}
+                            {/* Secciones */}
+                            <Card
+                                sx={{
+                                    borderRadius: '16px',
+                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                                    marginTop: '20px',
+                                }}
+                            >
+                                <CardContent>
+                                    <Typography variant="h5" color="primary" gutterBottom>
+                                        Secciones
+                                    </Typography>
+                                    <List sx={{ marginTop: '20px' }}>
+                                        {sections.map((section, index) => (
+                                            <ListItem key={index}>
+                                                <ListItemText
+                                                    primary={section.titulo_seccion}
+                                                    secondary={`Descripción: ${section.description}`}
+                                                />
+                                                <IconButton onClick={() => editSection(index)}>
+                                                    <EditIcon color="primary" />
+                                                </IconButton>
+                                                <IconButton onClick={() => deleteSection(index)}>
+                                                    <DeleteIcon color="error" />
+                                                </IconButton>
+                                            </ListItem>
+                                        ))}
+                                    </List>
+                                    <TextField
+                                        label="Título de la Sección"
+                                        variant="outlined"
+                                        value={newSectionTitle}
+                                        onChange={(e) => setNewSectionTitle(e.target.value)}
+                                        fullWidth
+                                        sx={{ marginBottom: '10px' }}
                                     />
-                                    <IconButton onClick={() => editSection(index)}>
-                                        <EditIcon color="primary" />
-                                    </IconButton>
-                                    <IconButton onClick={() => deleteSection(index)}>
-                                        <DeleteIcon color="error" />
-                                    </IconButton>
-                                </ListItem>
-                            ))}
-                        </List>
-                        <Typography variant="h5" color="primary" gutterBottom>
-                            Secciones
-                        </Typography>
-                        <TextField
-                            label="Título de la Sección"
-                            variant="outlined"
-                            value={newSectionTitle}
-                            onChange={(e) => setNewSectionTitle(e.target.value)}
-                            fullWidth
-                            sx={{ marginBottom: '10px' }}
-                        />
-                        <TextField
-                            label="Descripción de la Sección"
-                            variant="outlined"
-                            value={newSectionDescription}
-                            onChange={(e) => setNewSectionDescription(e.target.value)}
-                            fullWidth
-                            sx={{ marginBottom: '10px' }}
-                        />
-                        <List>
-                            {newSectionList.map((item, index) => (
-                                <ListItem key={index}>
-                                    <ListItemText primary={item} />
-                                    <IconButton onClick={() => editListItem(index)}>
-                                        <EditIcon color="primary" />
-                                    </IconButton>
-                                    <IconButton onClick={() => deleteListItem(index)}>
-                                        <DeleteIcon color="error" />
-                                    </IconButton>
-                                </ListItem>
-                            ))}
-                        </List>
-                        <TextField
-                            label="Ítem de Lista"
-                            variant="outlined"
-                            value={newListItem}
-                            onChange={(e) => setNewListItem(e.target.value)}
-                            fullWidth
-                            sx={{ marginBottom: '10px' }}
-                        />
+                                    <TextField
+                                        label="Descripción de la Sección"
+                                        variant="outlined"
+                                        value={newSectionDescription}
+                                        onChange={(e) => setNewSectionDescription(e.target.value)}
+                                        fullWidth
+                                        sx={{ marginBottom: '10px' }}
+                                    />
+                                    <List>
+                                        {newSectionList.map((item, index) => (
+                                            <ListItem key={index}>
+                                                <ListItemText primary={item} />
+                                                <IconButton onClick={() => editListItem(index)}>
+                                                    <EditIcon color="primary" />
+                                                </IconButton>
+                                                <IconButton onClick={() => deleteListItem(index)}>
+                                                    <DeleteIcon color="error" />
+                                                </IconButton>
+                                            </ListItem>
+                                        ))}
+                                    </List>
+                                    <TextField
+                                        label="Ítem de Lista"
+                                        variant="outlined"
+                                        value={newListItem}
+                                        onChange={(e) => setNewListItem(e.target.value)}
+                                        fullWidth
+                                        sx={{ marginBottom: '10px' }}
+                                    />
+                                    <Button variant="contained" color="secondary" onClick={addListItem}>
+                                        {editingListItemIndex !== null ? 'Actualizar Item' : 'Agregar Item'}
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={addSection}
+                                        sx={{ marginLeft: '10px' }}
+                                    >
+                                        {editingSectionIndex !== null ? 'Actualizar Sección' : 'Agregar Sección'}
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        </Box>
 
-                        <Button variant="contained" color="secondary" onClick={addListItem}>
-                            Agregar Ítem
-                        </Button>
-                        <Button variant="contained" color="primary" onClick={addSection} sx={{ marginLeft: '10px' }}>
-                            {editingSectionIndex !== null ? 'Actualizar Sección' : 'Agregar Sección'}
-                        </Button>
+                        {/* Sección para mostrar las políticas */}
+                        <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                            <Card
+                                sx={{
+                                    borderRadius: '16px',
+                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                                }}
+                            >
+                                <CardContent>
+                                    <Typography variant="h5" color="primary" gutterBottom>
+                                        Políticas de Privacidad
+                                    </Typography>
+                                    <List>
+                                        {items.map((policy, index) => (
+                                            <ListItem key={policy._id} alignItems="flex-start">
+                                                <ListItemText
+                                                    primary={policy.titulo_politica}
+                                                    secondary={
+                                                        <Box>
+                                                            {policy.secciones &&
+                                                                policy.secciones.map((section) => (
+                                                                    <Box key={section._id} mb={2}>
+                                                                        <Typography variant="subtitle1" color="textSecondary">
+                                                                            Sección: {section.titulo_seccion}
+                                                                        </Typography>
+                                                                        <Typography variant="body2" color="textSecondary">
+                                                                            Descripción: {section.description}
+                                                                        </Typography>
+                                                                        <List dense>
+                                                                            {section.list &&
+                                                                                section.list.map((listItem, listItemIndex) => (
+                                                                                    <ListItem key={listItemIndex}>
+                                                                                        <ListItemText primary={listItem} />
+                                                                                    </ListItem>
+                                                                                ))}
+                                                                        </List>
+                                                                    </Box>
+                                                                ))}
+                                                        </Box>
+                                                    }
+                                                />
+                                                <IconButton onClick={() => editPolicy(index)}>
+                                                    <EditIcon color="primary" />
+                                                </IconButton>
+                                                <IconButton onClick={() => deletePolicy(index)}>
+                                                    <DeleteIcon color="error" />
+                                                </IconButton>
+                                            </ListItem>
+                                        ))}
+                                    </List>
+                                </CardContent>
+                            </Card>
+                        </Box>
+
+                    </>
+                ) : (
+                    <>
+
+                        {/* Sección para agregar archivo de políticas */}
+                        <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                            <Card
+                                sx={{
+                                    borderRadius: '16px',
+                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                                    padding: '20px',
+                                }}
+                            >
+                                <Typography variant="h5" color="primary" gutterBottom>
+                                    Agregar Archivo De Políticas
+                                </Typography>
+                                <form onSubmit={handleSubmit}>
+                                    <TextField
+                                        type="file"
+                                        variant="outlined"
+                                        fullWidth
+                                        onChange={handleFileChange}
+                                        sx={{ marginBottom: '20px' }}
+                                    />
+                                    <Button variant="contained" color="primary" type="submit">
+                                        Subir Archivo
+                                    </Button>
+                                </form>
+                            </Card>
+                        </Box>
+
+                        {/* Sección para mostrar archivos de políticas */}
+                        <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                            <Card
+                                sx={{
+                                    borderRadius: '16px',
+                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                                }}
+                            >
+                                 <Typography variant="h5" color="primary" gutterBottom>
+                                    Historial De Políticas
+                                </Typography>
+                                <div>
+                                    {politicasArchivos.length > 0 ? (
+                                        politicasArchivos.map((archivo) => (
+                                            <Card key={archivo.id} sx={{ marginBottom: '20px', padding: '20px' }}>
+                                                <Typography variant="h6">{archivo.nombre}</Typography>
+                                                <>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        onClick={() => handleDownload(archivo.archivo, `${archivo.nombre}.pdf`)}
+                                                    >
+                                                        Descargar Archivo
+                                                    </Button>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="secondary"
+                                                    >
+                                                        Elimina Archivo
+                                                    </Button>
+                                                    <Typography variant="body2" color="textSecondary">
+                                                        {new Date(archivo.fechaSubida).toLocaleString('es-ES', {
+                                                            hour: 'numeric',
+                                                            minute: 'numeric',
+                                                            day: 'numeric',
+                                                            month: 'numeric',
+                                                            year: 'numeric',
+                                                        })}
+                                                    </Typography>
+                                                </>
+
+                                            </Card>
+                                        ))
+                                    ) : (
+                                        <Typography variant="body1" color="textSecondary" sx={{ padding: '20px' }}>
+                                            No hay archivos disponibles.
+                                        </Typography>
+                                    )}
+                                </div>
+                            </Card>
+                        </Box>
 
 
-                    </CardContent>
-                </Card>
+                    </>
+                )}
             </Box>
         </Box>
     );
+
 
 };
 

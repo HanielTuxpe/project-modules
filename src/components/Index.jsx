@@ -38,7 +38,7 @@ const Index = () => {
                 maxWidth: '100vw', // Para asegurarse que no exceda el ancho de la ventana
             }}
         >
-            <MenuPincipal></MenuPincipal>
+           
             <Box
                 sx={{
                     display: 'flex',

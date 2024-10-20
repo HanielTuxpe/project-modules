@@ -34,7 +34,7 @@ const Terminos = () => {
 
         try {
             // Enviar el archivo al backend usando fetch
-            const response = await fetch(`${API_URL}/Archivo`, {
+            const response = await fetch(`${API_URL}/subirArchivo`, {
                 method: 'POST',
                 body: formData, // El cuerpo de la petición es el FormData con el archivo
             });
