@@ -38,11 +38,12 @@ const Registro = ({ onRegister }) => {
         }
 
         // Patrón de contraseña: mínimo 8 caracteres, al menos una letra y un número
-        const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+.,;:])[A-Za-z\d!@#$%^&*()_+.,;:]{8,}$/;
         if (!passwordPattern.test(password)) {
             toast.warning('La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales (.!@#$%^&*()_+).');
             return;
         }
+        
 
         if (password !== confirmPassword) {
             toast.warning('Las contraseñas no coinciden.');
@@ -53,7 +54,8 @@ const Registro = ({ onRegister }) => {
             const response = await axios.post('https://prj-server.onrender.com/register', {
                 username,
                 password,
-                email
+                email,
+                type: 'Student'
             });
 
             if (response.status === 201) {
