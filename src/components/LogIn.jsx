@@ -57,7 +57,6 @@ const Login = ({ onLogin }) => {
 
     // Callback para cuando reCAPTCHA es exitoso
     const onRecaptchaChange = (token) => {
-        console.log("Token reCAPTCHA:", token);
         setRecaptchaToken(token);
     };
 
