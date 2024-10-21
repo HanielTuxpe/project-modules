@@ -28,14 +28,9 @@ const App = () => {
         setDarkMode(savedTheme);
     }, []);
 
-    const handleRegister = (username) => {
-        setUsuario(username);
-        localStorage.setItem('usuario', username);
-    };
-
-    const handleLogin = (username) => {
-        setUsuario(username);
-        localStorage.setItem('usuario', username);
+    const handleLogin = (userType) => {
+        setUsuario(userType);
+        localStorage.setItem('usuario', userType);
     };
 
     const handleLogout = () => {
@@ -65,7 +60,7 @@ const App = () => {
                             />
                             <Route
                                 path="/SignUp"
-                                element={usuario ? <Navigate to="/index" /> : <Registro onRegister={handleRegister} />}
+                                element={usuario ? <Navigate to="/index" /> : <Registro/>}
                             />
                             <Route
                                 path="/login"

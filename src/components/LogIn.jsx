@@ -13,7 +13,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [userType, setUserType] = useState('Student');
+    const [userType, setUserType] = useState('');
     const [recaptchaToken, setRecaptchaToken] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
@@ -22,7 +22,7 @@ const Login = ({ onLogin }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!username.trim() || !password.trim()) {
+        if (!username.trim() || !password.trim() || !userType.trim()) {
             toast.warning('Por favor, complete todos los campos.');
             return;
         }
@@ -39,15 +39,16 @@ const Login = ({ onLogin }) => {
             });
 
             // Si el reCAPTCHA es exitoso, proceder a validar las credenciales de usuario
-            const loginResponse = await axios.post('http://localhost:3001/login', {
+            const loginResponse = await axios.post('https://prj-server.onrender.com/login', {
                 username,
                 password,
-                type: userType,
+                userType,
             });
+
 
             if (loginResponse.status === 200) {
                 toast.success(loginResponse.data.message);
-                onLogin(username);
+                onLogin(loginResponse.data.type);
                 navigate('/index');
                 setRecaptchaToken(null);
             }
@@ -55,6 +56,7 @@ const Login = ({ onLogin }) => {
             if (error.response) {
                 const errorMessage = error.response.data.message || 'Error en el proceso de inicio de sesión.';
                 toast.warning(errorMessage);
+                console.log(error)
             } else {
                 toast.error('Error en el proceso de inicio de sesión.');
             }
@@ -143,12 +145,13 @@ const Login = ({ onLogin }) => {
                             SelectProps={{
                                 native: true,
                             }}
-                            value={userType} // Actualizamos el valor del estado
-                            onChange={(e) => setUserType(e.target.value)} // Control del estado
+                            value={userType}
+                            onChange={(e) => setUserType(e.target.value)}
                         >
-                            <option value="Student">Estudiante</option>
                             <option value="Admin">Admin</option>
+                            <option value="Student">Estudiante</option>
                         </TextField>
+
                         <TextField
                             variant="outlined"
                             margin="normal"

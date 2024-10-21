@@ -9,7 +9,7 @@ import zxcvbn from 'zxcvbn';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-const Registro = ({ onRegister }) => {
+const Registro = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState(''); // Nuevo estado para confirmar contraseña
@@ -43,7 +43,7 @@ const Registro = ({ onRegister }) => {
             toast.warning('La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales (.!@#$%^&*()_+).');
             return;
         }
-        
+
 
         if (password !== confirmPassword) {
             toast.warning('Las contraseñas no coinciden.');
@@ -55,24 +55,21 @@ const Registro = ({ onRegister }) => {
                 username,
                 password,
                 email,
-                type: 'Student'
+                type: 'Admin'
             });
 
-            if (response.status === 201) {
+            if (response.status === 200) {
                 toast.success(response.data.message);
                 setIsRegistered(true);
             } else if (response.status === 400) {
                 toast.warning(response.data.message);
-            } else {
-                toast.warning('Hubo un problema al registrar el usuario');
             }
         } catch (error) {
-            if (error.response && error.response.status === 400) {
+            if (error.response) {
                 toast.warning(error.response.data.message);
             } else {
                 toast.error('Error al registrar usuario');
             }
-            console.log(error);
         }
     };
 
@@ -82,19 +79,19 @@ const Registro = ({ onRegister }) => {
         try {
             const response = await axios.post('https://prj-server.onrender.com/verify', {
                 username,
-                code: verificationCode
+                code: Number(verificationCode)
             });
 
             if (response.status === 200) {
-                toast.success('Código verificado correctamente');
-                onRegister(username);
-                navigate('/index');
-            } else {
-                toast.warning('Código incorrecto');
+                toast.success(response.data.message);
+                navigate('/login');
+            } else if (response.status === 400) {
+                toast.warning(response.data.message);
             }
         } catch (error) {
-            toast.error('Error al verificar el código');
-            console.log(error);
+            if (error.response) {
+                toast.warning(error.response.data.message);
+            }
         }
     };
 
@@ -166,7 +163,7 @@ const Registro = ({ onRegister }) => {
                     <Typography component="h1" variant="h5">
                         {isRegistered ? 'Verificación de Código' : 'Registro'}
                     </Typography>
-                    <Box component="form" onSubmit={isRegistered ? handleVerification : handleSubmit} sx={{ mt: 3 }}>
+                    <Box component="form" onSubmit={isRegistered ? handleVerification : handleSubmit} sx={{ mt: 3, }}>
                         {!isRegistered ? (
                             <>
                                 <TextField
@@ -233,13 +230,26 @@ const Registro = ({ onRegister }) => {
                                         )
                                     }}
                                 />
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        fontSize: 18,
+                                        color: 
+                                            passwordStrength.score === 0 ? 'red' :
+                                            passwordStrength.score === 1 ? 'orange' :
+                                            passwordStrength.score === 2 ? 'yellow' :
+                                            passwordStrength.score === 3 ? 'green' :
+                                            passwordStrength.score === 4 ? 'darkgreen' :
+                                            'text.secondary'
+                                    }}
+                                >
                                     {passwordStrength.score === 0 && 'Muy débil'}
                                     {passwordStrength.score === 1 && 'Débil'}
                                     {passwordStrength.score === 2 && 'Moderada'}
                                     {passwordStrength.score === 3 && 'Fuerte'}
                                     {passwordStrength.score === 4 && 'Muy fuerte'}
                                 </Typography>
+
                                 <Button
                                     type="submit"
                                     fullWidth
