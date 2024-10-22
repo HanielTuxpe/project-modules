@@ -54,7 +54,7 @@ function SideMenu({ open, toggleMenu, user }) { // Recibe las props open y toggl
                     </>
                 ) : (
                     <ListItem>
-                        <ListItemText primary="Por favor, inicie sesión" style={{ color: '#ffffff' }} />
+                        <ListItemText primary={`Por favor, inicie sesión, ${user}`} style={{ color: '#ffffff' }} />
                     </ListItem>
                 )}
             </List>
