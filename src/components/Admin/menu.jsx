@@ -24,6 +24,10 @@ function SideMenu({ open, toggleMenu, user }) { // Recibe las props open y toggl
         navigate('/Crud'); // Navegar a la ruta "/Crud"
     };
 
+    const handleUsuariosClick = () => {
+        navigate('/Usuarios'); // Navegar a la ruta "/Crud"
+    };
+
     return (
         <StyledDrawer
             variant="temporary"
@@ -51,6 +55,16 @@ function SideMenu({ open, toggleMenu, user }) { // Recibe las props open y toggl
                                 INFORMACION DE LA EMPRESA
                             </Typography>
                         </ListItem>
+
+                        <ListItem button onClick={handleUsuariosClick}>
+                            <ListItemIcon>
+                                <TableChart style={{ color: '#c2c2c2' }} />
+                            </ListItemIcon>
+                            <Typography>
+                                USUARIOS
+                            </Typography>
+                        </ListItem>
+
                     </>
                 ) : (
                     <ListItem>
