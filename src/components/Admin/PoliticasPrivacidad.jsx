@@ -4,7 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { toast } from 'react-toastify';
 
-const API_URL = 'http://localhost:3001/politicas'; // Cambia por la URL de tu API
+const API_URL = 'https://prj-server.onrender.com/politicas'; // Cambia por la URL de tu API
 
 const PoliticasPrivacidad = () => {
     const [items, setItems] = useState([]);
