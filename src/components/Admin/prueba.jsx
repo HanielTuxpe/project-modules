@@ -332,7 +332,7 @@ const DeslindeLegal = () => {
     return (
         <Box>
             <Button variant="contained" onClick={toggleVista}>
-                {mostrarArchivos ? 'Ver Archivos' : 'Ver Deslinde Legal Resumido'}
+                {mostrarArchivos ? 'Ver Archivos' : 'Ver Deslinde Y Condiciones Resumidas'}
             </Button>
     
             <Box

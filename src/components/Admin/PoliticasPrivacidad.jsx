@@ -121,8 +121,10 @@ const PoliticasPrivacidad = () => {
             const createdPolicy = await response.json();
             setItems((prevItems) => [...prevItems, createdPolicy]);
             clearForm();
+            toast.success('Politica Agregada');
         } else {
             toast.warning('Error al agregar la política.');
+
         }
     };
 
@@ -134,6 +136,7 @@ const PoliticasPrivacidad = () => {
 
         if (response.ok) {
             setItems((prevItems) => prevItems.filter((_, i) => i !== index));
+            toast.success('Politica Eliminada');
         } else {
             toast.warning('Error al eliminar la política.');
         }
@@ -271,6 +274,57 @@ const PoliticasPrivacidad = () => {
         setNewSectionList([]);
     };
 
+    const handleDeleteArchivo = (id) => {
+        // Confirmar si el usuario desea eliminar el archivo
+        if (window.confirm("¿Estás seguro de que deseas eliminar este archivo?")) {
+            // Realiza la petición de eliminación
+            fetch(`${API_URL}/DeletArchivoPolitica/${id}`, {
+                method: 'DELETE',
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        // Elimina el archivo de la lista en el frontend
+                        setPoliticasArchivos((prevArchivos) => prevArchivos.filter((archivo) => archivo.id !== id));
+                        alert("Archivo eliminado con éxito.");
+                    } else {
+                        alert("Hubo un error al eliminar el archivo.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error eliminando el archivo:", error);
+                    alert("Ocurrió un error inesperado.");
+                });
+        }
+    };
+
+    const handleSetActual = (id) => {
+        // Confirmar si el usuario desea establecer este archivo como vigente
+        if (window.confirm("¿Estás seguro de que deseas establecer este archivo como vigente?")) {
+            // Realiza la petición de actualización
+            fetch(`${API_URL}/ActualArchivoPolitica/${id}`, {
+                method: 'PATCH', // Usamos PATCH para actualizar el estado
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        // Actualiza el estado del archivo en la lista en el frontend
+                        setPoliticasArchivos((prevArchivos) => 
+                            prevArchivos.map((archivo) => 
+                                archivo.id === id ? { ...archivo, estado: true } : { ...archivo, estado: false }
+                            )
+                        );
+                        alert("Archivo actualizado como vigente con éxito.");
+                    } else {
+                        alert("Hubo un error al actualizar el archivo.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error actualizando el archivo:", error);
+                    alert("Ocurrió un error inesperado.");
+                });
+        }
+    };
+    
+
     const toggleVista = () => {
         setMostrarArchivos(!mostrarArchivos);
     };
@@ -280,10 +334,11 @@ const PoliticasPrivacidad = () => {
             <Button variant="contained" onClick={toggleVista}>
                 {mostrarArchivos ? 'Ver Archivos' : 'Ver Políticas Resumidas'}
             </Button>
-
+    
             <Box
                 sx={{
                     display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' }, // Cambiar a columna en móviles
                     justifyContent: 'space-between',
                     padding: '20px',
                     minHeight: '100vh',
@@ -291,13 +346,10 @@ const PoliticasPrivacidad = () => {
                     overflowWrap: 'break-word',
                 }}
             >
-
-
                 {mostrarArchivos ? (
                     <>
-
-                        {/* Sección para agregar/editar políticas */}
-                        <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                        <Box sx={{ flex: 1, overflowY: 'auto', marginBottom: { xs: '20px', sm: '0' } }}>
+                            {/* Sección para agregar/editar políticas */}
                             <Card
                                 sx={{
                                     borderRadius: '16px',
@@ -322,7 +374,7 @@ const PoliticasPrivacidad = () => {
                                     </Button>
                                 </CardContent>
                             </Card>
-
+    
                             {/* Secciones */}
                             <Card
                                 sx={{
@@ -402,7 +454,7 @@ const PoliticasPrivacidad = () => {
                                 </CardContent>
                             </Card>
                         </Box>
-
+    
                         {/* Sección para mostrar las políticas */}
                         <Box sx={{ flex: 1, overflowY: 'auto' }}>
                             <Card
@@ -456,13 +508,11 @@ const PoliticasPrivacidad = () => {
                                 </CardContent>
                             </Card>
                         </Box>
-
                     </>
                 ) : (
                     <>
-
                         {/* Sección para agregar archivo de políticas */}
-                        <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                        <Box sx={{ flex: 1, overflowY: 'auto', marginBottom: { xs: '20px', sm: '0' } }}>
                             <Card
                                 sx={{
                                     borderRadius: '16px',
@@ -487,7 +537,7 @@ const PoliticasPrivacidad = () => {
                                 </form>
                             </Card>
                         </Box>
-
+    
                         {/* Sección para mostrar archivos de políticas */}
                         <Box sx={{ flex: 1, overflowY: 'auto' }}>
                             <Card
@@ -496,56 +546,83 @@ const PoliticasPrivacidad = () => {
                                     boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
                                 }}
                             >
-                                 <Typography variant="h5" color="primary" gutterBottom>
+                                <Typography variant="h5" color="primary" gutterBottom>
                                     Historial De Políticas
                                 </Typography>
                                 <div>
                                     {politicasArchivos.length > 0 ? (
-                                        politicasArchivos.map((archivo) => (
-                                            <Card key={archivo.id} sx={{ marginBottom: '20px', padding: '20px' }}>
-                                                <Typography variant="h6">{archivo.nombre}</Typography>
-                                                <>
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        onClick={() => handleDownload(archivo.archivo, `${archivo.nombre}.pdf`)}
-                                                    >
-                                                        Descargar Archivo
-                                                    </Button>
-                                                    <Button
-                                                        variant="contained"
-                                                        color="secondary"
-                                                    >
-                                                        Elimina Archivo
-                                                    </Button>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        {new Date(archivo.fechaSubida).toLocaleString('es-ES', {
-                                                            hour: 'numeric',
-                                                            minute: 'numeric',
-                                                            day: 'numeric',
-                                                            month: 'numeric',
-                                                            year: 'numeric',
-                                                        })}
+                                        politicasArchivos
+                                            .sort((a, b) => new Date(b.fechaSubida) - new Date(a.fechaSubida)) // Ordena archivos por fecha más reciente primero
+                                            .map((archivo, index) => (
+                                                <Card key={archivo.id} sx={{ marginBottom: '20px', padding: '20px' }}>
+                                                    <Typography variant="h6">
+                                                        {archivo.nombre}
+                                                        {archivo.estado ? (
+                                                            <Typography variant="subtitle1" color="primary">
+                                                                Política Actual
+                                                            </Typography>
+                                                        ) : (
+                                                            <Typography variant="subtitle1" color="textSecondary">
+                                                                No vigente
+                                                            </Typography>
+                                                        )}
                                                     </Typography>
-                                                </>
+                                                    <>
+                                                        <Button
+                                                            variant="contained"
+                                                            color="primary"
+                                                            onClick={() => handleDownload(archivo.archivo)}
+                                                        >
+                                                            Descargar
+                                                        </Button>
+                                                        {archivo.estado ? (
+                                                            <Button
+                                                                variant="contained"
+                                                                color="secondary"
+                                                                onClick={() => handleDeleteArchivo(archivo.id)} // Función para eliminar si es actual
+                                                            >
+                                                                No vigente
+                                                            </Button>
+                                                        ) : (
+                                                            <Button
+                                                                variant="contained"
+                                                                color="secondary"
+                                                                onClick={() => handleSetActual(archivo.id)} // Función para establecer como política actual
+                                                            >
+                                                                Establecer vigencia
+                                                            </Button>
+                                                        )}
+                                                        <Typography variant="body2" color="textSecondary">
+                                                            {new Date(archivo.fechaSubida).toLocaleString('es-ES', {
+                                                                hour: 'numeric',
+                                                                minute: 'numeric',
+                                                                day: 'numeric',
+                                                                month: 'numeric',
+                                                                year: 'numeric',
+                                                            })}
+                                                        </Typography>
 
-                                            </Card>
-                                        ))
+                                                        <Typography variant="body2" color="textSecondary">
+                                                            Versión: {archivo.version}
+                                                        </Typography>
+
+                                                    </>
+                                                </Card>
+                                            ))
                                     ) : (
-                                        <Typography variant="body1" color="textSecondary" sx={{ padding: '20px' }}>
-                                            No hay archivos disponibles.
+                                        <Typography variant="body1" color="textSecondary">
+                                            No hay archivos de políticas disponibles.
                                         </Typography>
                                     )}
                                 </div>
                             </Card>
                         </Box>
-
-
                     </>
                 )}
             </Box>
         </Box>
     );
+    
 
 
 };

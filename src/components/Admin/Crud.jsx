@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Box, Tabs, Tab, Fade } from '@mui/material';
+import { Box, Tabs, Tab, Fade , Button, useMediaQuery} from '@mui/material';
 import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'; // Importa el ícono de flecha derecha
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // Importa el ícono de flecha izquierda
 
 
 import MenuPrincipal from './menu'; // Importa tu menú
@@ -11,6 +13,7 @@ import DeslindeLegal from './DeslindeLegal'; // Importa DeslindeLegal
 
 // Colores personalizados
 const wineRed = '#8B0000'; // Rojo vino
+
 
 // Componente contenedor principal con un diseño centrado
 const MainContainer = styled(Box)(({ theme }) => ({
@@ -27,6 +30,21 @@ borderRadius:'5%',
 
 const EmpresaApp = ({ darkMode }) => {
   const [selectedTab, setSelectedTab] = useState(0);
+  const isMobile = useMediaQuery('(max-width:600px)');
+
+  const handlePreviousTab = () => {
+    // Lógica para ir a la pestaña anterior
+    if (selectedTab > 0) {
+      handleTabChange(null, selectedTab - 1);
+    }
+  };
+
+  const handleNextTab = () => {
+    // Lógica para ir a la pestaña siguiente
+    if (selectedTab < 3) { // Cambia 3 por el número total de pestañas - 1
+      handleTabChange(null, selectedTab + 1);
+    }
+  };
 
   // Crear el tema basado en el modo oscuro o claro
   const theme = useMemo(
@@ -75,24 +93,36 @@ const EmpresaApp = ({ darkMode }) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <MainContainer >
+      <MainContainer>
         {/* Menú principal */}
         <MenuPrincipal />
 
         {/* Menú horizontal centrado */}
-        <Box display="flex" justifyContent="center" alignItems="center" mb={4} >
+        <Box display="flex" justifyContent="center" alignItems="center" mb={4}>
+          {isMobile && (
+            <Button onClick={handlePreviousTab} disabled={selectedTab === 0}>
+              <ArrowBackIcon />
+            </Button>
+          )}
           <Tabs
             value={selectedTab}
             onChange={handleTabChange}
             centered
             textColor="primary"
             indicatorColor="primary"
+            scrollable
+            variant="scrollable"
           >
             <Tab label="Perfil de la Empresa" />
             <Tab label="Políticas de Privacidad" />
             <Tab label="Términos y Condiciones" />
             <Tab label="Deslinde Legal" />
           </Tabs>
+          {isMobile && (
+            <Button onClick={handleNextTab} disabled={selectedTab === 3}>
+              <ArrowForwardIcon />
+            </Button>
+          )}
         </Box>
 
         {/* Contenedor del contenido */}
@@ -105,6 +135,10 @@ const EmpresaApp = ({ darkMode }) => {
             borderRadius={4}
             sx={{
               backgroundColor: theme.palette.background.paper, // Fondo dinámico
+              padding: { xs: 2, sm: 3 }, // Ajusta el padding según el tamaño de la pantalla
+              margin: { xs: 1, sm: 2 }, // Ajusta el margin para móvil
+              overflowX: 'auto', // Permitir desplazamiento horizontal si es necesario
+              flexDirection: { xs: 'column', md: 'row' }, // Cambiar la dirección del flex si es necesario
             }}
           >
             {renderContent()}
