@@ -26,7 +26,7 @@ const BlockedUsers = () => {
     // Haz que la función sea asincrónica
     const resetIncidencias = async (usuarioId) => {
         try {
-            const response = await fetch(`https://prj-server.onrender.com/usuarios/${usuarioId}/reset-intentos`, {
+            const response = await fetch(`http://localhost:3001/usuarios/${usuarioId}/reset-intentos`, {
                 method: 'PATCH', // Método de la solicitud
                 headers: {
                     'Content-Type': 'application/json', // Especifica el tipo de contenido
@@ -71,7 +71,10 @@ const BlockedUsers = () => {
                                         Correo Electronico: {usuario._doc.email}
                                     </Typography>
                                 </Box>
-                                <Button variant="contained" color="primary" onClick={() => resetIncidencias(usuario._id)}>
+                                <Button variant="contained" color="primary" onClick={() => {
+    console.log(usuario._doc._id); // Agrega este log para verificar el valor
+    resetIncidencias(usuario._doc._id);
+  }}>
                                     Resetear Contador
                                 </Button>
                             </Box>
