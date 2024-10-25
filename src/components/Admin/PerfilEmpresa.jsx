@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, CardContent, IconButton, List, Card, ListItem, Avatar, Tooltip, Button } from '@mui/material';
+import { Box, Typography, TextField, IconButton, Button, Avatar, Tooltip, Select, MenuItem, ListItem, List } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-
-import { styled } from '@mui/material/styles';
-import { MenuItem, Select } from '@mui/material';
 
 const PerfilEmpresa = () => {
     const [nombreEmpresa, setNombreEmpresa] = useState('Nombre de la Empresa');
@@ -22,10 +19,10 @@ const PerfilEmpresa = () => {
 
     const [socialLinks, setSocialLinks] = useState([]);
     const [newLink, setNewLink] = useState('');
+    const [selectedPlatform, setSelectedPlatform] = useState('');
     const [isEditingLink, setIsEditingLink] = useState(false);
     const [currentEditIndex, setCurrentEditIndex] = useState(null);
-    const [editedLink, setEditedLink] = useState('');
-    const [selectedPlatform, setSelectedPlatform] = useState('');
+    const [editedLink, setEditedLink] = useState({ platform: '', url: '' });
 
     const cargarDatosEmpresa = async () => {
         try {
@@ -42,7 +39,9 @@ const PerfilEmpresa = () => {
                 setDireccion(empresa.direccion);
                 setObjetivo(empresa.objetivo);
                 setEmpresaId(empresa._id);
-                setNuevoNombre(empresa.nombreEmpresa);
+                if (empresa.redesSociales) {
+                    setSocialLinks(empresa.redesSociales);
+                }
             } else {
                 console.error('No se encontraron datos de la empresa');
             }
@@ -70,7 +69,6 @@ const PerfilEmpresa = () => {
             if (response.ok) {
                 const data = await response.json();
                 console.log(`Campo ${campo} actualizado con éxito`, data);
-
                 switch (campo) {
                     case 'nombreEmpresa':
                         setNombreEmpresa(data.nombreEmpresa);
@@ -92,6 +90,9 @@ const PerfilEmpresa = () => {
                         break;
                     case 'imagen':
                         setImagen(data.imagen);
+                        break;
+                    case 'redesSociales':
+                        setSocialLinks(data.redesSociales); // Asumiendo que el API devuelve la lista actualizada
                         break;
                     default:
                         break;
@@ -126,278 +127,304 @@ const PerfilEmpresa = () => {
     const toggleEditing = () => {
         if (isEditing) {
             // Guardar los cambios en todos los campos editados
-            handleFieldChange('nombreEmpresa', nombreEmpresa);
-            handleFieldChange('descripcion', descripcion);
-            handleFieldChange('mision', mision);
-            handleFieldChange('vision', vision);
-            handleFieldChange('direccion', direccion);
-            handleFieldChange('objetivo', objetivo);
+            actualizarEmpresa('nombreEmpresa', nombreEmpresa);
+            actualizarEmpresa('descripcion', descripcion);
+            actualizarEmpresa('mision', mision);
+            actualizarEmpresa('vision', vision);
+            actualizarEmpresa('direccion', direccion);
+            actualizarEmpresa('objetivo', objetivo);
         }
         setIsEditing(!isEditing);
     };
 
-    const handleFieldChange = (campo, valor) => {
-        actualizarEmpresa(campo, valor);
+    const handleAddLink = () => {
+        if (selectedPlatform && newLink) {
+            const newSocialLink = { nombre: selectedPlatform, link: newLink };
+            
+            // Actualiza el estado con el nuevo enlace social
+            const updatedLinks = [...socialLinks, newSocialLink];
+            setSocialLinks(updatedLinks);
+    
+            // Actualiza la empresa en la base de datos
+            actualizarEmpresa('redesSociales', updatedLinks);
+    
+            // Limpia los valores del formulario
+            setNewLink('');
+            setSelectedPlatform('');
+        }
+    };
+
+    const handleDeleteLink = (index) => {
+        // Verifica si el índice es válido
+        if (index >= 0 && index < socialLinks.length) {
+            // Crea una copia del estado actual de socialLinks
+            const updatedLinks = socialLinks.filter((_, i) => i !== index);
+
+            // Actualiza el estado de socialLinks con el nuevo arreglo sin el enlace eliminado
+            setSocialLinks(updatedLinks);
+
+            // Llama a la función para actualizar la empresa en el backend
+            actualizarEmpresa('redesSociales', updatedLinks);
+        } else {
+            console.error('Error: No se puede eliminar el enlace, índice no válido.');
+        }
+    };
+
+    const handleEditLink = (index) => {
+        setIsEditingLink(true);
+        setCurrentEditIndex(index);
+        setEditedLink(socialLinks[index]); // Carga el enlace a editar
+    };
+
+    const handleUpdateLink = () => {
+        if (currentEditIndex !== null) {
+            // Crea una copia del estado actual de socialLinks
+            const updatedLinks = [...socialLinks];
+
+            // Actualiza el enlace en el índice correspondiente
+            updatedLinks[currentEditIndex] = editedLink;
+
+            // Actualiza el estado de socialLinks con el nuevo arreglo
+            setSocialLinks(updatedLinks);
+
+            // Llama a la función para actualizar la empresa en el backend
+            actualizarEmpresa('redesSociales', updatedLinks);
+
+            // Restablece el estado de edición y el formulario
+            setIsEditingLink(false);
+            setEditedLink({ platform: '', url: '' }); // Limpia los valores del formulario
+            setCurrentEditIndex(null); // Reinicia el índice de edición
+        } else {
+            console.error('Error: No se puede actualizar el enlace, índice no válido.');
+        }
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditedLink({ ...editedLink, [name]: value });
     };
 
     if (loading) {
         return <div>Cargando datos de la empresa...</div>;
     }
 
-
-
-    const handleAddLink = () => {
-        const newSocialLink = { platform: selectedPlatform, url: newLink };
-        setSocialLinks([...socialLinks, newSocialLink]);
-        setNewLink('');
-        setSelectedPlatform('');
-    };
-
-  // Función para eliminar un enlace
-const handleDeleteLink = (index) => {
-    const updatedLinks = socialLinks.filter((_, i) => i !== index);
-    setSocialLinks(updatedLinks);
-};
-
-// Función para iniciar la edición de un enlace
-const handleEditLink = (index) => {
-    setIsEditingLink(true);
-    setCurrentEditIndex(index);
-    setEditedLink(socialLinks[index]); // Carga el enlace a editar
-};
-
-// Función para actualizar un enlace
-const handleUpdateLink = () => {
-    const updatedLinks = [...socialLinks];
-    updatedLinks[currentEditIndex] = editedLink; // Actualiza el enlace con los nuevos valores
-    setSocialLinks(updatedLinks);
-    setIsEditingLink(false);
-    setEditedLink({ platform: '', url: '' }); // Limpia los valores del formulario
-    setCurrentEditIndex(null);
-};
-
-// Función para manejar el cambio en los campos editables
-const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditedLink({ ...editedLink, [name]: value });
-};
-
     return (
-        <>
-            <Box sx={{ padding: 2 }}>
-                <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-                    <Typography variant="h4" color="primary" gutterBottom>
-                        {isEditingNombre ? (
-                            <Box display="flex" alignItems="center">
-                                <TextField
-                                    value={nuevoNombre}
-                                    onChange={(e) => setNuevoNombre(e.target.value)}
-                                    onBlur={handleEditNombre}
-                                    autoFocus
-                                />
-                            </Box>
-                        ) : (
-                            <Box display="flex" alignItems="center">
-                                {nombreEmpresa}
-                                <Tooltip title="Editar Nombre" arrow>
-                                    <IconButton onClick={() => setIsEditingNombre(true)} color="primary" sx={{ ml: 1 }}>
-                                        <EditIcon />
-                                    </IconButton>
-                                </Tooltip>
-                            </Box>
-                        )}
-                    </Typography>
-                </Box>
+        <Box sx={{ padding: 2 }}>
+            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                <Typography variant="h4" color="primary" gutterBottom>
+                    {isEditingNombre ? (
+                        <TextField
+                            value={nombreEmpresa}
+                            onChange={(e) => setNuevoNombre(e.target.value)}
+                            onBlur={handleEditNombre}
+                            autoFocus
+                        />
+                    ) : (
+                        <Box display="flex" alignItems="center">
+                            {nombreEmpresa}
+                            <Tooltip title="Editar Nombre" arrow>
+                                <IconButton onClick={() => setIsEditingNombre(true)} color="primary" sx={{ ml: 1 }}>
+                                    <EditIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </Box>
+                    )}
+                </Typography>
+            </Box>
 
-                <Box display="flex" justifyContent="center" mb={2}>
-                    <Avatar
-                        src={imagen}
-                        alt="Imagen de la empresa"
-                        sx={{
-                            width: 200,
-                            height: 200,
-                            border: '2px solid #ccc',
-                            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-                        }}
-                    />
-                </Box>
+            <Box display="flex" justifyContent="center" mb={2}>
+                <Avatar
+                    src={imagen}
+                    alt="Imagen de la empresa"
+                    sx={{ width: 200, height: 200, border: '2px solid #ccc', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }}
+                />
+            </Box>
 
-                <input
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    id="upload-image"
-                    type="file"
-                    onChange={handleImageChange}
+            <input
+                accept="image/*"
+                style={{ display: 'none' }}
+                id="upload-image"
+                type="file"
+                onChange={handleImageChange}
+                disabled={!isEditing}
+            />
+            <label htmlFor="upload-image">
+                <Button variant="contained" component="span" disabled={!isEditing}>
+                    Cambiar Imagen
+                </Button>
+            </label>
+
+            <Box mt={3}>
+                <Typography variant="h6">Dirección</Typography>
+                <TextField
+                    value={direccion}
+                    onChange={(e) => actualizarEmpresa('direccion', e.target.value)}
+                    multiline
+                    rows={2}
+                    fullWidth
                     disabled={!isEditing}
                 />
-                <label htmlFor="upload-image">
-                    <Button variant="contained" component="span" disabled={!isEditing}>
-                        Cambiar Imagen
-                    </Button>
-                </label>
+            </Box>
 
-                <Box mt={3}>
-                    <Typography variant="h6">Dirección</Typography>
-                    <TextField
-                        value={direccion}
-                        onChange={(e) => handleFieldChange('direccion', e.target.value)}
-                        multiline
-                        rows={2}
-                        fullWidth
-                        disabled={!isEditing}
-                    />
-                </Box>
+            <Box mt={3}>
+                <Typography variant="h6">Descripción</Typography>
+                <TextField
+                    value={descripcion}
+                    onChange={(e) => actualizarEmpresa('descripcion', e.target.value)}
+                    multiline
+                    rows={3}
+                    fullWidth
+                    disabled={!isEditing}
+                />
+            </Box>
 
-                <Box mt={3}>
-                    <Typography variant="h6">Descripción</Typography>
-                    <TextField
-                        value={descripcion}
-                        onChange={(e) => handleFieldChange('descripcion', e.target.value)}
-                        multiline
-                        rows={3}
-                        fullWidth
-                        disabled={!isEditing}
-                    />
-                </Box>
+            <Box mt={3}>
+                <Typography variant="h6">Misión</Typography>
+                <TextField
+                    value={mision}
+                    onChange={(e) => actualizarEmpresa('mision', e.target.value)}
+                    multiline
+                    rows={3}
+                    fullWidth
+                    disabled={!isEditing}
+                />
+            </Box>
 
-                <Box mt={3}>
-                    <Typography variant="h6">Misión</Typography>
-                    <TextField
-                        value={mision}
-                        onChange={(e) => handleFieldChange('mision', e.target.value)}
-                        multiline
-                        rows={2}
-                        fullWidth
-                        disabled={!isEditing}
-                    />
-                </Box>
+            <Box mt={3}>
+                <Typography variant="h6">Visión</Typography>
+                <TextField
+                    value={vision}
+                    onChange={(e) => actualizarEmpresa('vision', e.target.value)}
+                    multiline
+                    rows={3}
+                    fullWidth
+                    disabled={!isEditing}
+                />
+            </Box>
 
-                <Box mt={3}>
-                    <Typography variant="h6">Visión</Typography>
-                    <TextField
-                        value={vision}
-                        onChange={(e) => handleFieldChange('vision', e.target.value)}
-                        multiline
-                        rows={2}
-                        fullWidth
-                        disabled={!isEditing}
-                    />
-                </Box>
+            <Box mt={3}>
+                <Typography variant="h6">Objetivo</Typography>
+                <TextField
+                    value={objetivo}
+                    onChange={(e) => actualizarEmpresa('objetivo', e.target.value)}
+                    multiline
+                    rows={3}
+                    fullWidth
+                    disabled={!isEditing}
+                />
+            </Box>
 
-                <Box mt={3}>
-                    <Typography variant="h6">Objetivo</Typography>
-                    <TextField
-                        value={objetivo}
-                        onChange={(e) => handleFieldChange('objetivo', e.target.value)}
-                        multiline
-                        rows={2}
-                        fullWidth
-                        disabled={!isEditing}
-                    />
-                </Box>
-
-                <Button variant="contained" onClick={toggleEditing} sx={{ mt: 3 }}>
-                    {isEditing ? 'Guardar' : 'Editar Información'}
+            <Box mt={3} display="flex" justifyContent="center">
+                <Button variant="contained" onClick={toggleEditing}>
+                    {isEditing ? 'Guardar Cambios' : 'Editar Información'}
                 </Button>
             </Box>
-            <Card sx={{ mt: 4 }}>
-                <CardContent>
-                    <Typography variant="h6" gutterBottom>Gestión de Redes Sociales</Typography>
 
-                    <Box display="flex" alignItems="center" mb={2}>
-                        {/* Select para elegir la red social */}
-                        <Select
-                            value={selectedPlatform}
-                            onChange={(e) => setSelectedPlatform(e.target.value)}
-                            displayEmpty
-                            sx={{
-                                mr: 2, // Margen derecho
-                                width: '300px', // Ancho específico, ajusta según tus necesidades
-                            }}
-                            fullWidth
-                        >
-                            <MenuItem value="" disabled>Seleccionar Red Social</MenuItem>
-                            <MenuItem value="Facebook">Facebook</MenuItem>
-                            <MenuItem value="Twitter">Twitter</MenuItem>
-                            <MenuItem value="Instagram">Instagram</MenuItem>
-                            <MenuItem value="LinkedIn">LinkedIn</MenuItem>
-                            {/* Agrega más redes sociales si es necesario */}
-                        </Select>
 
-                        <TextField
-                            label="Agregar nuevo enlace de red social"
-                            value={newLink}
-                            onChange={(e) => setNewLink(e.target.value)}
-                            fullWidth
-                        />
+            <Box mt={3}>
+                <Typography variant="h6">Redes Sociales</Typography>
+                <Box display="flex" alignItems="center">
+                    <Select
+                        value={selectedPlatform}
+                        onChange={(e) => setSelectedPlatform(e.target.value)}
+                        sx={{
+                            mr: 2, // Margen derecho
+                            width: '300px', // Ancho específico, ajusta según tus necesidades
+                        }}
+                    >
+                        <MenuItem value="">
+                            <em>Seleccionar Plataforma</em>
+                        </MenuItem>
+                        <MenuItem value="Facebook">Facebook</MenuItem>
+                        <MenuItem value="WhatsApp">WhatsApp</MenuItem>
+                        <MenuItem value="Instagram">Instagram</MenuItem>
+                        <MenuItem value="YouTube">YouTube</MenuItem>
+                        <MenuItem value="Twitter">Twitter</MenuItem>
+                        <MenuItem value="LinkedIn">LinkedIn</MenuItem>
+                    </Select>
+                    <TextField
+                        value={newLink}
+                        onChange={(e) => setNewLink(e.target.value)}
+                        placeholder="URL"
+                        sx={{ ml: 2 }}
+                        fullWidth
+                    />
+                    <Button onClick={handleAddLink} variant="contained" sx={{ ml: 2 }} >
+                        Agregar Enlace
+                    </Button>
+                </Box>
 
-                        <Button
-                            onClick={handleAddLink}
-                            variant="contained"
-                            color="primary"
-                            sx={{ ml: 2 }}
-                            disabled={!selectedPlatform || !newLink} // Desactiva el botón si no hay plataforma o enlace
-                        >
-                            Agregar
-                        </Button>
-                    </Box>
+            </Box>
 
-                    {socialLinks.length > 0 && (
-                        <List>
-                            {socialLinks.map((link, index) => (
-                                <ListItem key={index} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Box mt={3} display="flex" alignItems="center" >
+                {socialLinks.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary">
+                        No hay enlaces de redes sociales.
+                    </Typography>
+                ) : (
+                    <Box mt={3} width="100%" >
+                        {socialLinks.map((link, index) => (
+                            <ListItem key={link._id}>
+                                <Box display="flex" alignItems="center" justifyContent="space-between" width="100%"  >
+
                                     {isEditingLink && currentEditIndex === index ? (
-                                        <>
+                                        <Box display="flex" alignItems="center" width="100%">
                                             <TextField
-                                                label="Red Social"
-                                                name="platform"
-                                                value={editedLink.platform}
+                                                name="nombre"
+                                                value={editedLink.nombre}
                                                 onChange={handleEditChange}
-                                                fullWidth
                                                 InputProps={{
                                                     readOnly: true, // Esto hace que el campo no sea editable
-                                                }}                                                
+                                                }}
+                                                sx={{
+                                                    mr: 2, // Margen derecho
+                                                    width: '300px', // Ancho específico, ajusta según tus necesidades
+                                                }}
+                                                fullWidth
                                             />
                                             <TextField
-                                                label="Enlace"
-                                                name="url"
-                                                value={editedLink.url}
+                                                name="link"
+                                                value={editedLink.link}
                                                 onChange={handleEditChange}
                                                 fullWidth
                                             />
-                                        </>
-                                    ) : (
-                                        <Typography>{link.platform}: {link.url}</Typography> // Muestra la plataforma y el enlace
-                                    )}
-
-                                    <Box>
-                                        {isEditingLink && currentEditIndex === index ? (
-                                            <Button onClick={handleUpdateLink} variant="contained" color="primary" sx={{ ml: 2 }}>
-                                                Actualizar
+                                            <Button onClick={handleUpdateLink} sx={{ ml: 1 }}>
+                                                Guardar
                                             </Button>
-                                        ) : (
-                                            <>
-                                                <Tooltip title="Editar enlace" arrow>
+                                        </Box>
+                                    ) : (
+                                        <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+                                            <Typography>
+                                                {link.nombre}: <a href={link.link} target="_blank" rel="noopener noreferrer">{link.link}</a>
+                                            </Typography>
+                                            <Box>
+
+                                                <Tooltip title="Editar" arrow>
                                                     <IconButton onClick={() => handleEditLink(index)} color="primary" sx={{ ml: 1 }}>
                                                         <EditIcon />
                                                     </IconButton>
                                                 </Tooltip>
-                                                <Tooltip title="Eliminar enlace" arrow>
-                                                    <IconButton onClick={() => handleDeleteLink(index)} color="secondary" sx={{ ml: 1 }}>
+
+                                                <Tooltip title="Eliminar" arrow>
+                                                    <IconButton onClick={() => handleDeleteLink(index)} color="primary" sx={{ ml: 1 }}>
                                                         <DeleteIcon />
                                                     </IconButton>
                                                 </Tooltip>
-                                            </>
-                                        )}
-                                    </Box>
-                                </ListItem>
-                            ))}
-                        </List>
-                    )}
-                </CardContent>
-            </Card>
-        </>
 
+
+                                            </Box>
+
+                                        </Box>
+                                    )}
+                                </Box>
+                            </ListItem>
+                        ))}
+                    </Box>
+                )}
+            </Box>
+
+
+        </Box>
     );
 };
 

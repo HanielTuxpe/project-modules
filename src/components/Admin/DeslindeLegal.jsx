@@ -108,7 +108,7 @@ const DeslindeLegal = () => {
             return;
         }
 
-        const newPolicyObj = { titulo_politica: newPolicy, secciones: sections };
+        const newPolicyObj = { titulo_deslinde: newPolicy, secciones: sections };
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -215,7 +215,7 @@ const DeslindeLegal = () => {
         const policy = items[index];
 
         if (policy) {
-            setNewPolicy(policy.titulo_politica);
+            setNewPolicy(policy.titulo_deslinde);
             setSections(policy.secciones);
             setEditingPolicyId(policy._id);
         }
@@ -231,7 +231,7 @@ const DeslindeLegal = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    titulo_politica: newPolicy,  // Cambiamos el campo a 'name' para que coincida con lo que espera la API
+                    titulo_deslinde: newPolicy,  // Cambiamos el campo a 'name' para que coincida con lo que espera la API
                     secciones: sections,
                 }),
             });
@@ -471,7 +471,7 @@ const DeslindeLegal = () => {
                                         {items.map((policy, index) => (
                                             <ListItem key={policy._id} alignItems="flex-start">
                                                 <ListItemText
-                                                    primary={policy.titulo_politica}
+                                                    primary={policy.titulo_deslinde}
                                                     secondary={
                                                         <Box>
                                                             {policy.secciones &&
@@ -571,7 +571,7 @@ const DeslindeLegal = () => {
                                                         <Button
                                                             variant="contained"
                                                             color="primary"
-                                                            onClick={() => handleDownload(archivo.archivo)}
+                                                            onClick={() => handleDownload(archivo.archivo,archivo.nombre)}
                                                         >
                                                             Descargar
                                                         </Button>

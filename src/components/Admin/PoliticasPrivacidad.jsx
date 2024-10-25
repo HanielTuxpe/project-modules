@@ -571,7 +571,7 @@ const PoliticasPrivacidad = () => {
                                                         <Button
                                                             variant="contained"
                                                             color="primary"
-                                                            onClick={() => handleDownload(archivo.archivo)}
+                                                            onClick={() => handleDownload(archivo.archivo,archivo.nombre)}
                                                         >
                                                             Descargar
                                                         </Button>

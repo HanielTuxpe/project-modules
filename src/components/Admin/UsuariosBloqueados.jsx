@@ -70,9 +70,9 @@ const BlockedUsers = () => {
                                     </Typography>
                                 </Box>
                                 <Button variant="contained" color="primary" onClick={() => {
-    console.log(usuario._doc._id); // Agrega este log para verificar el valor
-    resetIncidencias(usuario._doc._id);
-  }}>
+                                    console.log(usuario._doc._id); // Agrega este log para verificar el valor
+                                    resetIncidencias(usuario._doc._id);
+                                }}>
                                     Resetear Contador
                                 </Button>
                             </Box>

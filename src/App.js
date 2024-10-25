@@ -11,7 +11,15 @@ import ForgotPassword from './components/ForgotPassword';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Index from './components/Index';
+<<<<<<< Updated upstream
 import { obtenerTipoUsuario, cerrarSesion } from './components/SessionService';
+=======
+import PoliticasDePrivacidadPublico from './components/Crud/PoliticasDePrivacidadPublico';
+import TerminosYCondicionesPublico from './components/Crud/TerminosYCondicionesPublico';
+import DeslindeLegalPublico from './components/Crud/DeslindeLegalPublico';
+import AcercaDePublico from './components/Crud/AcercaDePublico';
+
+>>>>>>> Stashed changes
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import getTheme from './theme';
@@ -55,12 +63,13 @@ const App = () => {
                             />
                             <Route
                                 path="/SignUp"
-                                element={usuario ? <Navigate to="/index" /> : <Registro/>}
+                                element={usuario ? <Navigate to="/index" /> : <Registro />}
                             />
                             <Route
                                 path="/login"
                                 element={usuario ? <Navigate to="/index" /> : <Login />}
                             />
+
                             <Route
                                 path="/forgot-password"
                                 element={<ForgotPassword />}
@@ -77,6 +86,24 @@ const App = () => {
                                 path="/Usuarios"
                                 element={usuario ? <Usuarios darkMode={darkMode} /> : <Navigate to="/" />}
                             />
+                            <Route
+                                path="/privacy-policy"
+                                element={usuario ? <PoliticasDePrivacidadPublico darkMode={darkMode} /> : <PoliticasDePrivacidadPublico darkMode={darkMode} />}
+                            />
+                            <Route
+                                path="/terms-conditions"
+                                element={usuario ? <TerminosYCondicionesPublico darkMode={darkMode} /> : <TerminosYCondicionesPublico darkMode={darkMode} />}
+                            />
+                            <Route
+                                path="/legal-disclaimer"
+                                element={usuario ? <DeslindeLegalPublico darkMode={darkMode} /> : <DeslindeLegalPublico darkMode={darkMode} />}
+                            />
+                            <Route
+                                path="/about"
+                                element={usuario ? <AcercaDePublico darkMode={darkMode} /> : <AcercaDePublico darkMode={darkMode} />}
+                            />
+
+
 
                         </Routes>
                     </Container>
