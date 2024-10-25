@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../assets/uthh.png';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import MenuPrincipal from './Admin/menu'; // Importa tu menú
+import { obtenerTipoUsuario } from './SessionService';
 
 const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
     const navigate = useNavigate();
@@ -22,7 +23,7 @@ const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
 
     useEffect(() => {
         // Simula la obtención del usuario almacenado
-        const savedUser = localStorage.getItem('usuario');
+        const savedUser = obtenerTipoUsuario();
         setUser(savedUser);
     }, []);
 

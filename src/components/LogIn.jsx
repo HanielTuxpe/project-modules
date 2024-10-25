@@ -9,6 +9,7 @@ import { useMediaQuery } from '@mui/material';
 import ReCAPTCHA from 'react-google-recaptcha';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { iniciarSesion } from './SessionService';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
@@ -48,7 +49,7 @@ const Login = ({ onLogin }) => {
 
             if (loginResponse.status === 200) {
                 toast.success(loginResponse.data.message);
-                onLogin(loginResponse.data.type);
+                iniciarSesion(loginResponse.data.type)
                 navigate('/index');
                 setRecaptchaToken(null);
             }

@@ -11,7 +11,7 @@ import ForgotPassword from './components/ForgotPassword';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Index from './components/Index';
-
+import { obtenerTipoUsuario, cerrarSesion } from './components/SessionService';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import getTheme from './theme';
@@ -21,7 +21,7 @@ const App = () => {
     const [darkMode, setDarkMode] = useState(false);
 
     useEffect(() => {
-        const savedUser = localStorage.getItem('usuario');
+        const savedUser = obtenerTipoUsuario();
         const savedTheme = localStorage.getItem('darkMode') === 'true';
         if (savedUser) {
             setUsuario(savedUser);
@@ -29,14 +29,8 @@ const App = () => {
         setDarkMode(savedTheme);
     }, []);
 
-    const handleLogin = (userType) => {
-        setUsuario(userType);
-        localStorage.setItem('usuario', userType);
-    };
-
     const handleLogout = () => {
-        setUsuario(null);
-        localStorage.removeItem('usuario');
+        cerrarSesion()
     };
 
     const toggleDarkMode = () => {
@@ -65,7 +59,7 @@ const App = () => {
                             />
                             <Route
                                 path="/login"
-                                element={usuario ? <Navigate to="/index" /> : <Login onLogin={handleLogin} />}
+                                element={usuario ? <Navigate to="/index" /> : <Login />}
                             />
                             <Route
                                 path="/forgot-password"
