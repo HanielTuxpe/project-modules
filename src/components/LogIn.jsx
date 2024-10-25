@@ -89,7 +89,7 @@ const Login = ({ onLogin }) => {
                     flexDirection: isMobile ? 'column' : 'row',
                     boxShadow: '0 4px 10px rgba(0, 0, 0, 0.8)',
                     borderRadius: 2,
-                    maxWidth: '100%',
+                    maxWidth: isMobile ? 'auto' : '100%',
                     marginLeft: '0 !important',
                     marginRight: '0 !important',
                 }}
@@ -100,7 +100,7 @@ const Login = ({ onLogin }) => {
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
-                        width: '100%',
+                        width: isMobile ? '100%' : '90%', // Ajustar para móvil
                         alignItems: 'center',
                         backgroundColor: '#921F45',
                     }}
@@ -110,7 +110,8 @@ const Login = ({ onLogin }) => {
                         alt="Banner PODAI"
                         style={{
                             borderRadius: 10,
-                            maxHeight: 'auto',
+                            width: '100%', // Ajustar imagen al ancho disponible
+                            height: 'auto', // Ajustar la altura en móviles
                         }}
                     />
                 </Box>
@@ -124,8 +125,8 @@ const Login = ({ onLogin }) => {
                         alignItems: 'center',
                         background: '#BC955B',
                         height: '50%',
-                        width: '50%',
-                        padding: 4,
+                        width: isMobile ? '100%' : '50%', // Ajustar para móvil
+                        padding: isMobile ? 2 : 4,
                         borderRadius: '0 8px 8px 0',
                     }}
                 >

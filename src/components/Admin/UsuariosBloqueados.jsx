@@ -11,8 +11,6 @@ const BlockedUsers = () => {
             try {
                 const response = await axios.get(`https://prj-server.onrender.com/usuarios`); // Asegúrate de que tu API esté configurada
                 const blockedUsersData = response.data;
-
-                console.log(blockedUsersData);
                 // Asignar los datos recibidos a los estados
                 setUsuariosBloqueados(blockedUsersData);
             } catch (error) {
