@@ -11,15 +11,12 @@ import ForgotPassword from './components/ForgotPassword';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Index from './components/Index';
-<<<<<<< Updated upstream
 import { obtenerTipoUsuario, cerrarSesion } from './components/SessionService';
-=======
 import PoliticasDePrivacidadPublico from './components/Crud/PoliticasDePrivacidadPublico';
 import TerminosYCondicionesPublico from './components/Crud/TerminosYCondicionesPublico';
 import DeslindeLegalPublico from './components/Crud/DeslindeLegalPublico';
 import AcercaDePublico from './components/Crud/AcercaDePublico';
 
->>>>>>> Stashed changes
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import getTheme from './theme';
