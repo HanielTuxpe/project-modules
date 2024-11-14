@@ -19,12 +19,13 @@ const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
     const navigate = useNavigate();
     const isMobile = useMediaQuery('(max-width: 600px)'); // Detecta si es un dispositivo móvil
     const [user, setUser] = useState(null);
-    const [showMenu, setShowMenu] = useState(false); // Controla el estado de visibilidad del menú lateral
+    const [showMenu, setShowMenu] = useState(true); // Controla el estado de visibilidad del menú lateral
 
     useEffect(() => {
         // Simula la obtención del usuario almacenado
         const savedUser = obtenerTipoUsuario();
         setUser(savedUser);
+        setShowMenu(showMenu);
     }, []);
 
     const handleLoginClick = () => {

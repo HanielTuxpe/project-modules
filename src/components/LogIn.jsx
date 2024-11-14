@@ -150,6 +150,7 @@ const Login = ({ onLogin }) => {
                             value={userType}
                             onChange={(e) => setUserType(e.target.value)}
                         >
+                            <option value="#">Seleccione una opcion</option>
                             <option value="Admin">Admin</option>
                             <option value="Student">Estudiante</option>
                         </TextField>

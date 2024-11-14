@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, IconButton, Button, Avatar, Tooltip, Select, MenuItem, ListItem, List } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { toast } from 'react-toastify';
 
 const PerfilEmpresa = () => {
     const [nombreEmpresa, setNombreEmpresa] = useState('Nombre de la Empresa');
@@ -39,6 +40,7 @@ const PerfilEmpresa = () => {
                 setDireccion(empresa.direccion);
                 setObjetivo(empresa.objetivo);
                 setEmpresaId(empresa._id);
+                setNuevoNombre(empresa.nombreEmpresa);
                 if (empresa.redesSociales) {
                     setSocialLinks(empresa.redesSociales);
                 }
@@ -58,7 +60,7 @@ const PerfilEmpresa = () => {
 
     const actualizarEmpresa = async (campo, valor) => {
         try {
-            const response = await fetch(`https://prj-server.onrender.com/informacionEmpresa/${empresaId}`, {
+            const response = await fetch(`https://prj-server.onrender.com/InformacionEmpresa/${empresaId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -66,9 +68,11 @@ const PerfilEmpresa = () => {
                 body: JSON.stringify({ [campo]: valor }),
             });
 
+           
             if (response.ok) {
                 const data = await response.json();
-                console.log(`Campo ${campo} actualizado con éxito`, data);
+                //toast.success(`Campo ${campo} actualizado con éxito`);
+
                 switch (campo) {
                     case 'nombreEmpresa':
                         setNombreEmpresa(data.nombreEmpresa);
@@ -88,9 +92,9 @@ const PerfilEmpresa = () => {
                     case 'objetivo':
                         setObjetivo(data.objetivo);
                         break;
-                    case 'imagen':
-                        setImagen(data.imagen);
-                        break;
+                        case 'imagen':
+                            setImagen(data.imagen);
+                            break;                   
                     case 'redesSociales':
                         setSocialLinks(data.redesSociales); // Asumiendo que el API devuelve la lista actualizada
                         break;
@@ -99,6 +103,7 @@ const PerfilEmpresa = () => {
                 }
             } else {
                 const errorData = await response.json();
+                toast.error(`Error en el Campo ${campo}`);
                 console.error('Error al actualizar el campo:', errorData.message);
             }
         } catch (error) {
@@ -106,26 +111,79 @@ const PerfilEmpresa = () => {
         }
     };
 
-    const handleImageChange = (e) => {
+    const handleImageChange = async (e) => { // Usar 'async' aquí
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const nuevaImagen = reader.result;
-                setImagen(nuevaImagen);
-                actualizarEmpresa('imagen', nuevaImagen);
-            };
-            reader.readAsDataURL(file);
+            // Validar tipo de archivo y tamaño...
+            const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            if (!validTypes.includes(file.type)) {
+                toast.warning('Solo se permiten imágenes JPG, PNG y JPEG');
+                return;
+            }
+    
+            const maxSize = 2 * 1024 * 1024; // 2 MB
+            if (file.size > maxSize) {
+                toast.warning('El tamaño de la imagen debe ser de 2 MB o menos');
+                return;
+            }
+    
+            // Crear un FormData para enviar la imagen
+            const formData = new FormData();
+            formData.append('imagen', file); // 'imagen' es el nombre del campo
+    
+            // Hacer la solicitud para actualizar la imagen en la base de datos
+            try {
+                const response = await fetch(`http://localhost:3001/InformacionEmpresa/${empresaId}`, {
+                    method: 'PATCH',
+                    body: formData, // Enviamos el FormData con la imagen
+                });
+    
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    toast.error(`Error al actualizar la imagen: ${errorData.message || response.statusText}`);
+                } else {
+                    const updatedData = await response.json();
+                    toast.success('Imagen actualizada con éxito');
+                }
+            } catch (error) {
+                toast.error('Error al realizar la solicitud');
+            }
         }
     };
+    
+    
+    
+    
 
     const handleEditNombre = () => {
-        actualizarEmpresa('nombreEmpresa', nuevoNombre);
-        setIsEditingNombre(false);
+
+        if (nuevoNombre.trim() === '') {
+            toast.error('El campo Nombre no puede estar vacío,');
+        } else {
+            actualizarEmpresa('nombreEmpresa', nuevoNombre);
+            setIsEditingNombre(false);
+        }
+
+
     };
 
     const toggleEditing = () => {
         if (isEditing) {
+            // Verifica que todos los campos tengan contenido antes de guardar
+            if (
+                nombreEmpresa.trim() === '' ||
+                descripcion.trim() === '' ||
+                mision.trim() === '' ||
+                vision.trim() === '' ||
+                direccion.trim() === '' ||
+                objetivo.trim() === '' ||
+                imagen.trim() === ''
+            ) {
+                toast.warning('Todos los campos deben estar completos antes de guardar.');
+
+                return; // No guarda si algún campo está vacío
+            }
+
             // Guardar los cambios en todos los campos editados
             actualizarEmpresa('nombreEmpresa', nombreEmpresa);
             actualizarEmpresa('descripcion', descripcion);
@@ -133,21 +191,33 @@ const PerfilEmpresa = () => {
             actualizarEmpresa('vision', vision);
             actualizarEmpresa('direccion', direccion);
             actualizarEmpresa('objetivo', objetivo);
+            toast.success('Informacion actualizada con éxito');
+            
         }
+
+        // Alterna entre modo de edición y visualización
         setIsEditing(!isEditing);
     };
 
+
     const handleAddLink = () => {
         if (selectedPlatform && newLink) {
+            // Verificar que el link comience con "https://"
+            const urlPattern = /^https:\/\/.+/;
+            if (!urlPattern.test(newLink)) {
+                toast.warning("El enlace debe comenzar con 'https://'.");
+                return; // No continúa si el enlace no es válido
+            }
+
             const newSocialLink = { nombre: selectedPlatform, link: newLink };
-            
+
             // Actualiza el estado con el nuevo enlace social
             const updatedLinks = [...socialLinks, newSocialLink];
             setSocialLinks(updatedLinks);
-    
+
             // Actualiza la empresa en la base de datos
             actualizarEmpresa('redesSociales', updatedLinks);
-    
+
             // Limpia los valores del formulario
             setNewLink('');
             setSelectedPlatform('');
@@ -214,7 +284,7 @@ const PerfilEmpresa = () => {
                 <Typography variant="h4" color="primary" gutterBottom>
                     {isEditingNombre ? (
                         <TextField
-                            value={nombreEmpresa}
+                            value={nuevoNombre}
                             onChange={(e) => setNuevoNombre(e.target.value)}
                             onBlur={handleEditNombre}
                             autoFocus
@@ -246,13 +316,18 @@ const PerfilEmpresa = () => {
                 id="upload-image"
                 type="file"
                 onChange={handleImageChange}
-                disabled={!isEditing}
+                
             />
             <label htmlFor="upload-image">
-                <Button variant="contained" component="span" disabled={!isEditing}>
+                <Button variant="contained" component="span" >
                     Cambiar Imagen
                 </Button>
             </label>
+            <Box mt={3} display="flex" justifyContent="center">
+                <Button variant="contained" onClick={toggleEditing}>
+                    {isEditing ? 'Guardar Cambios' : 'Editar Información'}
+                </Button>
+            </Box>
 
             <Box mt={3}>
                 <Typography variant="h6">Dirección</Typography>
@@ -314,11 +389,7 @@ const PerfilEmpresa = () => {
                 />
             </Box>
 
-            <Box mt={3} display="flex" justifyContent="center">
-                <Button variant="contained" onClick={toggleEditing}>
-                    {isEditing ? 'Guardar Cambios' : 'Editar Información'}
-                </Button>
-            </Box>
+
 
 
             <Box mt={3}>
