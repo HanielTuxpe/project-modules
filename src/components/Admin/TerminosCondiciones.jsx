@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, List, ListItem, ListItemText, IconButton, TextField, Button, Card, CardContent } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText, IconButton, TextField, Button, Card, CardContent, Tooltip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DownloadIcon from '@mui/icons-material/Download';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+
 import { toast } from 'react-toastify';
+import { useReducer } from 'react';
 
-const API_URL = 'https://prj-server.onrender.com/terminos'; // Cambia por la URL de tu API
+const API_URL = 'http://localhost:3001/terminos'; // Cambia por la URL de tu API
 
-const TerminosYCondiciones = () => {
+const PoliticasPrivacidad = () => {
     const [items, setItems] = useState([]);
     const [newPolicy, setNewPolicy] = useState('');
     const [sections, setSections] = useState([]);
@@ -14,75 +20,18 @@ const TerminosYCondiciones = () => {
     const [newSectionDescription, setNewSectionDescription] = useState('');
     const [newSectionList, setNewSectionList] = useState([]);
     const [newListItem, setNewListItem] = useState('');
+    const [newArchivos, setNewArchivos] = useState('null');
+
     const [isEditing, setIsEditing] = useState(false);
     const [editingIndex, setEditingIndex] = useState(null);
     const [editingSectionIndex, setEditingSectionIndex] = useState(null);
     const [editingListItemIndex, setEditingListItemIndex] = useState(null); // Nuevo estado para editar el ítem
     const [editingPolicyId, setEditingPolicyId] = useState(null);
-    const [politicasArchivos, setPoliticasArchivos] = useState([]);
-    const [mostrarArchivos, setMostrarArchivos] = useState(true);
 
     const [file, setFile] = useState(null); // Guardar el archivo seleccionado
-
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]); // Capturar el archivo seleccionado
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        const formData = new FormData();
-        formData.append('archivo', file); // Agregar el archivo al FormData
-
-        try {
-            // Enviar el archivo al backend usando fetch
-            const response = await fetch(`${API_URL}/subirArchivo`, {
-                method: 'POST',
-                body: formData, // El cuerpo de la petición es el FormData con el archivo
-            });
-
-            if (response.ok) {
-                toast.success('Archivo subido con éxito');
-                setFile(null);
-            } else {
-                toast.warning('Error al subir el archivo');
-            }
-        } catch (error) {
-            toast.warning('Error al subir el archivo');
-        }
-
-    };
-
-    const handleDownload = (archivoBase64, nombreArchivo) => {
-        // Crear un enlace temporal
-        const link = document.createElement('a');
-        link.href = `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${archivoBase64}`;
-        link.download = nombreArchivo;
-
-        // Agregar el enlace al DOM y hacer clic en él para iniciar la descarga
-        document.body.appendChild(link);
-        link.click();
-
-        // Limpiar el enlace del DOM
-        document.body.removeChild(link);
-    };
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0); // Define forceUpdate
 
     useEffect(() => {
-
-        const fetchPoliticasConArchivo = async () => {
-            try {
-                const response = await fetch(`${API_URL}/ConArchivo`);
-                if (!response.ok) {
-                    toast.warning('Error al obtener los Terminos y Condiciones');
-                }
-
-                const politicas = await response.json();
-                setPoliticasArchivos(politicas);
-
-            } catch (error) {
-                toast.warning('Error');
-            }
-        };
 
         const fetchPolicies = async () => {
             try {
@@ -91,54 +40,256 @@ const TerminosYCondiciones = () => {
                 if (Array.isArray(data)) {
                     setItems(data);
                 }
+                //toast.success('Políticas Cargadas');
             } catch (error) {
-                toast.warning('Error al Cargar Terminos y Condiciones');
+                toast.error('Error al cargar terminos');
             }
         };
-
-
-        fetchPoliticasConArchivo();
 
         fetchPolicies();
     }, []);
 
+    const handleFileChange = (event) => {
+
+        const selectedFile = event.target.files[0];
+
+        // Verificar si se ha seleccionado un archivo
+        if (selectedFile) {
+            // Verificar que el archivo sea PDF
+            const fileType = selectedFile.type;
+            if (fileType !== 'application/pdf') {
+                toast.error('El archivo debe ser un PDF.');
+                setFile(null);
+                return;
+            }
+
+            // Verificar que el tamaño del archivo no sea mayor a 10MB
+            const maxSizeInBytes = 10 * 1024 * 1024; // 10 MB en bytes
+            if (selectedFile.size > maxSizeInBytes) {
+                toast.warning('El archivo debe ser de 10MB o menos.');
+                setFile(null);
+                return;
+            }
+
+            setFile(selectedFile);
+        }
+    };
+
+    const handleView = (archivoBuffer) => {
+        // Convertir el Buffer en un Blob de tipo PDF
+        const blob = new Blob([new Uint8Array(archivoBuffer.data)], { type: 'application/pdf' });
+
+        // Crear una URL a partir del Blob
+        const fileURL = URL.createObjectURL(blob);
+
+        // Abrir el archivo en una nueva pestaña del navegador
+        window.open(fileURL, '_blank');
+
+        // Liberar la URL del Blob cuando ya no se necesite (opcional)
+        setTimeout(() => URL.revokeObjectURL(fileURL), 100);
+    };
+
+    const handleDownload = (archivoBuffer, nombreArchivo) => {
+        // Convertir el Buffer a una cadena Base64
+        const base64String = btoa(
+            new Uint8Array(archivoBuffer.data).reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+
+        // Crear la URL del archivo en formato PDF para descargarlo
+        const fileURL = `data:application/pdf;base64,${base64String}`;
+
+        // Crear un enlace temporal para la descarga
+        const link = document.createElement('a');
+        link.href = fileURL;
+        link.download = nombreArchivo;
+
+        // Agregar el enlace al DOM, hacer clic para iniciar la descarga y luego eliminarlo
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const addPolicy = async () => {
         if (newPolicy.trim() === '' || sections.length === 0) {
-            toast.warning('Por favor, ingresa un nombre para el termino y agrega al menos una sección.');
+            toast.warning('Por favor, ingresa un nombre para el terminos y agrega al menos una sección.');
             return;
         }
 
-        const newPolicyObj = { titulo_termino: newPolicy, secciones: sections };
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newPolicyObj),
-        });
+        const countResponse = await fetch(`${API_URL}/count`); // Endpoint para contar políticas
+        const { count } = await countResponse.json();
+        const version = count + 1;
 
-        if (response.ok) {
-            const createdPolicy = await response.json();
-            setItems((prevItems) => [...prevItems, createdPolicy]);
+
+        // Crear un objeto FormData para enviar tanto texto como archivo
+        const formData = new FormData();
+        formData.append('titulo_termino', newPolicy);
+        formData.append('secciones', JSON.stringify(sections));
+
+        // Configura los campos adicionales
+        formData.append('fechaSubida', new Date().toISOString()); // Fecha actual en formato ISO
+        formData.append('version', version); // Puedes ajustar la versión inicial
+        formData.append('estadoVigencia', true); // Estado de vigencia por defecto
+        formData.append('estado', true); // Estado por defecto
+
+        // Verificar si se ha seleccionado un archivo para agregarlo
+        if (file) {
+            formData.append('archivo', file); // 'Archivo' es el nombre del campo que el servidor espera
+        }
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                body: formData, // Enviar formData en lugar de JSON
+            });
+
+            if (response.ok) {
+                const createdPolicy = await response.json();
+                setItems((prevItems) => [...prevItems, createdPolicy]);
+                clearForm();
+                toast.success('Terminos Agregado');
+            } else {
+                toast.warning('Error al agregar el Terminos.');
+            }
+        } catch (error) {
+            toast.error('Hubo un problema con la solicitud.');
+        }
+    };
+
+    const deletePolicy = async () => {
+        if (editingPolicyId === null) return;
+
+        try {
+            // Create a FormData instance to handle both text and optional file data
+            const formData = new FormData();
+            formData.append('estado', false);
+            formData.append('fechaSubida', new Date().toISOString()); // Fecha actual en formato ISO
+
+            const response = await fetch(`${API_URL}/${editingPolicyId}`, {
+                method: 'PATCH',
+                body: formData, // Use FormData as the body when sending
+            });
+
+
+
+            if (!response.ok) {
+                //console.error(`Error: ${response.status} - ${response.statusText}`);
+                //toast.warning(`Error ${response.status}: ${response.statusText}`);
+            } else {
+                response.json().then(data => {
+                    toast.success('Termino Eliminado con éxito');
+                }).catch(error => {
+                    toast.warning('Error al obtener la respuesta');
+                });
+            }
+
+            const updatedPolicy = await response.json();
+            const updatedItems = items.map((item, index) =>
+                index === editingIndex ? updatedPolicy : item
+            );
+
+            setItems(updatedItems);
             clearForm();
-            toast.success('Termino Agregada');
-        } else {
-            toast.warning('Error al agregar el Termino.');
+            toast.success('Termino Eliminado con éxito');
+        } catch (error) {
 
         }
     };
 
-    const deletePolicy = async (index) => {
-        const policyToDelete = items[index];
-        const response = await fetch(`${API_URL}/${policyToDelete._id}`, {
-            method: 'DELETE',
-        });
+    const PolicyNoVigente = async (index) => {
 
-        if (response.ok) {
-            setItems((prevItems) => prevItems.filter((_, i) => i !== index));
-            toast.success('Termino Eliminado');
-        } else {
-            toast.warning('Error al eliminar el Termino.');
+        const policy = items[index];
+
+        if (policy) {
+            setEditingPolicyId(policy._id);
+        }
+
+        if (editingPolicyId === null) return;
+
+        try {
+
+            // Create a FormData instance to handle both text and optional file data
+            const formData = new FormData();
+            formData.append('estadoVigencia', false);
+            formData.append('fechaSubida', new Date().toISOString()); // Fecha actual en formato ISO
+
+
+            const response = await fetch(`${API_URL}/${editingPolicyId}`, {
+                method: 'PATCH',
+                body: formData, // Use FormData as the body when sending
+            });
+
+
+
+            if (!response.ok) {
+                //console.error(`Error: ${response.status} - ${response.statusText}`);
+                //toast.warning(`Error ${response.status}: ${response.statusText}`);
+            } else {
+                response.json().then(data => {
+                    toast.success('Termino No Vigente');
+                }).catch(error => {
+                    toast.warning('Error al obtener la respuesta');
+                });
+            }
+
+            const updatedPolicy = await response.json();
+            const updatedItems = items.map((item, index) =>
+                index === editingIndex ? updatedPolicy : item
+            );
+
+            setItems(updatedItems);
+            clearForm();
+            toast.success('Termino No Vigente');
+        } catch (error) {
+
+        }
+    };
+
+    const PolicyVigente = async (index) => {
+
+        const policy = items[index];
+
+        if (policy) {
+            setEditingPolicyId(policy._id);
+        }
+
+        if (editingPolicyId === null) return;
+
+        try {
+
+            // Create a FormData instance to handle both text and optional file data
+            const formData = new FormData();
+            formData.append('estadoVigencia', true);
+            formData.append('fechaSubida', new Date().toISOString()); // Fecha actual en formato ISO
+
+
+            const response = await fetch(`${API_URL}/${editingPolicyId}`, {
+                method: 'PATCH',
+                body: formData, // Use FormData as the body when sending
+            });
+
+
+
+            if (!response.ok) {
+                //console.error(`Error: ${response.status} - ${response.statusText}`);
+                //toast.warning(`Error ${response.status}: ${response.statusText}`);
+            } else {
+                response.json().then(data => {
+                    toast.success('Termino Vigente');
+                }).catch(error => {
+                    toast.warning('Error al obtener la respuesta');
+                });
+            }
+
+            const updatedPolicy = await response.json();
+            const updatedItems = items.map((item, index) =>
+                index === editingIndex ? updatedPolicy : item
+            );
+
+            setItems(updatedItems);
+            clearForm();
+            toast.success('Termino Vigente');
+        } catch (error) {
+
         }
     };
 
@@ -217,27 +368,60 @@ const TerminosYCondiciones = () => {
         if (policy) {
             setNewPolicy(policy.titulo_termino);
             setSections(policy.secciones);
+            setNewArchivos(Array.isArray(policy.Archivo) ? policy.Archivo : [policy.Archivo]);
             setEditingPolicyId(policy._id);
         }
+    };
+
+    const editPolicyCancelar = () => {
+        setNewPolicy('');                 // Limpiar el título de la política
+        setNewSectionTitle('');            // Limpiar el título de la sección
+        setNewSectionDescription('');      // Limpiar la descripción de la sección
+        setNewListItem('');                // Limpiar el ítem de la lista
+        setNewSectionList([]);             // Limpiar la lista de ítems de la sección
+
+        setIsEditing(false);               // Salir del modo de edición
+        setEditingSectionIndex(null);
+        setEditingListItemIndex(null);
+
+        // Forzar renderizado completo
+        forceUpdate();
+
     };
 
     const updatePolicy = async () => {
         if (editingPolicyId === null) return;
 
         try {
+            // Create a FormData instance to handle both text and optional file data
+            const formData = new FormData();
+            formData.append('titulo_termino', newPolicy);
+            formData.append('secciones', JSON.stringify(sections));
+            formData.append('fechaSubida', new Date().toISOString()); // Fecha actual en formato ISO
+            // Check if a file is selected; if so, include it in the request
+            if (file) {
+                formData.append('archivo', file);
+
+            }
+
             const response = await fetch(`${API_URL}/${editingPolicyId}`, {
-                method: 'PATCH', // Asegúrate de usar PATCH ya que esa es la ruta correcta en tu backend
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    titulo_termino: newPolicy,  // Cambiamos el campo a 'name' para que coincida con lo que espera la API
-                    secciones: sections,
-                }),
+                method: 'PATCH',
+                body: formData, // Use FormData as the body when sending
             });
 
+
+
             if (!response.ok) {
-                throw new Error(`Error: ${response.statusText}`);
+                console.error(`Error: ${response.status} - ${response.statusText}`);
+                toast.warning(`Error ${response.status}: ${response.statusText}`);
+            } else {
+                response.json().then(data => {
+
+                    toast.success('Termino Actualizado con exito');
+                }).catch(error => {
+
+                    toast.warning('Error al obtener la respuesta');
+                });
             }
 
             const updatedPolicy = await response.json();
@@ -247,10 +431,11 @@ const TerminosYCondiciones = () => {
 
             setItems(updatedItems);
             clearForm();
+            toast.success('Termino Actualizado con exito');
         } catch (error) {
-            toast.warning('Error al actualizar el Termino');
+
         }
-    };
+    };;
 
     const saveChanges = async () => {
         if (isEditing) {
@@ -274,256 +459,192 @@ const TerminosYCondiciones = () => {
         setNewSectionList([]);
     };
 
-    const handleDeleteArchivo = (id) => {
-        // Confirmar si el usuario desea eliminar el archivo
-        if (window.confirm("¿Estás seguro de que deseas eliminar este archivo?")) {
-            // Realiza la petición de eliminación
-            fetch(`${API_URL}/DeletArchivoTermino/${id}`, {
-                method: 'DELETE',
-            })
-                .then((response) => {
-                    if (response.ok) {
-                        // Elimina el archivo de la lista en el frontend
-                        setPoliticasArchivos((prevArchivos) => prevArchivos.filter((archivo) => archivo.id !== id));
-                        alert("Archivo eliminado con éxito.");
-                    } else {
-                        alert("Hubo un error al eliminar el archivo.");
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error eliminando el archivo:", error);
-                    alert("Ocurrió un error inesperado.");
-                });
-        }
+    const deleteArchivo = (index) => {
+        const updatedArchivos = newArchivos.filter((_, i) => i !== index);
+        setNewArchivos(updatedArchivos);
     };
 
-    const handleSetActual = (id) => {
-        // Confirmar si el usuario desea establecer este archivo como vigente
-        if (window.confirm("¿Estás seguro de que deseas establecer este archivo como vigente?")) {
-            // Realiza la petición de actualización
-            fetch(`${API_URL}/ActualArchivoTermino/${id}`, {
-                method: 'PATCH', // Usamos PATCH para actualizar el estado
-            })
-                .then((response) => {
-                    if (response.ok) {
-                        // Actualiza el estado del archivo en la lista en el frontend
-                        setPoliticasArchivos((prevArchivos) => 
-                            prevArchivos.map((archivo) => 
-                                archivo.id === id ? { ...archivo, estado: true } : { ...archivo, estado: false }
-                            )
-                        );
-                        alert("Archivo actualizado como vigente con éxito.");
-                    } else {
-                        alert("Hubo un error al actualizar el archivo.");
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error actualizando el archivo:", error);
-                    alert("Ocurrió un error inesperado.");
-                });
-        }
-    };
-    
-
-    const toggleVista = () => {
-        setMostrarArchivos(!mostrarArchivos);
-    };
 
     return (
         <Box>
-            <Button variant="contained" onClick={toggleVista}>
-                {mostrarArchivos ? 'Ver Archivos' : 'Ver Termino Y Condiciones Resumidas'}
-            </Button>
-    
             <Box
                 sx={{
                     display: 'flex',
-                    flexDirection: { xs: 'column', sm: 'row' }, // Cambiar a columna en móviles
+                    flexDirection: 'column', // Configuración predeterminada en columna
                     justifyContent: 'space-between',
                     padding: '20px',
                     minHeight: '100vh',
                     wordWrap: 'break-word',
                     overflowWrap: 'break-word',
+                    '@media (min-width: 1000px)': {
+                        flexDirection: 'row', // Cambia a dos columnas (fila) cuando la pantalla es mayor a 1000 px
+                    },
                 }}
             >
-                {mostrarArchivos ? (
-                    <>
-                        <Box sx={{ flex: 1, overflowY: 'auto', marginBottom: { xs: '20px', sm: '0' } }}>
-                            {/* Sección para agregar/editar políticas */}
-                            <Card
-                                sx={{
-                                    borderRadius: '16px',
-                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
-                                    transition: 'all 0.3s ease-in-out',
-                                }}
-                            >
-                                <CardContent>
-                                    <Typography variant="h5" color="primary" gutterBottom>
-                                        {isEditing ? 'Editar Termino' : 'Agregar Nuevo Termino'}
-                                    </Typography>
-                                    <TextField
-                                        label="Título del Termino"
-                                        variant="outlined"
-                                        value={newPolicy}
-                                        onChange={(e) => setNewPolicy(e.target.value)}
-                                        fullWidth
-                                        sx={{ marginBottom: '20px' }}
-                                    />
-                                    <Button variant="contained" color="primary" onClick={saveChanges}>
-                                        {isEditing ? 'Actualizar Termino' : 'Agregar Termino'}
+                {/* formulario de las políticas */}
+                <Box sx={{ flex: 1, overflowY: 'auto', marginBottom: { xs: '20px', sm: '0' } }}>
+                    {/* Sección para agregar/editar Terminos */}
+                    <Card
+                        sx={{
+                            borderRadius: '16px',
+                            boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                            transition: 'all 0.3s ease-in-out',
+                        }}
+                    >
+                        <CardContent>
+                            <Typography variant="h5" color="primary" gutterBottom>
+                                {isEditing ? 'Editar Termino' : 'Agregar Nuevo Termino'}
+                            </Typography>
+                            <TextField
+                                label="Título del Termino"
+                                variant="outlined"
+                                value={newPolicy}
+                                onChange={(e) => setNewPolicy(e.target.value)}
+                                fullWidth
+                                sx={{ marginBottom: '20px' }}
+                            />
+
+                            <Box sx={{ display: 'flex', gap: '100px' }}>
+                                <Button variant="contained" color="primary" onClick={saveChanges}>
+                                    {isEditing ? 'Actualizar Termino' : 'Agregar Termino'}
+                                </Button>
+
+                                {isEditing && (
+                                    <Button variant="contained" color="primary" onClick={editPolicyCancelar}>
+                                        Cancelar
                                     </Button>
-                                </CardContent>
-                            </Card>
-    
-                            {/* Secciones */}
-                            <Card
-                                sx={{
-                                    borderRadius: '16px',
-                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
-                                    marginTop: '20px',
-                                }}
+                                )}
+                            </Box>
+
+                        </CardContent>
+                    </Card>
+
+                    {/* Secciones */}
+                    <Card
+                        sx={{
+                            borderRadius: '16px',
+                            boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                            marginTop: '20px',
+                        }}
+                    >
+                        <CardContent>
+                            <Typography variant="h5" color="primary" gutterBottom>
+                                Secciones
+                            </Typography>
+                            <List sx={{ marginTop: '20px' }}>
+                                {sections.map((section, index) => (
+                                    <ListItem key={index}>
+                                        <ListItemText
+                                            primary={`Titulo: ${section.titulo_seccion}`}
+                                            secondary={`Descripción: ${section.description}`}
+                                        />
+
+
+                                        <Tooltip title="Editar Seccion" arrow>
+                                            <IconButton onClick={() => editSection(index)}>
+                                                <EditIcon color="primary" />
+                                            </IconButton>
+                                        </Tooltip>
+
+                                        <Tooltip title="Eliminar Seccion" arrow>
+                                            <IconButton onClick={() => deleteSection(index)}>
+                                                <DeleteIcon color="error" />
+                                            </IconButton>
+                                        </Tooltip>
+
+
+                                    </ListItem>
+                                ))}
+                            </List>
+                            <TextField
+                                label="Título de la Sección"
+                                variant="outlined"
+                                value={newSectionTitle}
+                                onChange={(e) => setNewSectionTitle(e.target.value)}
+                                fullWidth
+                                sx={{ marginBottom: '10px' }}
+                            />
+                            <TextField
+                                label="Descripción de la Sección"
+                                variant="outlined"
+                                value={newSectionDescription}
+                                onChange={(e) => setNewSectionDescription(e.target.value)}
+                                fullWidth
+                                sx={{ marginBottom: '10px' }}
+                            />
+                            <List>
+                                {newSectionList.map((item, index) => (
+                                    <ListItem key={index}>
+                                        <ListItemText primary={item} />
+
+
+                                        <Tooltip title="Editar Item" arrow>
+                                            <IconButton onClick={() => editListItem(index)}>
+                                                <EditIcon color="primary" />
+                                            </IconButton>
+                                        </Tooltip>
+
+                                        <Tooltip title="Eliminar Item" arrow>
+                                            <IconButton onClick={() => deleteListItem(index)}>
+                                                <DeleteIcon color="error" />
+                                            </IconButton>
+                                        </Tooltip>
+
+
+                                    </ListItem>
+                                ))}
+                            </List>
+                            <TextField
+                                label="Ítem de Lista"
+                                variant="outlined"
+                                value={newListItem}
+                                onChange={(e) => setNewListItem(e.target.value)}
+                                fullWidth
+                                sx={{ marginBottom: '10px' }}
+                            />
+                            <Button variant="contained" color="secondary" onClick={addListItem}>
+                                {editingListItemIndex !== null ? 'Actualizar Item' : 'Agregar Item'}
+                            </Button>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={addSection}
+                                sx={{ marginLeft: '10px' }}
                             >
-                                <CardContent>
-                                    <Typography variant="h5" color="primary" gutterBottom>
-                                        Secciones
-                                    </Typography>
-                                    <List sx={{ marginTop: '20px' }}>
-                                        {sections.map((section, index) => (
-                                            <ListItem key={index}>
-                                                <ListItemText
-                                                    primary={section.titulo_seccion}
-                                                    secondary={`Descripción: ${section.description}`}
-                                                />
-                                                <IconButton onClick={() => editSection(index)}>
-                                                    <EditIcon color="primary" />
-                                                </IconButton>
-                                                <IconButton onClick={() => deleteSection(index)}>
-                                                    <DeleteIcon color="error" />
-                                                </IconButton>
-                                            </ListItem>
-                                        ))}
-                                    </List>
-                                    <TextField
-                                        label="Título de la Sección"
-                                        variant="outlined"
-                                        value={newSectionTitle}
-                                        onChange={(e) => setNewSectionTitle(e.target.value)}
-                                        fullWidth
-                                        sx={{ marginBottom: '10px' }}
-                                    />
-                                    <TextField
-                                        label="Descripción de la Sección"
-                                        variant="outlined"
-                                        value={newSectionDescription}
-                                        onChange={(e) => setNewSectionDescription(e.target.value)}
-                                        fullWidth
-                                        sx={{ marginBottom: '10px' }}
-                                    />
+                                {editingSectionIndex !== null ? 'Actualizar Sección' : 'Agregar Sección'}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                    <Card
+                        sx={{
+                            borderRadius: '16px',
+                            boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                            padding: '20px',
+                        }}
+                    >
+                        <Typography variant="h5" color="primary" gutterBottom>
+                            Agregar Archivo De Terminos
+                        </Typography>
+
+                        {isEditing && newArchivos && (
+
+                            <div>
+                                {Array.isArray(newArchivos) && newArchivos.filter(archivo => archivo && archivo.archivo).length > 0 ? (
                                     <List>
-                                        {newSectionList.map((item, index) => (
+                                        {newArchivos.filter(archivo => archivo && archivo.archivo).map((archivo, index) => (
                                             <ListItem key={index}>
-                                                <ListItemText primary={item} />
-                                                <IconButton onClick={() => editListItem(index)}>
-                                                    <EditIcon color="primary" />
-                                                </IconButton>
-                                                <IconButton onClick={() => deleteListItem(index)}>
-                                                    <DeleteIcon color="error" />
-                                                </IconButton>
+                                                <ListItemText primary={archivo.nombre} />
+
+                                                <Tooltip title="Eliminar Archivo" arrow>
+                                                    <IconButton onClick={() => deleteArchivo(index)}>
+                                                        <DeleteIcon color="error" />
+                                                    </IconButton>
+                                                </Tooltip>
+
                                             </ListItem>
                                         ))}
                                     </List>
-                                    <TextField
-                                        label="Ítem de Lista"
-                                        variant="outlined"
-                                        value={newListItem}
-                                        onChange={(e) => setNewListItem(e.target.value)}
-                                        fullWidth
-                                        sx={{ marginBottom: '10px' }}
-                                    />
-                                    <Button variant="contained" color="secondary" onClick={addListItem}>
-                                        {editingListItemIndex !== null ? 'Actualizar Item' : 'Agregar Item'}
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={addSection}
-                                        sx={{ marginLeft: '10px' }}
-                                    >
-                                        {editingSectionIndex !== null ? 'Actualizar Sección' : 'Agregar Sección'}
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        </Box>
-    
-                        {/* Sección para mostrar las políticas */}
-                        <Box sx={{ flex: 1, overflowY: 'auto' }}>
-                            <Card
-                                sx={{
-                                    borderRadius: '16px',
-                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
-                                }}
-                            >
-                                <CardContent>
-                                    <Typography variant="h5" color="primary" gutterBottom>
-                                        Terminos y Condiciones
-                                    </Typography>
-                                    <List>
-                                        {items.map((policy, index) => (
-                                            <ListItem key={policy._id} alignItems="flex-start">
-                                                <ListItemText
-                                                    primary={policy.titulo_termino}
-                                                    secondary={
-                                                        <Box>
-                                                            {policy.secciones &&
-                                                                policy.secciones.map((section) => (
-                                                                    <Box key={section._id} mb={2}>
-                                                                        <Typography variant="subtitle1" color="textSecondary">
-                                                                            Sección: {section.titulo_seccion}
-                                                                        </Typography>
-                                                                        <Typography variant="body2" color="textSecondary">
-                                                                            Descripción: {section.description}
-                                                                        </Typography>
-                                                                        <List dense>
-                                                                            {section.list &&
-                                                                                section.list.map((listItem, listItemIndex) => (
-                                                                                    <ListItem key={listItemIndex}>
-                                                                                        <ListItemText primary={listItem} />
-                                                                                    </ListItem>
-                                                                                ))}
-                                                                        </List>
-                                                                    </Box>
-                                                                ))}
-                                                        </Box>
-                                                    }
-                                                />
-                                                <IconButton onClick={() => editPolicy(index)}>
-                                                    <EditIcon color="primary" />
-                                                </IconButton>
-                                                <IconButton onClick={() => deletePolicy(index)}>
-                                                    <DeleteIcon color="error" />
-                                                </IconButton>
-                                            </ListItem>
-                                        ))}
-                                    </List>
-                                </CardContent>
-                            </Card>
-                        </Box>
-                    </>
-                ) : (
-                    <>
-                        {/* Sección para agregar archivo de políticas */}
-                        <Box sx={{ flex: 1, overflowY: 'auto', marginBottom: { xs: '20px', sm: '0' } }}>
-                            <Card
-                                sx={{
-                                    borderRadius: '16px',
-                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
-                                    padding: '20px',
-                                }}
-                            >
-                                <Typography variant="h5" color="primary" gutterBottom>
-                                    Agregar Archivo De Terminos
-                                </Typography>
-                                <form onSubmit={handleSubmit}>
+                                ) : (
                                     <TextField
                                         type="file"
                                         variant="outlined"
@@ -531,100 +652,181 @@ const TerminosYCondiciones = () => {
                                         onChange={handleFileChange}
                                         sx={{ marginBottom: '20px' }}
                                     />
-                                    <Button variant="contained" color="primary" type="submit">
-                                        Subir Archivo
-                                    </Button>
-                                </form>
-                            </Card>
-                        </Box>
-    
-                        {/* Sección para mostrar archivos de políticas */}
-                        <Box sx={{ flex: 1, overflowY: 'auto' }}>
-                            <Card
-                                sx={{
-                                    borderRadius: '16px',
-                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
-                                }}
-                            >
-                                <Typography variant="h5" color="primary" gutterBottom>
-                                    Historial De Terminos
-                                </Typography>
-                                <div>
-                                    {politicasArchivos.length > 0 ? (
-                                        politicasArchivos
-                                            .sort((a, b) => new Date(b.fechaSubida) - new Date(a.fechaSubida)) // Ordena archivos por fecha más reciente primero
-                                            .map((archivo, index) => (
-                                                <Card key={archivo.id} sx={{ marginBottom: '20px', padding: '20px' }}>
-                                                    <Typography variant="h6">
-                                                        {archivo.nombre}
-                                                        {archivo.estado ? (
-                                                            <Typography variant="subtitle1" color="primary">
-                                                                Termino Actual
-                                                            </Typography>
-                                                        ) : (
-                                                            <Typography variant="subtitle1" color="textSecondary">
-                                                                No vigente
-                                                            </Typography>
-                                                        )}
+                                )}
+                            </div>
+
+                        )}
+
+                        {!isEditing && (
+                            <TextField
+                                type="file"
+                                variant="outlined"
+                                fullWidth
+                                onChange={handleFileChange}
+                                sx={{ marginBottom: '20px' }}
+                            />
+                        )
+                        }
+                    </Card>
+                </Box>
+
+
+
+                {/* vista de todas las políticas */}
+                <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                    <Card
+                        sx={{
+                            borderRadius: '16px',
+                            boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                        }}
+                    >
+                        <CardContent>
+                            <Typography variant="h5" color="primary" gutterBottom>
+                                Terminos y Condiciones
+                            </Typography>
+                            <List>
+                                {items.map((policy, index) => (
+                                    <ListItem key={policy._id} alignItems="flex-start">
+
+
+                                        <Box >
+
+                                            <Box display="flex" alignItems="center" gap={2}>
+                                                {policy.estadoVigencia ? (
+                                                    <Typography variant="subtitle1" color="primary">
+                                                        Vigente
                                                     </Typography>
-                                                    <>
-                                                        <Button
-                                                            variant="contained"
-                                                            color="primary"
-                                                            onClick={() => handleDownload(archivo.archivo, archivo.nombre)}
-                                                        >
-                                                            Descargar
-                                                        </Button>
-                                                        {archivo.estado ? (
-                                                            <Button
-                                                                variant="contained"
-                                                                color="secondary"
-                                                                onClick={() => handleDeleteArchivo(archivo.id)} // Función para eliminar si es actual
-                                                            >
-                                                                No vigente
-                                                            </Button>
-                                                        ) : (
-                                                            <Button
-                                                                variant="contained"
-                                                                color="secondary"
-                                                                onClick={() => handleSetActual(archivo.id)} // Función para establecer como política actual
-                                                            >
-                                                                Establecer vigencia
-                                                            </Button>
+                                                ) : (
+                                                    <Typography variant="subtitle1" color="textSecondary">
+                                                        No vigente
+                                                    </Typography>
+                                                )}
+                                                <Typography variant="body2" color="textSecondary">
+                                                    {new Date(policy.fechaSubida).toLocaleString('es-ES', {
+                                                        hour: 'numeric',
+                                                        minute: 'numeric',
+                                                        day: 'numeric',
+                                                        month: 'numeric',
+                                                        year: 'numeric',
+                                                    })}
+                                                </Typography>
+                                                <Typography variant="body2" color="textSecondary">
+                                                    Versión: {policy.version}
+                                                </Typography>
+
+                                                <Tooltip title="Editar Termino" arrow>
+                                                    <IconButton onClick={() => editPolicy(index)}>
+                                                        <EditIcon color="primary" />
+                                                    </IconButton>
+                                                </Tooltip>
+
+                                                <Tooltip title="Eliminar Termino" arrow>
+                                                    <IconButton onClick={() => deletePolicy(index)}>
+                                                        <DeleteIcon color="error" />
+                                                    </IconButton>
+                                                </Tooltip>
+
+                                                {policy.estadoVigencia ? (
+                                                    <Tooltip title="Poner como No Vigente" arrow>
+                                                        <IconButton onClick={() => PolicyNoVigente(index)}>
+                                                            <CheckCircleIcon color="success" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                ) : (
+                                                    <Tooltip title="Poner como Vigente" arrow>
+                                                        <IconButton onClick={() => PolicyVigente(index)}>
+                                                            <CancelIcon color="primary" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )}
+
+                                            </Box>
+
+
+                                            <ListItemText
+                                                primary={policy.titulo_termino}
+                                                secondary={
+                                                    <Box>
+                                                        {policy.secciones &&
+                                                            policy.secciones.map((section) => (
+                                                                <Box key={section._id} mb={2}>
+                                                                    <Typography
+                                                                        variant="body2"
+                                                                        color="textSecondary"
+                                                                        sx={{
+                                                                            marginBottom: '10px',
+                                                                            overflowWrap: 'break-word',  // Asegura que el texto se ajuste dentro del contenedor
+                                                                            wordBreak: 'break-word'      // Rompe las palabras largas si es necesario
+                                                                        }}
+                                                                    >
+                                                                        Sección: {section.titulo_seccion}
+                                                                    </Typography>
+                                                                    <Typography
+                                                                        variant="body2"
+                                                                        color="textSecondary"
+                                                                        sx={{
+                                                                            marginBottom: '10px',
+                                                                            overflowWrap: 'break-word',
+                                                                            wordBreak: 'break-word'
+                                                                        }}
+                                                                    >
+                                                                        Descripción: {section.description}
+                                                                    </Typography>
+                                                                    <List dense>
+                                                                        {section.list &&
+                                                                            section.list.map((listItem, listItemIndex) => (
+                                                                                <ListItem key={listItemIndex}>
+                                                                                    <ListItemText primary={listItem} />
+                                                                                </ListItem>
+                                                                            ))}
+                                                                    </List>
+                                                                </Box>
+                                                            ))}
+
+                                                        {policy.Archivo && Array.isArray(policy.Archivo) && policy.Archivo[0] && (
+                                                            <>
+                                                                <Typography variant="body2" color="textSecondary">
+                                                                    {policy.Archivo[0].nombre}
+                                                                </Typography>
+
+                                                                <Box sx={{ display: 'flex', gap: '100px' }}>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="primary"
+                                                                        startIcon={<DownloadIcon />}
+                                                                        onClick={() => handleDownload(policy.Archivo[0].archivo, policy.Archivo[0].nombre)}
+                                                                    >
+                                                                        Descargar
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        color="primary"
+                                                                        startIcon={<VisibilityIcon />}
+                                                                        onClick={() => handleView(policy.Archivo[0].archivo)}
+                                                                    >
+                                                                        Ver
+                                                                    </Button>
+                                                                </Box>
+                                                            </>
                                                         )}
-                                                        <Typography variant="body2" color="textSecondary">
-                                                            {new Date(archivo.fechaSubida).toLocaleString('es-ES', {
-                                                                hour: 'numeric',
-                                                                minute: 'numeric',
-                                                                day: 'numeric',
-                                                                month: 'numeric',
-                                                                year: 'numeric',
-                                                            })}
-                                                        </Typography>
+                                                    </Box>
+                                                }
+                                            />
+                                        </Box>
 
-                                                        <Typography variant="body2" color="textSecondary">
-                                                            Versión: {archivo.version}
-                                                        </Typography>
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </CardContent>
+                    </Card>
+                </Box>
 
-                                                    </>
-                                                </Card>
-                                            ))
-                                    ) : (
-                                        <Typography variant="body1" color="textSecondary">
-                                            No hay archivos de Terminos disponibles.
-                                        </Typography>
-                                    )}
-                                </div>
-                            </Card>
-                        </Box>
-                    </>
-                )}
             </Box>
         </Box>
     );
-    
+
 
 
 };
 
-export default TerminosYCondiciones;
+export default PoliticasPrivacidad;

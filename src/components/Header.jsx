@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -15,17 +15,23 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import MenuPrincipal from './Admin/menu'; // Importa tu menú
 import { obtenerTipoUsuario } from './SessionService';
 
+
 const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
     const navigate = useNavigate();
     const isMobile = useMediaQuery('(max-width: 600px)'); // Detecta si es un dispositivo móvil
     const [user, setUser] = useState(null);
-    const [showMenu, setShowMenu] = useState(false); // Controla el estado de visibilidad del menú lateral
-
-    useEffect(() => {
-        // Simula la obtención del usuario almacenado
-        const savedUser = obtenerTipoUsuario();
-        setUser(savedUser);
-    }, []);
+    const [showMenu, setShowMenu] = useState(true); // Controla el estado de visibilidad del menú lateral
+  
+  
+    
+        // Cargar usuario inicial al montar el componente
+        useEffect(() => {
+            const savedUser = obtenerTipoUsuario();
+            if (savedUser) {
+                setUser(savedUser);
+            }
+        }, []);
+    
 
     const handleLoginClick = () => {
         navigate('/login');

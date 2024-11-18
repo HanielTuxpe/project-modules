@@ -6,7 +6,7 @@ const SESSION_COOKIE_NAME = 'session';
 export const iniciarSesion = (tipoUsuario) => {
     // Lógica de autenticación
     Cookies.set(SESSION_COOKIE_NAME, tipoUsuario, { 
-        expires: 5 / (24 * 60),
+        expires: 20 / (24 * 60), // Tiempo de expiración ajustado a 20 minutos
         sameSite: 'None', 
         secure: true, 
     });
