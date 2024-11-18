@@ -1,4 +1,3 @@
-// src/components/Login.js
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box, Link, IconButton } from '@mui/material';
 import axios from 'axios';
@@ -15,8 +14,10 @@ const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [userType, setUserType] = useState('');
+    const [code, setCode] = useState('');
     const [recaptchaToken, setRecaptchaToken] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
+    const [isCodeRequired, setIsCodeRequired] = useState(false); // Nuevo estado para manejar el código
     const navigate = useNavigate();
     const isMobile = useMediaQuery('(max-width: 600px)');
 
@@ -46,31 +47,59 @@ const Login = ({ onLogin }) => {
                 userType,
             });
 
-
             if (loginResponse.status === 200) {
                 toast.success(loginResponse.data.message);
-                iniciarSesion(loginResponse.data.type)
-                navigate('/index');
+                setIsCodeRequired(true); // Mostrar el campo de código
                 setRecaptchaToken(null);
             }
         } catch (error) {
             if (error.response) {
                 const errorMessage = error.response.data.message || 'Error en el proceso de inicio de sesión.';
                 toast.warning(errorMessage);
-                console.log(error)
+                console.log(error);
             } else {
                 toast.error('Error en el proceso de inicio de sesión.');
             }
         }
     };
 
-    // Callback para cuando reCAPTCHA es exitoso
-    const onRecaptchaChange = (token) => {
-        setRecaptchaToken(token);
+    const verifyCode = async (e) => {
+        e.preventDefault();
+
+        if (!code.trim() || code.length !== 6) {
+            toast.warning('Por favor, introduzca un código válido de 6 dígitos.');
+            return;
+        }
+
+        try {
+            // Verificar código
+            const verifyResponse = await axios.post('https://prj-server.onrender.com/code-login', {
+                username,
+                code : Number(code),
+            });
+
+            if (verifyResponse.status === 200) {
+                toast.success(verifyResponse.data.message);
+                iniciarSesion(verifyResponse.data.type);
+                navigate('/index');
+            }
+        } catch (error) {
+            if (error.response) {
+                const errorMessage = error.response.data.message || 'Error en el proceso de verificación.';
+                toast.warning(errorMessage);
+                console.log(error);
+            } else {
+                toast.error('Error en el proceso de verificación.');
+            }
+        }
     };
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
+    };
+
+    const onRecaptchaChange = (token) => {
+        setRecaptchaToken(token);
     };
 
     return (
@@ -101,7 +130,7 @@ const Login = ({ onLogin }) => {
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
-                        width: isMobile ? '100%' : '90%', // Ajustar para móvil
+                        width: isMobile ? '100%' : '90%',
                         alignItems: 'center',
                         backgroundColor: '#921F45',
                     }}
@@ -111,13 +140,13 @@ const Login = ({ onLogin }) => {
                         alt="Banner PODAI"
                         style={{
                             borderRadius: 10,
-                            width: '100%', // Ajustar imagen al ancho disponible
-                            height: 'auto', // Ajustar la altura en móviles
+                            width: '100%',
+                            height: 'auto',
                         }}
                     />
                 </Box>
 
-                {/* Formulario de Inicio de Sesión Derecho */}
+                {/* Formulario */}
                 <Box
                     sx={{
                         display: 'flex',
@@ -126,73 +155,97 @@ const Login = ({ onLogin }) => {
                         alignItems: 'center',
                         background: '#BC955B',
                         height: '50%',
-                        width: isMobile ? '100%' : '50%', // Ajustar para móvil
+                        width: isMobile ? '100%' : '50%',
                         padding: isMobile ? 2 : 4,
                         borderRadius: '0 8px 8px 0',
                     }}
                 >
                     <Typography component="h1" variant="h5">
-                        Acceder al Sistema
+                        {isCodeRequired ? 'Verificar Código' : 'Acceder al Sistema'}
                     </Typography>
-                    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, color: '#fff' }}>
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="userType"
-                            label="Elige un tipo de usuario"
-                            name="userType"
-                            select
-                            SelectProps={{
-                                native: true,
-                            }}
-                            value={userType}
-                            onChange={(e) => setUserType(e.target.value)}
-                        >
-                            <option value="Admin">Admin</option>
-                            <option value="Student">Estudiante</option>
-                        </TextField>
+                    <Box
+                        component="form"
+                        onSubmit={isCodeRequired ? verifyCode : handleSubmit}
+                        sx={{ mt: 3, color: '#fff' }}
+                    >
+                        {!isCodeRequired && (
+                            <>
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    id="userType"
+                                    label="Elige un tipo de usuario"
+                                    name="userType"
+                                    select
+                                    SelectProps={{
+                                        native: true,
+                                    }}
+                                    value={userType}
+                                    onChange={(e) => setUserType(e.target.value)}
+                                >
+                                    <option value=" "> </option>
+                                    <option value="Admin">Admin</option>
+                                    <option value="Student">Estudiante</option>
+                                </TextField>
 
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="username"
-                            label="Usuario"
-                            name="username"
-                            autoComplete="username"
-                            autoFocus
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                        />
-                        <Box sx={{ position: 'relative' }}>
+                                <TextField
+                                    variant="outlined"
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    id="username"
+                                    label="Usuario"
+                                    name="username"
+                                    autoComplete="username"
+                                    autoFocus
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                />
+                                <Box sx={{ position: 'relative' }}>
+                                    <TextField
+                                        variant="outlined"
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        name="password"
+                                        label="Contraseña"
+                                        type={showPassword ? 'text' : 'password'}
+                                        id="password"
+                                        autoComplete="current-password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                    <IconButton
+                                        color="inherit"
+                                        onClick={togglePasswordVisibility}
+                                        sx={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}
+                                    >
+                                        {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                    </IconButton>
+                                </Box>
+                                <ReCAPTCHA
+                                    sitekey="6Le3YWUqAAAAAAsmFo9W0iT84R3qyVKtLuPJ9hhr"
+                                    onChange={onRecaptchaChange}
+                                />
+                            </>
+                        )}
+
+                        {isCodeRequired && (
                             <TextField
                                 variant="outlined"
                                 margin="normal"
                                 required
                                 fullWidth
-                                name="password"
-                                label="Contraseña"
-                                type={showPassword ? 'text' : 'password'} // Cambia el tipo según el estado
-                                id="password"
-                                autoComplete="current-password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                id="code"
+                                label="Ingrese el código de verificación"
+                                name="code"
+                                value={code}
+                                onChange={(e) => setCode(e.target.value)}
                             />
-                            <IconButton
-                                color="inherit"
-                                onClick={togglePasswordVisibility} // Pasar la función como referencia
-                                sx={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}
-                            >
-                                {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                            </IconButton>
-                        </Box>
-                        <ReCAPTCHA
-                            sitekey="6Le3YWUqAAAAAAsmFo9W0iT84R3qyVKtLuPJ9hhr"
-                            onChange={onRecaptchaChange} // Callback para actualizar el token
-                        />
+                        )}
+
                         <Button
                             type="submit"
                             fullWidth
@@ -200,7 +253,7 @@ const Login = ({ onLogin }) => {
                             color="primary"
                             sx={{ mt: 3, mb: 2 }}
                         >
-                            Acceder
+                            {isCodeRequired ? 'Verificar Código' : 'Acceder'}
                         </Button>
 
                         <Typography variant="body2" align="center">
