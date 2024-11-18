@@ -77,6 +77,12 @@ const ForgotPassword = () => {
             return;
         }
 
+        const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+.,;:])[A-Za-z\d!@#$%^&*()_+.,;:]{8,}$/;
+        if (!passwordPattern.test(newPassword)) {
+            toast.warning('La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales (.!@#$%^&*()_+).');
+            return;
+        }
+
         try {
             console.log(token)
             const response = await axios.post('https://prj-server.onrender.com/reset-password', {
