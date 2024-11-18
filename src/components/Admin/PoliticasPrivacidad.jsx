@@ -4,6 +4,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import DownloadIcon from '@mui/icons-material/Download';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import { toast } from 'react-toastify';
 import { useReducer } from 'react';
@@ -48,7 +50,7 @@ const PoliticasPrivacidad = () => {
     }, []);
 
     const handleFileChange = (event) => {
-      
+
         const selectedFile = event.target.files[0];
 
         // Verificar si se ha seleccionado un archivo
@@ -466,18 +468,18 @@ const PoliticasPrivacidad = () => {
     return (
         <Box>
             <Box
-               sx={{
-                display: 'flex',
-                flexDirection: 'column', // Configuración predeterminada en columna
-                justifyContent: 'space-between',
-                padding: '20px',
-                minHeight: '100vh',
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word',
-                '@media (min-width: 1000px)': {
-                    flexDirection: 'row', // Cambia a dos columnas (fila) cuando la pantalla es mayor a 1000 px
-                },
-            }}
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column', // Configuración predeterminada en columna
+                    justifyContent: 'space-between',
+                    padding: '20px',
+                    minHeight: '100vh',
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                    '@media (min-width: 1000px)': {
+                        flexDirection: 'row', // Cambia a dos columnas (fila) cuando la pantalla es mayor a 1000 px
+                    },
+                }}
             >
                 {/* formulario de las políticas */}
                 <Box sx={{ flex: 1, overflowY: 'auto', marginBottom: { xs: '20px', sm: '0' } }}>
@@ -530,7 +532,7 @@ const PoliticasPrivacidad = () => {
                                 Secciones
                             </Typography>
                             <List sx={{ marginTop: '20px' }}>
-                                { sections.map((section, index) => (
+                                {sections.map((section, index) => (
                                     <ListItem key={index}>
                                         <ListItemText
                                             primary={`Titulo: ${section.titulo_seccion}`}
@@ -791,6 +793,7 @@ const PoliticasPrivacidad = () => {
                                                                     <Button
                                                                         variant="contained"
                                                                         color="primary"
+                                                                        startIcon={<DownloadIcon />}
                                                                         onClick={() => handleDownload(policy.Archivo[0].archivo, policy.Archivo[0].nombre)}
                                                                     >
                                                                         Descargar
@@ -798,9 +801,10 @@ const PoliticasPrivacidad = () => {
                                                                     <Button
                                                                         variant="contained"
                                                                         color="primary"
+                                                                        startIcon={<VisibilityIcon />}
                                                                         onClick={() => handleView(policy.Archivo[0].archivo)}
                                                                     >
-                                                                        ver
+                                                                        Ver
                                                                     </Button>
                                                                 </Box>
                                                             </>

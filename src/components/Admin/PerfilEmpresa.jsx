@@ -27,7 +27,7 @@ const PerfilEmpresa = () => {
 
     const cargarDatosEmpresa = async () => {
         try {
-            const response = await fetch('https://prj-server.onrender.com/InformacionEmpresa');
+            const response = await fetch('http://localhost:3001/InformacionEmpresa');
             const data = await response.json();
 
             if (response.ok && data.length > 0) {
@@ -60,7 +60,7 @@ const PerfilEmpresa = () => {
 
     const actualizarEmpresa = async (campo, valor) => {
         try {
-            const response = await fetch(`https://prj-server.onrender.com/InformacionEmpresa/${empresaId}`, {
+            const response = await fetch(`http://localhost:3001/InformacionEmpresa/${empresaId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -68,35 +68,36 @@ const PerfilEmpresa = () => {
                 body: JSON.stringify({ [campo]: valor }),
             });
 
-           
+
+
             if (response.ok) {
                 const data = await response.json();
                 //toast.success(`Campo ${campo} actualizado con éxito`);
 
                 switch (campo) {
                     case 'nombreEmpresa':
-                        setNombreEmpresa(data.nombreEmpresa);
+                        setNombreEmpresa(data.empresa.nombreEmpresa);
                         break;
                     case 'descripcion':
-                        setDescripcion(data.descripcion);
+                        setDescripcion(data.empresa.descripcion);
                         break;
                     case 'mision':
-                        setMision(data.mision);
+                        setMision(data.empresa.mision);
                         break;
                     case 'vision':
-                        setVision(data.vision);
+                        setVision(data.empresa.vision);
                         break;
                     case 'direccion':
-                        setDireccion(data.direccion);
+                        setDireccion(data.empresa.direccion);
                         break;
                     case 'objetivo':
-                        setObjetivo(data.objetivo);
+                        setObjetivo(data.empresa.objetivo);
                         break;
-                        case 'imagen':
-                            setImagen(data.imagen);
-                            break;                   
+                    case 'imagen':
+                        setImagen(data.empresa.imagen);
+                        break;
                     case 'redesSociales':
-                        setSocialLinks(data.redesSociales); // Asumiendo que el API devuelve la lista actualizada
+                        setSocialLinks(data.empresa.redesSociales);
                         break;
                     default:
                         break;
@@ -120,24 +121,24 @@ const PerfilEmpresa = () => {
                 toast.warning('Solo se permiten imágenes JPG, PNG y JPEG');
                 return;
             }
-    
+
             const maxSize = 2 * 1024 * 1024; // 2 MB
             if (file.size > maxSize) {
                 toast.warning('El tamaño de la imagen debe ser de 2 MB o menos');
                 return;
             }
-    
+
             // Crear un FormData para enviar la imagen
             const formData = new FormData();
             formData.append('imagen', file); // 'imagen' es el nombre del campo
-    
+
             // Hacer la solicitud para actualizar la imagen en la base de datos
             try {
                 const response = await fetch(`http://localhost:3001/InformacionEmpresa/${empresaId}`, {
                     method: 'PATCH',
                     body: formData, // Enviamos el FormData con la imagen
                 });
-    
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     toast.error(`Error al actualizar la imagen: ${errorData.message || response.statusText}`);
@@ -150,10 +151,10 @@ const PerfilEmpresa = () => {
             }
         }
     };
-    
-    
-    
-    
+
+
+
+
 
     const handleEditNombre = () => {
 
@@ -191,8 +192,9 @@ const PerfilEmpresa = () => {
             actualizarEmpresa('vision', vision);
             actualizarEmpresa('direccion', direccion);
             actualizarEmpresa('objetivo', objetivo);
-            toast.success('Informacion actualizada con éxito');
             
+            toast.success('Informacion actualizada con éxito');
+           
         }
 
         // Alterna entre modo de edición y visualización
@@ -202,27 +204,33 @@ const PerfilEmpresa = () => {
 
     const handleAddLink = () => {
         if (selectedPlatform && newLink) {
-            // Verificar que el link comience con "https://"
+            // Verificar que el enlace comience con "https://"
             const urlPattern = /^https:\/\/.+/;
             if (!urlPattern.test(newLink)) {
                 toast.warning("El enlace debe comenzar con 'https://'.");
                 return; // No continúa si el enlace no es válido
             }
 
+            // Crear el nuevo enlace
             const newSocialLink = { nombre: selectedPlatform, link: newLink };
 
-            // Actualiza el estado con el nuevo enlace social
-            const updatedLinks = [...socialLinks, newSocialLink];
+            // Asegurarse de que socialLinks sea un arreglo antes de concatenar
+            const updatedLinks = Array.isArray(socialLinks) ? [...socialLinks, newSocialLink] : [newSocialLink];
+
+            // Actualizar el estado
             setSocialLinks(updatedLinks);
 
-            // Actualiza la empresa en la base de datos
+            // Actualizar en la base de datos
             actualizarEmpresa('redesSociales', updatedLinks);
 
-            // Limpia los valores del formulario
+            // Limpiar el formulario
             setNewLink('');
             setSelectedPlatform('');
+        } else {
+            toast.warning("Debe completar todos los campos.");
         }
     };
+
 
     const handleDeleteLink = (index) => {
         // Verifica si el índice es válido
@@ -316,7 +324,7 @@ const PerfilEmpresa = () => {
                 id="upload-image"
                 type="file"
                 onChange={handleImageChange}
-                
+
             />
             <label htmlFor="upload-image">
                 <Button variant="contained" component="span" >
@@ -333,7 +341,7 @@ const PerfilEmpresa = () => {
                 <Typography variant="h6">Dirección</Typography>
                 <TextField
                     value={direccion}
-                    onChange={(e) => actualizarEmpresa('direccion', e.target.value)}
+                    onChange={(e) => setDireccion(e.target.value)}
                     multiline
                     rows={2}
                     fullWidth
@@ -345,7 +353,7 @@ const PerfilEmpresa = () => {
                 <Typography variant="h6">Descripción</Typography>
                 <TextField
                     value={descripcion}
-                    onChange={(e) => actualizarEmpresa('descripcion', e.target.value)}
+                    onChange={(e) => setDescripcion(e.target.value)}
                     multiline
                     rows={3}
                     fullWidth
@@ -357,7 +365,7 @@ const PerfilEmpresa = () => {
                 <Typography variant="h6">Misión</Typography>
                 <TextField
                     value={mision}
-                    onChange={(e) => actualizarEmpresa('mision', e.target.value)}
+                    onChange={(e) => setMision(e.target.value)}
                     multiline
                     rows={3}
                     fullWidth
@@ -369,7 +377,7 @@ const PerfilEmpresa = () => {
                 <Typography variant="h6">Visión</Typography>
                 <TextField
                     value={vision}
-                    onChange={(e) => actualizarEmpresa('vision', e.target.value)}
+                    onChange={(e) => setVision(e.target.value)}
                     multiline
                     rows={3}
                     fullWidth
@@ -381,7 +389,7 @@ const PerfilEmpresa = () => {
                 <Typography variant="h6">Objetivo</Typography>
                 <TextField
                     value={objetivo}
-                    onChange={(e) => actualizarEmpresa('objetivo', e.target.value)}
+                    onChange={(e) => setObjetivo(e.target.value)}
                     multiline
                     rows={3}
                     fullWidth
@@ -428,16 +436,15 @@ const PerfilEmpresa = () => {
             </Box>
 
             <Box mt={3} display="flex" alignItems="center" >
-                {socialLinks.length === 0 ? (
+                {!Array.isArray(socialLinks) || socialLinks.length === 0 ? (
                     <Typography variant="body2" color="text.secondary">
                         No hay enlaces de redes sociales.
                     </Typography>
                 ) : (
-                    <Box mt={3} width="100%" >
+                    <Box mt={3} width="100%">
                         {socialLinks.map((link, index) => (
                             <ListItem key={link._id}>
-                                <Box display="flex" alignItems="center" justifyContent="space-between" width="100%"  >
-
+                                <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
                                     {isEditingLink && currentEditIndex === index ? (
                                         <Box display="flex" alignItems="center" width="100%">
                                             <TextField
@@ -448,8 +455,8 @@ const PerfilEmpresa = () => {
                                                     readOnly: true, // Esto hace que el campo no sea editable
                                                 }}
                                                 sx={{
-                                                    mr: 2, // Margen derecho
-                                                    width: '300px', // Ancho específico, ajusta según tus necesidades
+                                                    mr: 2,
+                                                    width: '300px',
                                                 }}
                                                 fullWidth
                                             />
@@ -469,22 +476,17 @@ const PerfilEmpresa = () => {
                                                 {link.nombre}: <a href={link.link} target="_blank" rel="noopener noreferrer">{link.link}</a>
                                             </Typography>
                                             <Box>
-
                                                 <Tooltip title="Editar" arrow>
                                                     <IconButton onClick={() => handleEditLink(index)} color="primary" sx={{ ml: 1 }}>
                                                         <EditIcon />
                                                     </IconButton>
                                                 </Tooltip>
-
                                                 <Tooltip title="Eliminar" arrow>
                                                     <IconButton onClick={() => handleDeleteLink(index)} color="primary" sx={{ ml: 1 }}>
                                                         <DeleteIcon />
                                                     </IconButton>
                                                 </Tooltip>
-
-
                                             </Box>
-
                                         </Box>
                                     )}
                                 </Box>
@@ -492,6 +494,7 @@ const PerfilEmpresa = () => {
                         ))}
                     </Box>
                 )}
+
             </Box>
 
 

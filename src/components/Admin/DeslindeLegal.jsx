@@ -4,6 +4,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import DownloadIcon from '@mui/icons-material/Download';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import { toast } from 'react-toastify';
 import { useReducer } from 'react';
@@ -48,7 +50,7 @@ const PoliticasPrivacidad = () => {
     }, []);
 
     const handleFileChange = (event) => {
-      
+
         const selectedFile = event.target.files[0];
 
         // Verificar si se ha seleccionado un archivo
@@ -466,18 +468,18 @@ const PoliticasPrivacidad = () => {
     return (
         <Box>
             <Box
-               sx={{
-                display: 'flex',
-                flexDirection: 'column', // Configuración predeterminada en columna
-                justifyContent: 'space-between',
-                padding: '20px',
-                minHeight: '100vh',
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word',
-                '@media (min-width: 1000px)': {
-                    flexDirection: 'row', // Cambia a dos columnas (fila) cuando la pantalla es mayor a 1000 px
-                },
-            }}
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column', // Configuración predeterminada en columna
+                    justifyContent: 'space-between',
+                    padding: '20px',
+                    minHeight: '100vh',
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                    '@media (min-width: 1000px)': {
+                        flexDirection: 'row', // Cambia a dos columnas (fila) cuando la pantalla es mayor a 1000 px
+                    },
+                }}
             >
                 {/* formulario de las políticas */}
                 <Box sx={{ flex: 1, overflowY: 'auto', marginBottom: { xs: '20px', sm: '0' } }}>
@@ -501,22 +503,22 @@ const PoliticasPrivacidad = () => {
                                 fullWidth
                                 sx={{ marginBottom: '20px' }}
                             />
-    
+
                             <Box sx={{ display: 'flex', gap: '100px' }}>
                                 <Button variant="contained" color="primary" onClick={saveChanges}>
                                     {isEditing ? 'Actualizar Deslinde' : 'Agregar Deslinde'}
                                 </Button>
-    
+
                                 {isEditing && (
                                     <Button variant="contained" color="primary" onClick={editPolicyCancelar}>
                                         Cancelar
                                     </Button>
                                 )}
                             </Box>
-    
+
                         </CardContent>
                     </Card>
-    
+
                     {/* Secciones */}
                     <Card
                         sx={{
@@ -530,27 +532,27 @@ const PoliticasPrivacidad = () => {
                                 Secciones
                             </Typography>
                             <List sx={{ marginTop: '20px' }}>
-                                { sections.map((section, index) => (
+                                {sections.map((section, index) => (
                                     <ListItem key={index}>
                                         <ListItemText
                                             primary={`Titulo: ${section.titulo_seccion}`}
                                             secondary={`Descripción: ${section.description}`}
                                         />
-    
-    
+
+
                                         <Tooltip title="Editar Seccion" arrow>
                                             <IconButton onClick={() => editSection(index)}>
                                                 <EditIcon color="primary" />
                                             </IconButton>
                                         </Tooltip>
-    
+
                                         <Tooltip title="Eliminar Seccion" arrow>
                                             <IconButton onClick={() => deleteSection(index)}>
                                                 <DeleteIcon color="error" />
                                             </IconButton>
                                         </Tooltip>
-    
-    
+
+
                                     </ListItem>
                                 ))}
                             </List>
@@ -574,21 +576,21 @@ const PoliticasPrivacidad = () => {
                                 {newSectionList.map((item, index) => (
                                     <ListItem key={index}>
                                         <ListItemText primary={item} />
-    
-    
+
+
                                         <Tooltip title="Editar Item" arrow>
                                             <IconButton onClick={() => editListItem(index)}>
                                                 <EditIcon color="primary" />
                                             </IconButton>
                                         </Tooltip>
-    
+
                                         <Tooltip title="Eliminar Item" arrow>
                                             <IconButton onClick={() => deleteListItem(index)}>
                                                 <DeleteIcon color="error" />
                                             </IconButton>
                                         </Tooltip>
-    
-    
+
+
                                     </ListItem>
                                 ))}
                             </List>
@@ -623,22 +625,22 @@ const PoliticasPrivacidad = () => {
                         <Typography variant="h5" color="primary" gutterBottom>
                             Agregar Archivo De Deslinde
                         </Typography>
-    
+
                         {isEditing && newArchivos && (
-    
+
                             <div>
                                 {Array.isArray(newArchivos) && newArchivos.filter(archivo => archivo && archivo.archivo).length > 0 ? (
                                     <List>
                                         {newArchivos.filter(archivo => archivo && archivo.archivo).map((archivo, index) => (
                                             <ListItem key={index}>
                                                 <ListItemText primary={archivo.nombre} />
-    
+
                                                 <Tooltip title="Eliminar Archivo" arrow>
                                                     <IconButton onClick={() => deleteArchivo(index)}>
                                                         <DeleteIcon color="error" />
                                                     </IconButton>
                                                 </Tooltip>
-    
+
                                             </ListItem>
                                         ))}
                                     </List>
@@ -652,9 +654,9 @@ const PoliticasPrivacidad = () => {
                                     />
                                 )}
                             </div>
-    
+
                         )}
-    
+
                         {!isEditing && (
                             <TextField
                                 type="file"
@@ -667,9 +669,9 @@ const PoliticasPrivacidad = () => {
                         }
                     </Card>
                 </Box>
-    
-    
-    
+
+
+
                 {/* vista de todas las políticas */}
                 <Box sx={{ flex: 1, overflowY: 'auto' }}>
                     <Card
@@ -680,15 +682,15 @@ const PoliticasPrivacidad = () => {
                     >
                         <CardContent>
                             <Typography variant="h5" color="primary" gutterBottom>
-                            Deslinde Legal
+                                Deslinde Legal
                             </Typography>
                             <List>
                                 {items.map((policy, index) => (
                                     <ListItem key={policy._id} alignItems="flex-start">
-    
-    
+
+
                                         <Box >
-    
+
                                             <Box display="flex" alignItems="center" gap={2}>
                                                 {policy.estadoVigencia ? (
                                                     <Typography variant="subtitle1" color="primary">
@@ -711,19 +713,19 @@ const PoliticasPrivacidad = () => {
                                                 <Typography variant="body2" color="textSecondary">
                                                     Versión: {policy.version}
                                                 </Typography>
-    
-                                                <Tooltip title="Editar Termino" arrow>
+
+                                                <Tooltip title="Editar Deslinde" arrow>
                                                     <IconButton onClick={() => editPolicy(index)}>
                                                         <EditIcon color="primary" />
                                                     </IconButton>
                                                 </Tooltip>
-    
-                                                <Tooltip title="Eliminar Politica" arrow>
+
+                                                <Tooltip title="Eliminar Deslinde" arrow>
                                                     <IconButton onClick={() => deletePolicy(index)}>
                                                         <DeleteIcon color="error" />
                                                     </IconButton>
                                                 </Tooltip>
-    
+
                                                 {policy.estadoVigencia ? (
                                                     <Tooltip title="Poner como No Vigente" arrow>
                                                         <IconButton onClick={() => PolicyNoVigente(index)}>
@@ -737,10 +739,10 @@ const PoliticasPrivacidad = () => {
                                                         </IconButton>
                                                     </Tooltip>
                                                 )}
-    
+
                                             </Box>
-    
-    
+
+
                                             <ListItemText
                                                 primary={policy.titulo_deslinde}
                                                 secondary={
@@ -780,17 +782,18 @@ const PoliticasPrivacidad = () => {
                                                                     </List>
                                                                 </Box>
                                                             ))}
-    
+
                                                         {policy.Archivo && Array.isArray(policy.Archivo) && policy.Archivo[0] && (
                                                             <>
                                                                 <Typography variant="body2" color="textSecondary">
                                                                     {policy.Archivo[0].nombre}
                                                                 </Typography>
-    
+
                                                                 <Box sx={{ display: 'flex', gap: '100px' }}>
                                                                     <Button
                                                                         variant="contained"
                                                                         color="primary"
+                                                                        startIcon={<DownloadIcon />}
                                                                         onClick={() => handleDownload(policy.Archivo[0].archivo, policy.Archivo[0].nombre)}
                                                                     >
                                                                         Descargar
@@ -798,9 +801,10 @@ const PoliticasPrivacidad = () => {
                                                                     <Button
                                                                         variant="contained"
                                                                         color="primary"
+                                                                        startIcon={<VisibilityIcon />}
                                                                         onClick={() => handleView(policy.Archivo[0].archivo)}
                                                                     >
-                                                                        ver
+                                                                        Ver
                                                                     </Button>
                                                                 </Box>
                                                             </>
@@ -809,14 +813,14 @@ const PoliticasPrivacidad = () => {
                                                 }
                                             />
                                         </Box>
-    
+
                                     </ListItem>
                                 ))}
                             </List>
                         </CardContent>
                     </Card>
                 </Box>
-    
+
             </Box>
         </Box>
     );
