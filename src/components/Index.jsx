@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Box, Typography } from '@mui/material';
 import banner from '../assets/banner.png';
 import { useMediaQuery } from '@mui/material';
-import MenuPincipal from './Admin/menu'; // Importa politicas
+
 
 
 const Index = () => {
@@ -10,6 +10,10 @@ const Index = () => {
     const [visits, setVisits] = useState(0); 
     const [usersConnected, setusersConnected] = useState(0); 
     const isMobile = useMediaQuery('(max-width: 600px)');
+
+    
+   
+
 
     useEffect(() => {
         // Cargar tema guardado en localStorage

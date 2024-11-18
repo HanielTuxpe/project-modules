@@ -1,419 +1,630 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, CardContent, IconButton, List, Card, ListItem, Avatar, Tooltip, Button } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
-import { MenuItem, Select } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, Typography, List, ListItem, ListItemText, IconButton, TextField, Button, Card, CardContent } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import { toast } from 'react-toastify';
 
-const PerfilEmpresa = () => {
-    const [nombreEmpresa, setNombreEmpresa] = useState('Nombre de la Empresa');
-    const [imagen, setImagen] = useState(null);
-    const [descripcion, setDescripcion] = useState('Descripción de la empresa.');
-    const [mision, setMision] = useState('Misión de la empresa.');
-    const [vision, setVision] = useState('Visión de la empresa.');
-    const [direccion, setDireccion] = useState('Dirección de la empresa.');
-    const [objetivo, setObjetivo] = useState('Objetivo de la empresa.');
-    const [nuevoNombre, setNuevoNombre] = useState('');
+const API_URL = 'https://prj-server.onrender.com/deslinde'; // Cambia por la URL de tu API
 
-    const [loading, setLoading] = useState(true);
-    const [empresaId, setEmpresaId] = useState(null);
+const DeslindeLegal = () => {
+    const [items, setItems] = useState([]);
+    const [newPolicy, setNewPolicy] = useState('');
+    const [sections, setSections] = useState([]);
+    const [newSectionTitle, setNewSectionTitle] = useState('');
+    const [newSectionDescription, setNewSectionDescription] = useState('');
+    const [newSectionList, setNewSectionList] = useState([]);
+    const [newListItem, setNewListItem] = useState('');
     const [isEditing, setIsEditing] = useState(false);
-    const [isEditingNombre, setIsEditingNombre] = useState(false);
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [editingSectionIndex, setEditingSectionIndex] = useState(null);
+    const [editingListItemIndex, setEditingListItemIndex] = useState(null); // Nuevo estado para editar el ítem
+    const [editingPolicyId, setEditingPolicyId] = useState(null);
+    const [politicasArchivos, setPoliticasArchivos] = useState([]);
+    const [mostrarArchivos, setMostrarArchivos] = useState(true);
 
-    const [socialLinks, setSocialLinks] = useState([]);
-    const [newLink, setNewLink] = useState('');
-    const [isEditingLink, setIsEditingLink] = useState(false);
-    const [currentEditIndex, setCurrentEditIndex] = useState(null);
-    const [editedLink, setEditedLink] = useState({ platform: '', url: '' });
-    const [selectedPlatform, setSelectedPlatform] = useState('');
+    const [file, setFile] = useState(null); // Guardar el archivo seleccionado
 
-    const cargarDatosEmpresa = async () => {
-        try {
-            const response = await fetch('http://localhost:3001/InformacionEmpresa');
-            const data = await response.json();
-
-            if (response.ok && data.length > 0) {
-                const empresa = data[0];
-                setNombreEmpresa(empresa.nombreEmpresa);
-                setImagen(empresa.imagen);
-                setDescripcion(empresa.descripcion);
-                setMision(empresa.mision);
-                setVision(empresa.vision);
-                setDireccion(empresa.direccion);
-                setObjetivo(empresa.objetivo);
-                setEmpresaId(empresa._id);
-                if (empresa.redesSociales) {
-                    setSocialLinks(empresa.redesSociales);
-
-                    console.log(empresa.redesSociales);
-                }
-            } else {
-                console.error('No se encontraron datos de la empresa');
-            }
-        } catch (error) {
-            console.error('Error al cargar los datos de la empresa:', error);
-        } finally {
-            setLoading(false);
-        }
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]); // Capturar el archivo seleccionado
     };
 
-    useEffect(() => {
-        cargarDatosEmpresa();
-    }, []);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-    const actualizarEmpresa = async (campo, valor) => {
+        const formData = new FormData();
+        formData.append('archivo', file); // Agregar el archivo al FormData
+
         try {
-            const response = await fetch(`http://localhost:3001/informacionEmpresa/${empresaId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ [campo]: valor }),
+            // Enviar el archivo al backend usando fetch
+            const response = await fetch(`${API_URL}/subirArchivo`, {
+                method: 'POST',
+                body: formData, // El cuerpo de la petición es el FormData con el archivo
             });
 
             if (response.ok) {
-                const data = await response.json();
-                console.log(`Campo ${campo} actualizado con éxito`, data);
-
-                switch (campo) {
-                    case 'nombreEmpresa':
-                        setNombreEmpresa(data.nombreEmpresa);
-                        break;
-                    case 'descripcion':
-                        setDescripcion(data.descripcion);
-                        break;
-                    case 'mision':
-                        setMision(data.mision);
-                        break;
-                    case 'vision':
-                        setVision(data.vision);
-                        break;
-                    case 'direccion':
-                        setDireccion(data.direccion);
-                        break;
-                    case 'objetivo':
-                        setObjetivo(data.objetivo);
-                        break;
-                    case 'imagen':
-                        setImagen(data.imagen);
-                        break;
-                    default:
-                        break;
-                }
+                toast.success('Archivo subido con éxito');
+                setFile(null);
             } else {
-                const errorData = await response.json();
-                console.error('Error al actualizar el campo:', errorData.message);
+                toast.warning('Error al subir el archivo');
             }
         } catch (error) {
-            console.error('Error al actualizar la empresa:', error);
+            toast.warning('Error al subir el archivo');
+        }
+
+    };
+
+    const handleDownload = (archivoBase64, nombreArchivo) => {
+        // Crear un enlace temporal
+        const link = document.createElement('a');
+        link.href = `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${archivoBase64}`;
+        link.download = nombreArchivo;
+
+        // Agregar el enlace al DOM y hacer clic en él para iniciar la descarga
+        document.body.appendChild(link);
+        link.click();
+
+        // Limpiar el enlace del DOM
+        document.body.removeChild(link);
+    };
+
+    useEffect(() => {
+
+        const fetchPoliticasConArchivo = async () => {
+            try {
+                const response = await fetch(`${API_URL}/ConArchivo`);
+                if (!response.ok) {
+                    toast.warning('Error al obtener los Deslinde Legal');
+                }
+
+                const politicas = await response.json();
+                setPoliticasArchivos(politicas);
+
+            } catch (error) {
+                toast.warning('Error');
+            }
+        };
+
+        const fetchPolicies = async () => {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    setItems(data);
+                }
+            } catch (error) {
+                toast.warning('Error al Cargar Deslinde Legal');
+            }
+        };
+
+
+        fetchPoliticasConArchivo();
+
+        fetchPolicies();
+    }, []);
+
+    const addPolicy = async () => {
+        if (newPolicy.trim() === '' || sections.length === 0) {
+            toast.warning('Por favor, ingresa un nombre para el Deslinde y agrega al menos una sección.');
+            return;
+        }
+
+        const newPolicyObj = { titulo_deslinde: newPolicy, secciones: sections };
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newPolicyObj),
+        });
+
+        if (response.ok) {
+            const createdPolicy = await response.json();
+            setItems((prevItems) => [...prevItems, createdPolicy]);
+            clearForm();
+            toast.success('Deslinde Agregado');
+        } else {
+            toast.warning('Error al agregar el Deslinde.');
+
         }
     };
 
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const nuevaImagen = reader.result;
-                setImagen(nuevaImagen);
-                actualizarEmpresa('imagen', nuevaImagen);
-            };
-            reader.readAsDataURL(file);
+    const deletePolicy = async (index) => {
+        const policyToDelete = items[index];
+        const response = await fetch(`${API_URL}/${policyToDelete._id}`, {
+            method: 'DELETE',
+        });
+
+        if (response.ok) {
+            setItems((prevItems) => prevItems.filter((_, i) => i !== index));
+            toast.success('Deslinde Eliminado');
+        } else {
+            toast.warning('Error al eliminar el Deslinde.');
         }
     };
 
-    const handleEditNombre = () => {
-        actualizarEmpresa('nombreEmpresa', nuevoNombre);
-        setIsEditingNombre(false);
+    const addSection = async () => {
+        if (newSectionTitle.trim() === '' || newSectionDescription.trim() === '') {
+            toast.warning('Por favor, ingresa un título y una descripción para la sección.');
+            return;
+        }
+
+        const newSection = {
+            titulo_seccion: newSectionTitle,
+            description: newSectionDescription,
+            list: newSectionList,
+        };
+
+        if (editingSectionIndex !== null) {
+            const updatedSections = [...sections];
+            updatedSections[editingSectionIndex] = newSection;
+            setSections(updatedSections);
+            setEditingSectionIndex(null);
+        } else {
+            setSections((prevSections) => [...prevSections, newSection]);
+        }
+        clearSectionForm();
     };
 
-    const toggleEditing = () => {
+    const deleteSection = (index) => {
+        const updatedSections = sections.filter((_, i) => i !== index);
+        setSections(updatedSections);
+    };
+
+    const editSection = (index) => {
+        const section = sections[index];
+        setNewSectionTitle(section.titulo_seccion);
+        setNewSectionDescription(section.description);
+        setNewSectionList(section.list); // Actualizar con la lista de la sección editada
+        setEditingSectionIndex(index);
+    };
+
+    const addListItem = () => {
+        if (newListItem.trim() === '') {
+            toast.warning('Por favor, ingresa un ítem para la lista.');
+            return;
+        }
+
+        if (editingListItemIndex !== null) {
+            // Si está editando un ítem, lo actualiza
+            const updatedList = [...newSectionList];
+            updatedList[editingListItemIndex] = newListItem;
+            setNewSectionList(updatedList);
+            setEditingListItemIndex(null); // Resetear el índice de edición
+        } else {
+            // Si no está editando, lo agrega
+            setNewSectionList((prevList) => [...prevList, newListItem]);
+        }
+        setNewListItem('');
+
+    };
+
+    const deleteListItem = (index) => {
+        const updatedList = newSectionList.filter((_, i) => i !== index);
+        setNewSectionList(updatedList);
+    };
+
+    const editListItem = (index) => {
+        const listItem = newSectionList[index];
+        setNewListItem(listItem);
+        setEditingListItemIndex(index); // Guardar el índice del ítem que se está editando
+    };
+
+    const editPolicy = (index) => {
+        setIsEditing(true);
+        setEditingIndex(index);
+        const policy = items[index];
+
+        if (policy) {
+            setNewPolicy(policy.titulo_deslinde);
+            setSections(policy.secciones);
+            setEditingPolicyId(policy._id);
+        }
+    };
+
+    const updatePolicy = async () => {
+        if (editingPolicyId === null) return;
+
+        try {
+            const response = await fetch(`${API_URL}/${editingPolicyId}`, {
+                method: 'PATCH', // Asegúrate de usar PATCH ya que esa es la ruta correcta en tu backend
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    titulo_deslinde: newPolicy,  // Cambiamos el campo a 'name' para que coincida con lo que espera la API
+                    secciones: sections,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+
+            const updatedPolicy = await response.json();
+            const updatedItems = items.map((item, index) =>
+                index === editingIndex ? updatedPolicy : item
+            );
+
+            setItems(updatedItems);
+            clearForm();
+        } catch (error) {
+            toast.warning('Error al actualizar el Deslinde');
+        }
+    };
+
+    const saveChanges = async () => {
         if (isEditing) {
-            // Guardar los cambios en todos los campos editados
-            actualizarEmpresa('nombreEmpresa', nombreEmpresa);
-            actualizarEmpresa('descripcion', descripcion);
-            actualizarEmpresa('mision', mision);
-            actualizarEmpresa('vision', vision);
-            actualizarEmpresa('direccion', direccion);
-            actualizarEmpresa('objetivo', objetivo);
-        }
-        setIsEditing(!isEditing);
-    };
-
-    const handleAddLink = () => {
-        if (selectedPlatform && newLink) {
-            const newSocialLink = { platform: selectedPlatform, url: newLink };
-            setSocialLinks([...socialLinks, newSocialLink]);
-            setNewLink('');
-            setSelectedPlatform('');
-            // Aquí puedes agregar la lógica para enviar el nuevo enlace al servidor si es necesario
+            await updatePolicy();
+        } else {
+            await addPolicy();
         }
     };
 
-    // Función para eliminar un enlace
-    const handleDeleteLink = (index) => {
-        const updatedLinks = socialLinks.filter((_, i) => i !== index);
-        setSocialLinks(updatedLinks);
-        // Aquí puedes agregar la lógica para eliminar el enlace del servidor si es necesario
+    const clearForm = () => {
+        setNewPolicy('');
+        setSections([]);
+        setIsEditing(false);
+        setEditingIndex(null);
+        setEditingPolicyId(null);
     };
 
-    // Función para iniciar la edición de un enlace
-    const handleEditLink = (index) => {
-        setIsEditingLink(true);
-        setCurrentEditIndex(index);
-        setEditedLink(socialLinks[index]); // Carga el enlace a editar
+    const clearSectionForm = () => {
+        setNewSectionTitle('');
+        setNewSectionDescription('');
+        setNewSectionList([]);
     };
 
-    // Función para actualizar un enlace
-    const handleUpdateLink = () => {
-        const updatedLinks = [...socialLinks];
-        updatedLinks[currentEditIndex] = editedLink; // Actualiza el enlace con los nuevos valores
-        setSocialLinks(updatedLinks);
-        setIsEditingLink(false);
-        setEditedLink({ platform: '', url: '' }); // Limpia los valores del formulario
-        setCurrentEditIndex(null);
-        // Aquí puedes agregar la lógica para actualizar el enlace en el servidor si es necesario
+    const handleDeleteArchivo = (id) => {
+        // Confirmar si el usuario desea eliminar el archivo
+        if (window.confirm("¿Estás seguro de que deseas eliminar este archivo?")) {
+            // Realiza la petición de eliminación
+            fetch(`${API_URL}/DeletArchivoDeslinde/${id}`, {
+                method: 'DELETE',
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        // Elimina el archivo de la lista en el frontend
+                        setPoliticasArchivos((prevArchivos) => prevArchivos.filter((archivo) => archivo.id !== id));
+                        alert("Archivo eliminado con éxito.");
+                    } else {
+                        alert("Hubo un error al eliminar el archivo.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error eliminando el archivo:", error);
+                    alert("Ocurrió un error inesperado.");
+                });
+        }
     };
 
-    // Función para manejar el cambio en los campos editables
-    const handleEditChange = (e) => {
-        const { name, value } = e.target;
-        setEditedLink({ ...editedLink, [name]: value });
+    const handleSetActual = (id) => {
+        // Confirmar si el usuario desea establecer este archivo como vigente
+        if (window.confirm("¿Estás seguro de que deseas establecer este archivo como vigente?")) {
+            // Realiza la petición de actualización
+            fetch(`${API_URL}/ActualArchivoDeslinde/${id}`, {
+                method: 'PATCH', // Usamos PATCH para actualizar el estado
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        // Actualiza el estado del archivo en la lista en el frontend
+                        setPoliticasArchivos((prevArchivos) => 
+                            prevArchivos.map((archivo) => 
+                                archivo.id === id ? { ...archivo, estado: true } : { ...archivo, estado: false }
+                            )
+                        );
+                        alert("Archivo actualizado como vigente con éxito.");
+                    } else {
+                        alert("Hubo un error al actualizar el archivo.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error actualizando el archivo:", error);
+                    alert("Ocurrió un error inesperado.");
+                });
+        }
     };
+    
 
-    if (loading) {
-        return <div>Cargando datos de la empresa...</div>;
-    }
+    const toggleVista = () => {
+        setMostrarArchivos(!mostrarArchivos);
+    };
 
     return (
-        <>
-            <Box sx={{ padding: 2 }}>
-                <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-                    <Typography variant="h4" color="primary" gutterBottom>
-                        {isEditingNombre ? (
-                            <Box display="flex" alignItems="center">
-                                <TextField
-                                    value={nuevoNombre}
-                                    onChange={(e) => setNuevoNombre(e.target.value)}
-                                    onBlur={handleEditNombre}
-                                    autoFocus
-                                />
-                            </Box>
-                        ) : (
-                            <Box display="flex" alignItems="center">
-                                {nombreEmpresa}
-                                <Tooltip title="Editar Nombre" arrow>
-                                    <IconButton onClick={() => setIsEditingNombre(true)} color="primary" sx={{ ml: 1 }}>
-                                        <EditIcon />
-                                    </IconButton>
-                                </Tooltip>
-                            </Box>
-                        )}
-                    </Typography>
-                </Box>
-
-                <Box display="flex" justifyContent="center" mb={2}>
-                    <Avatar
-                        src={imagen}
-                        alt="Imagen de la empresa"
-                        sx={{
-                            width: 200,
-                            height: 200,
-                            border: '2px solid #ccc',
-                            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-                        }}
-                    />
-                </Box>
-
-                <input
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    id="upload-image"
-                    type="file"
-                    onChange={handleImageChange}
-                    disabled={!isEditing}
-                />
-                <label htmlFor="upload-image">
-                    <Button variant="contained" component="span" disabled={!isEditing}>
-                        Cambiar Imagen
-                    </Button>
-                </label>
-
-                <Box mt={3}>
-                    <Typography variant="h6">Dirección</Typography>
-                    <TextField
-                        value={direccion}
-                        onChange={(e) => actualizarEmpresa('direccion', e.target.value)}
-                        multiline
-                        rows={2}
-                        fullWidth
-                        disabled={!isEditing}
-                    />
-                </Box>
-
-                <Box mt={3}>
-                    <Typography variant="h6">Descripción</Typography>
-                    <TextField
-                        value={descripcion}
-                        onChange={(e) => actualizarEmpresa('descripcion', e.target.value)}
-                        multiline
-                        rows={3}
-                        fullWidth
-                        disabled={!isEditing}
-                    />
-                </Box>
-
-                <Box mt={3}>
-                    <Typography variant="h6">Misión</Typography>
-                    <TextField
-                        value={mision}
-                        onChange={(e) => actualizarEmpresa('mision', e.target.value)}
-                        multiline
-                        rows={3}
-                        fullWidth
-                        disabled={!isEditing}
-                    />
-                </Box>
-
-                <Box mt={3}>
-                    <Typography variant="h6">Visión</Typography>
-                    <TextField
-                        value={vision}
-                        onChange={(e) => actualizarEmpresa('vision', e.target.value)}
-                        multiline
-                        rows={3}
-                        fullWidth
-                        disabled={!isEditing}
-                    />
-                </Box>
-
-                <Box mt={3}>
-                    <Typography variant="h6">Objetivo</Typography>
-                    <TextField
-                        value={objetivo}
-                        onChange={(e) => actualizarEmpresa('objetivo', e.target.value)}
-                        multiline
-                        rows={3}
-                        fullWidth
-                        disabled={!isEditing}
-                    />
-                </Box>
-
-                <Box mt={3} display="flex" justifyContent="center">
-                    <Button variant="contained" onClick={toggleEditing}>
-                        {isEditing ? 'Guardar Cambios' : 'Editar Información'}
-                    </Button>
-                </Box>
-                
-
-                <Box mt={3}>
-                    <Typography variant="h6">Redes Sociales</Typography>
-                    <Box display="flex" alignItems="center">
-                        <Select
-                            value={selectedPlatform}
-                            onChange={(e) => setSelectedPlatform(e.target.value)}
-                            sx={{
-                                mr: 2, // Margen derecho
-                                width: '300px', // Ancho específico, ajusta según tus necesidades
-                            }}
-                        >
-                            <MenuItem value="">
-                                <em>Seleccionar Plataforma</em>
-                            </MenuItem>
-                            <MenuItem value="Facebook">Facebook</MenuItem>
-                            <MenuItem value="Twitter">Twitter</MenuItem>
-                            <MenuItem value="Instagram">Instagram</MenuItem>
-                            <MenuItem value="LinkedIn">LinkedIn</MenuItem>
-                            <MenuItem value="Otro">Otro</MenuItem>
-                        </Select>
-                        <TextField
-                            value={newLink}
-                            onChange={(e) => setNewLink(e.target.value)}
-                            placeholder="URL"
-                            sx={{ ml: 2 }}
-                            fullWidth
-                        />
-                        <Button onClick={handleAddLink} variant="contained" sx={{ ml: 2 }} >
-                            Agregar Enlace
-                        </Button>
-                    </Box>
-
-                </Box>
-                <Box mt={3} display="flex" alignItems="center" >
-                    {socialLinks.length === 0 ? (
-                        <Typography variant="body2" color="text.secondary">
-                            No hay enlaces de redes sociales.
-                        </Typography>
-                    ) : (
-                        <Box mt={3} width="100%" >
-                            {socialLinks.map((link, index) => (
-                                <ListItem key={link._id}>
-                                    <Box display="flex" alignItems="center" justifyContent="space-between" width="100%"  >
-
-                                        {isEditingLink && currentEditIndex === index ? (
-                                            <Box display="flex" alignItems="center" width="100%">
-                                                <TextField
-                                                    name="nombre"
-                                                    value={editedLink.nombre}
-                                                    onChange={handleEditChange}
-                                                    InputProps={{
-                                                        readOnly: true, // Esto hace que el campo no sea editable
-                                                    }}
-                                                    sx={{
-                                                        mr: 2, // Margen derecho
-                                                        width: '300px', // Ancho específico, ajusta según tus necesidades
-                                                    }}
-                                                    fullWidth
+        <Box>
+            <Button variant="contained" onClick={toggleVista}>
+                {mostrarArchivos ? 'Ver Archivos' : 'Ver Deslinde Legal Resumido'}
+            </Button>
+    
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' }, // Cambiar a columna en móviles
+                    justifyContent: 'space-between',
+                    padding: '20px',
+                    minHeight: '100vh',
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                }}
+            >
+                {mostrarArchivos ? (
+                    <>
+                        <Box sx={{ flex: 1, overflowY: 'auto', marginBottom: { xs: '20px', sm: '0' } }}>
+                            {/* Sección para agregar/editar políticas */}
+                            <Card
+                                sx={{
+                                    borderRadius: '16px',
+                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                                    transition: 'all 0.3s ease-in-out',
+                                }}
+                            >
+                                <CardContent>
+                                    <Typography variant="h5" color="primary" gutterBottom>
+                                        {isEditing ? 'Editar Deslinde' : 'Agregar Nuevo Deslinde'}
+                                    </Typography>
+                                    <TextField
+                                        label="Título del Deslinde"
+                                        variant="outlined"
+                                        value={newPolicy}
+                                        onChange={(e) => setNewPolicy(e.target.value)}
+                                        fullWidth
+                                        sx={{ marginBottom: '20px' }}
+                                    />
+                                    <Button variant="contained" color="primary" onClick={saveChanges}>
+                                        {isEditing ? 'Actualizar Deslinde' : 'Agregar Deslinde'}
+                                    </Button>
+                                </CardContent>
+                            </Card>
+    
+                            {/* Secciones */}
+                            <Card
+                                sx={{
+                                    borderRadius: '16px',
+                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                                    marginTop: '20px',
+                                }}
+                            >
+                                <CardContent>
+                                    <Typography variant="h5" color="primary" gutterBottom>
+                                        Secciones
+                                    </Typography>
+                                    <List sx={{ marginTop: '20px' }}>
+                                        {sections.map((section, index) => (
+                                            <ListItem key={index}>
+                                                <ListItemText
+                                                    primary={section.titulo_seccion}
+                                                    secondary={`Descripción: ${section.description}`}
                                                 />
-                                                <TextField
-                                                    name="link"
-                                                    value={editedLink.link}
-                                                    onChange={handleEditChange}
-                                                    fullWidth
-                                                />
-                                                <Button onClick={handleUpdateLink} sx={{ ml: 1 }}>
-                                                    Guardar
-                                                </Button>
-                                            </Box>
-                                        ) : (
-                                            <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
-                                                <Typography>
-                                                    {link.nombre}: <a href={link.link} target="_blank" rel="noopener noreferrer">{link.link}</a>
-                                                </Typography>
-                                                <Box>
-
-                                                    <Tooltip title="Editar" arrow>
-                                                        <IconButton onClick={() => handleEditLink(index)} color="primary" sx={{ ml: 1 }}>
-                                                            <EditIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
-
-                                                    <Tooltip title="Eliminar" arrow>
-                                                        <IconButton onClick={() => handleDeleteLink(index)} color="primary" sx={{ ml: 1 }}>
-                                                            <DeleteIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
-
-
-                                                </Box>
-
-                                            </Box>
-                                        )}
-                                    </Box>
-                                </ListItem>
-                            ))}
+                                                <IconButton onClick={() => editSection(index)}>
+                                                    <EditIcon color="primary" />
+                                                </IconButton>
+                                                <IconButton onClick={() => deleteSection(index)}>
+                                                    <DeleteIcon color="error" />
+                                                </IconButton>
+                                            </ListItem>
+                                        ))}
+                                    </List>
+                                    <TextField
+                                        label="Título de la Sección"
+                                        variant="outlined"
+                                        value={newSectionTitle}
+                                        onChange={(e) => setNewSectionTitle(e.target.value)}
+                                        fullWidth
+                                        sx={{ marginBottom: '10px' }}
+                                    />
+                                    <TextField
+                                        label="Descripción de la Sección"
+                                        variant="outlined"
+                                        value={newSectionDescription}
+                                        onChange={(e) => setNewSectionDescription(e.target.value)}
+                                        fullWidth
+                                        sx={{ marginBottom: '10px' }}
+                                    />
+                                    <List>
+                                        {newSectionList.map((item, index) => (
+                                            <ListItem key={index}>
+                                                <ListItemText primary={item} />
+                                                <IconButton onClick={() => editListItem(index)}>
+                                                    <EditIcon color="primary" />
+                                                </IconButton>
+                                                <IconButton onClick={() => deleteListItem(index)}>
+                                                    <DeleteIcon color="error" />
+                                                </IconButton>
+                                            </ListItem>
+                                        ))}
+                                    </List>
+                                    <TextField
+                                        label="Ítem de Lista"
+                                        variant="outlined"
+                                        value={newListItem}
+                                        onChange={(e) => setNewListItem(e.target.value)}
+                                        fullWidth
+                                        sx={{ marginBottom: '10px' }}
+                                    />
+                                    <Button variant="contained" color="secondary" onClick={addListItem}>
+                                        {editingListItemIndex !== null ? 'Actualizar Item' : 'Agregar Item'}
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={addSection}
+                                        sx={{ marginLeft: '10px' }}
+                                    >
+                                        {editingSectionIndex !== null ? 'Actualizar Sección' : 'Agregar Sección'}
+                                    </Button>
+                                </CardContent>
+                            </Card>
                         </Box>
-                    )}
-                </Box>
+    
+                        {/* Sección para mostrar las políticas */}
+                        <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                            <Card
+                                sx={{
+                                    borderRadius: '16px',
+                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                                }}
+                            >
+                                <CardContent>
+                                    <Typography variant="h5" color="primary" gutterBottom>
+                                        Deslinde Legal
+                                    </Typography>
+                                    <List>
+                                        {items.map((policy, index) => (
+                                            <ListItem key={policy._id} alignItems="flex-start">
+                                                <ListItemText
+                                                    primary={policy.titulo_deslinde}
+                                                    secondary={
+                                                        <Box>
+                                                            {policy.secciones &&
+                                                                policy.secciones.map((section) => (
+                                                                    <Box key={section._id} mb={2}>
+                                                                        <Typography variant="subtitle1" color="textSecondary">
+                                                                            Sección: {section.titulo_seccion}
+                                                                        </Typography>
+                                                                        <Typography variant="body2" color="textSecondary">
+                                                                            Descripción: {section.description}
+                                                                        </Typography>
+                                                                        <List dense>
+                                                                            {section.list &&
+                                                                                section.list.map((listItem, listItemIndex) => (
+                                                                                    <ListItem key={listItemIndex}>
+                                                                                        <ListItemText primary={listItem} />
+                                                                                    </ListItem>
+                                                                                ))}
+                                                                        </List>
+                                                                    </Box>
+                                                                ))}
+                                                        </Box>
+                                                    }
+                                                />
+                                                <IconButton onClick={() => editPolicy(index)}>
+                                                    <EditIcon color="primary" />
+                                                </IconButton>
+                                                <IconButton onClick={() => deletePolicy(index)}>
+                                                    <DeleteIcon color="error" />
+                                                </IconButton>
+                                            </ListItem>
+                                        ))}
+                                    </List>
+                                </CardContent>
+                            </Card>
+                        </Box>
+                    </>
+                ) : (
+                    <>
+                        {/* Sección para agregar archivo de políticas */}
+                        <Box sx={{ flex: 1, overflowY: 'auto', marginBottom: { xs: '20px', sm: '0' } }}>
+                            <Card
+                                sx={{
+                                    borderRadius: '16px',
+                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                                    padding: '20px',
+                                }}
+                            >
+                                <Typography variant="h5" color="primary" gutterBottom>
+                                    Agregar Archivo De Deslindes
+                                </Typography>
+                                <form onSubmit={handleSubmit}>
+                                    <TextField
+                                        type="file"
+                                        variant="outlined"
+                                        fullWidth
+                                        onChange={handleFileChange}
+                                        sx={{ marginBottom: '20px' }}
+                                    />
+                                    <Button variant="contained" color="primary" type="submit">
+                                        Subir Archivo
+                                    </Button>
+                                </form>
+                            </Card>
+                        </Box>
+    
+                        {/* Sección para mostrar archivos de políticas */}
+                        <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                            <Card
+                                sx={{
+                                    borderRadius: '16px',
+                                    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                                }}
+                            >
+                                <Typography variant="h5" color="primary" gutterBottom>
+                                    Historial De Deslindes
+                                </Typography>
+                                <div>
+                                    {politicasArchivos.length > 0 ? (
+                                        politicasArchivos
+                                            .sort((a, b) => new Date(b.fechaSubida) - new Date(a.fechaSubida)) // Ordena archivos por fecha más reciente primero
+                                            .map((archivo, index) => (
+                                                <Card key={archivo.id} sx={{ marginBottom: '20px', padding: '20px' }}>
+                                                    <Typography variant="h6">
+                                                        {archivo.nombre}
+                                                        {archivo.estado ? (
+                                                            <Typography variant="subtitle1" color="primary">
+                                                                Deslinde Actual
+                                                            </Typography>
+                                                        ) : (
+                                                            <Typography variant="subtitle1" color="textSecondary">
+                                                                No vigente
+                                                            </Typography>
+                                                        )}
+                                                    </Typography>
+                                                    <>
+                                                        <Button
+                                                            variant="contained"
+                                                            color="primary"
+                                                            onClick={() => handleDownload(archivo.archivo,archivo.nombre)}
+                                                        >
+                                                            Descargar
+                                                        </Button>
+                                                        {archivo.estado ? (
+                                                            <Button
+                                                                variant="contained"
+                                                                color="secondary"
+                                                                onClick={() => handleDeleteArchivo(archivo.id)} // Función para eliminar si es actual
+                                                            >
+                                                                No vigente
+                                                            </Button>
+                                                        ) : (
+                                                            <Button
+                                                                variant="contained"
+                                                                color="secondary"
+                                                                onClick={() => handleSetActual(archivo.id)} // Función para establecer como política actual
+                                                            >
+                                                                Establecer vigencia
+                                                            </Button>
+                                                        )}
+                                                        <Typography variant="body2" color="textSecondary">
+                                                            {new Date(archivo.fechaSubida).toLocaleString('es-ES', {
+                                                                hour: 'numeric',
+                                                                minute: 'numeric',
+                                                                day: 'numeric',
+                                                                month: 'numeric',
+                                                                year: 'numeric',
+                                                            })}
+                                                        </Typography>
 
-                <Box mt={3} display="flex" justifyContent="center">
-                    <Button variant="contained" onClick={toggleEditing}>
-                        {isEditing ? 'Guardar Cambios' : 'Editar Información'}
-                    </Button>
-                </Box>
+                                                        <Typography variant="body2" color="textSecondary">
+                                                            Versión: {archivo.version}
+                                                        </Typography>
 
+                                                    </>
+                                                </Card>
+                                            ))
+                                    ) : (
+                                        <Typography variant="body1" color="textSecondary">
+                                            No hay archivos de Deslindes disponibles.
+                                        </Typography>
+                                    )}
+                                </div>
+                            </Card>
+                        </Box>
+                    </>
+                )}
             </Box>
-        </>
+        </Box>
     );
+    
+
+
 };
 
-export default PerfilEmpresa;
+export default DeslindeLegal;

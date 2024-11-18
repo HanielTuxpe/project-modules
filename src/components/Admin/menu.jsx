@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
-import { TableChart} from '@mui/icons-material';
+import { TableChart } from '@mui/icons-material';
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
+import { obtenerTipoUsuario } from '../SessionService';
 
-// Estilos personalizados
 const drawerWidth = 240;
 
 const StyledDrawer = styled(Drawer)(({ theme }) => ({
@@ -17,26 +17,35 @@ const StyledDrawer = styled(Drawer)(({ theme }) => ({
     },
 }));
 
-function SideMenu({ open, toggleMenu, user }) { // Recibe las props open y toggleMenu
-    const navigate = useNavigate(); // useNavigate dentro del componente
+function SideMenu({ open, toggleMenu }) {
+    const navigate = useNavigate();
+    const [user, setUser] = useState(() => obtenerTipoUsuario()); // Inicializa el estado con el valor de la cookie
+
+    useEffect(() => {
+        // Ejecuta cada vez que el componente se renderiza
+        const savedUser = obtenerTipoUsuario(); // Obtiene el valor actual de la cookie
+        if (savedUser !== user) { // Si el valor de la cookie es diferente del estado actual
+            setUser(savedUser); // Actualiza el estado solo si la cookie ha cambiado
+        }
+    }, [user]); // Se ejecuta siempre que el estado `user` cambie
+    
 
     const handleCrudClick = () => {
-        navigate('/Crud'); // Navegar a la ruta "/Crud"
+        navigate('/Crud');
     };
 
     const handleUsuariosClick = () => {
-        navigate('/Usuarios'); // Navegar a la ruta "/Crud"
+        navigate('/Usuarios');
     };
 
     return (
         <StyledDrawer
             variant="temporary"
             anchor="right"
-            open={open} // Usa la prop open para controlar la visibilidad del Drawer
-            onClose={toggleMenu} // Usa la prop toggleMenu para cerrar el Drawer
+            open={open}
+            onClose={toggleMenu}
         >
             <List>
-                {/* Verificar si hay un usuario autenticado y si es administrador */}
                 {user && user === 'Admin' ? (
                     <>
                         <ListItem>
@@ -45,17 +54,14 @@ function SideMenu({ open, toggleMenu, user }) { // Recibe las props open y toggl
                         <ListItem>
                             <ListItemText primary={`Bienvenido, ${user}`} style={{ color: '#ffffff' }} />
                         </ListItem>
-
-                        {/* Elementos del menú */}
                         <ListItem button onClick={handleCrudClick}>
                             <ListItemIcon>
                                 <TableChart style={{ color: '#c2c2c2' }} />
                             </ListItemIcon>
                             <Typography>
-                                INFORMACION DE LA EMPRESA
+                                INFORMACIÓN DE LA EMPRESA
                             </Typography>
                         </ListItem>
-
                         <ListItem button onClick={handleUsuariosClick}>
                             <ListItemIcon>
                                 <TableChart style={{ color: '#c2c2c2' }} />
@@ -64,17 +70,15 @@ function SideMenu({ open, toggleMenu, user }) { // Recibe las props open y toggl
                                 USUARIOS
                             </Typography>
                         </ListItem>
-
                     </>
                 ) : (
                     <ListItem>
-                        <ListItemText primary={`Por favor, inicie sesión, ${user}`} style={{ color: '#ffffff' }} />
+                        <ListItemText primary={`Por favor, inicie sesión${user ? `, ${user}` : ''}`} style={{ color: '#ffffff' }} />
                     </ListItem>
                 )}
             </List>
         </StyledDrawer>
     );
-
 }
 
 export default SideMenu;

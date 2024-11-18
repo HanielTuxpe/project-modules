@@ -29,9 +29,6 @@ const PoliticasPrivacidad = () => {
     const [file, setFile] = useState(null); // Guardar el archivo seleccionado
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0); // Define forceUpdate
 
-
-
-
     useEffect(() => {
 
         const fetchPolicies = async () => {
@@ -533,7 +530,7 @@ const PoliticasPrivacidad = () => {
                                 Secciones
                             </Typography>
                             <List sx={{ marginTop: '20px' }}>
-                                {isEditing && sections.map((section, index) => (
+                                { sections.map((section, index) => (
                                     <ListItem key={index}>
                                         <ListItemText
                                             primary={`Titulo: ${section.titulo_seccion}`}
