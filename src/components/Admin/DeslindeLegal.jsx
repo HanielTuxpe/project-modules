@@ -10,7 +10,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { toast } from 'react-toastify';
 import { useReducer } from 'react';
 
-const API_URL = 'http://localhost:3001/deslinde'; // Cambia por la URL de tu API
+const API_URL = 'https://prj-server.onrender.com/deslinde'; // Cambia por la URL de tu API
 
 const PoliticasPrivacidad = () => {
     const [items, setItems] = useState([]);

@@ -27,7 +27,7 @@ const PerfilEmpresa = () => {
 
     const cargarDatosEmpresa = async () => {
         try {
-            const response = await fetch('http://localhost:3001/InformacionEmpresa');
+            const response = await fetch('https://prj-server.onrender.com/InformacionEmpresa');
             const data = await response.json();
 
             if (response.ok && data.length > 0) {
@@ -60,7 +60,7 @@ const PerfilEmpresa = () => {
 
     const actualizarEmpresa = async (campo, valor) => {
         try {
-            const response = await fetch(`http://localhost:3001/InformacionEmpresa/${empresaId}`, {
+            const response = await fetch(`https://prj-server.onrender.com/InformacionEmpresa/${empresaId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ const PerfilEmpresa = () => {
 
             // Hacer la solicitud para actualizar la imagen en la base de datos
             try {
-                const response = await fetch(`http://localhost:3001/InformacionEmpresa/${empresaId}`, {
+                const response = await fetch(`https://prj-server.onrender.com/InformacionEmpresa/${empresaId}`, {
                     method: 'PATCH',
                     body: formData, // Enviamos el FormData con la imagen
                 });

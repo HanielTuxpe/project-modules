@@ -75,13 +75,17 @@ const Login = ({ onLogin }) => {
             // Verificar código
             const verifyResponse = await axios.post('https://prj-server.onrender.com/code-login', {
                 username,
-                code : Number(code),
+                code: Number(code),
             });
 
             if (verifyResponse.status === 200) {
-                toast.success(verifyResponse.data.message);
                 iniciarSesion(verifyResponse.data.type);
-                navigate('/index');
+
+                // Aseguramos la redirección después de un tiempo breve para garantizar el flujo correcto.
+                toast.success(verifyResponse.data.message);
+ 
+                window.location.replace('/index');
+
             }
         } catch (error) {
             if (error.response) {

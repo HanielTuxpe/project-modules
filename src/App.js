@@ -35,7 +35,8 @@ const App = () => {
     }, []);
 
     const handleLogout = () => {
-        cerrarSesion()
+        cerrarSesion();
+        setUsuario(null);
     };
 
     const toggleDarkMode = () => {
@@ -45,69 +46,59 @@ const App = () => {
 
     const theme = getTheme(darkMode);
 
+    // Componente para Layout Base con dependencias
+    const Layout = ({ children }) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <Header
+                usuario={usuario} // Depende del estado de usuario
+                onLogout={handleLogout}
+                toggleDarkMode={toggleDarkMode}
+                darkMode={darkMode}
+            />
+            <Container component="main" sx={{ mt: 2, mb: 2, flexGrow: 1 }}>
+                {children}
+            </Container>
+            <Footer />
+        </Box>
+    );
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <Router>
-                <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-                    <Header usuario={usuario} onLogout={handleLogout} toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+                <Layout key={usuario ? 'authenticated' : 'guest'}>
+                    <Routes>
+                        {/* Rutas Públicas */}
+                        <Route path="/" element={usuario ? <Navigate to="/index" /> : <Index />} />
+                        <Route path="/SignUp" element={usuario ? <Navigate to="/index" /> : <Registro />} />
+                        <Route path="/login" element={usuario ? <Navigate to="/index" /> : <Login />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-                    <Container component="main" sx={{ mt: 2, mb: 2 }}>
-                        <Routes>
-                            <Route
-                                path="/"
-                                element={usuario ? <Navigate to="/index" /> : <Index />}
-                            />
-                            <Route
-                                path="/SignUp"
-                                element={usuario ? <Navigate to="/index" /> : <Registro />}
-                            />
-                            <Route
-                                path="/login"
-                                element={usuario ? <Navigate to="/index" /> : <Login />}
-                            />
+                        {/* Rutas Privadas */}
+                        <Route path="/index" element={usuario ? <BuscarRuta /> : <Navigate to="/" />} />
+                        <Route path="/Crud" element={usuario ? <Crud darkMode={darkMode} /> : <Navigate to="/" />} />
+                        <Route path="/Usuarios" element={usuario ? <Usuarios darkMode={darkMode} /> : <Navigate to="/" />} />
 
-                            <Route
-                                path="/forgot-password"
-                                element={<ForgotPassword />}
-                            />
-                            <Route
-                                path="/index"
-                                element={usuario ? <BuscarRuta /> : <Navigate to="/" />}
-                            />
-                            <Route
-                                path="/Crud"
-                                element={usuario ? <Crud darkMode={darkMode} /> : <Navigate to="/" />}
-                            />
-                            <Route
-                                path="/Usuarios"
-                                element={usuario ? <Usuarios darkMode={darkMode} /> : <Navigate to="/" />}
-                            />
-                            <Route
-                                path="/privacy-policy"
-                                element={usuario ? <PoliticasDePrivacidadPublico darkMode={darkMode} /> : <PoliticasDePrivacidadPublico darkMode={darkMode} />}
-                            />
-                            <Route
-                                path="/terms-conditions"
-                                element={usuario ? <TerminosYCondicionesPublico darkMode={darkMode} /> : <TerminosYCondicionesPublico darkMode={darkMode} />}
-                            />
-                            <Route
-                                path="/legal-disclaimer"
-                                element={usuario ? <DeslindeLegalPublico darkMode={darkMode} /> : <DeslindeLegalPublico darkMode={darkMode} />}
-                            />
-                            <Route
-                                path="/about"
-                                element={usuario ? <AcercaDePublico darkMode={darkMode} /> : <AcercaDePublico darkMode={darkMode} />}
-                            />
-
-
-
-                        </Routes>
-                    </Container>
-
-                    <Footer />
-                    <ToastContainer />
-                </Box>
+                        {/* Páginas informativas públicas */}
+                        <Route
+                            path="/privacy-policy"
+                            element={<PoliticasDePrivacidadPublico darkMode={darkMode} />}
+                        />
+                        <Route
+                            path="/terms-conditions"
+                            element={<TerminosYCondicionesPublico darkMode={darkMode} />}
+                        />
+                        <Route
+                            path="/legal-disclaimer"
+                            element={<DeslindeLegalPublico darkMode={darkMode} />}
+                        />
+                        <Route
+                            path="/about"
+                            element={<AcercaDePublico darkMode={darkMode} />}
+                        />
+                    </Routes>
+                </Layout>
+                <ToastContainer />
             </Router>
         </ThemeProvider>
     );

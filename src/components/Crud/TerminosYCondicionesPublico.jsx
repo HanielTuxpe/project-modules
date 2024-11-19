@@ -19,7 +19,7 @@ const PoliticasPublica = () => {
     useEffect(() => {
         const fetchPoliticas = async () => {
             try {
-                const response = await fetch('http://localhost:3001/terminos');
+                const response = await fetch('https://prj-server.onrender.com/terminos');
                 const data = await response.json();
                 setItems(data);
             } catch (error) {
