@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, IconButton, Button, Avatar, Tooltip, Select, MenuItem, ListItem, List } from '@mui/material';
+import { Box, Typography, TextField, IconButton, Button, Avatar, Tooltip, Select, MenuItem, ListItem, List ,CardMedia} from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 
@@ -311,11 +311,20 @@ const PerfilEmpresa = () => {
             </Box>
 
             <Box display="flex" justifyContent="center" mb={2}>
-                <Avatar
-                    src={imagen}
-                    alt="Imagen de la empresa"
-                    sx={{ width: 200, height: 200, border: '2px solid #ccc', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }}
-                />
+               
+                        
+            <CardMedia
+              component="img"
+              image={imagen}
+              alt={`${nombreEmpresa} logo`}
+              sx={{
+                width: '25%',
+                objectFit: 'contain',
+               
+                filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4))', // Filtro de sombra más natural
+               // Opcional: redondea bordes
+              }}
+            />
             </Box>
 
             <input

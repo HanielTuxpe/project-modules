@@ -9,7 +9,14 @@ import {
   Link,
 } from '@mui/material';
 import { styled } from '@mui/system';
-import { Facebook, Twitter, Instagram, LinkedIn , WhatsApp, YouTube} from '@mui/icons-material'; // Import icons
+
+// Import PNG icons
+import FacebookIcon from '../../assets/facebook.png';
+import TwitterIcon from '../../assets/twitter.png';
+import InstagramIcon from '../../assets/instagram.png';
+import LinkedInIcon from '../../assets/linkedin.png';
+import WhatsAppIcon from '../../assets/whatsapp.png';
+import YouTubeIcon from '../../assets/youtube.png';
 
 const colors = {
   primary: '#921F45',
@@ -17,29 +24,29 @@ const colors = {
   accent: '#BC955B',
   white: '#FFFFFF',
   lightBlue: '#E1EDFF',
-  black: '#000000', // Added black for text
+  black: '#000000',
 };
 
 // Styles for the ProfileCard
 const ProfileCard = styled(Card)(({ theme }) => ({
   backgroundColor: colors.white,
   borderRadius: '12px',
-  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)', // Enhanced shadow
-  transition: 'transform 0.3s, box-shadow 0.3s', // Transition for shadow and scale
+  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
+  transition: 'transform 0.3s, box-shadow 0.3s',
   '&:hover': {
-    transform: 'scale(1.05)', // Scale on hover
-    boxShadow: '0 16px 32px rgba(0, 0, 0, 0.4)', // Deeper shadow on hover
+    transform: 'scale(1.05)',
+    boxShadow: '0 16px 32px rgba(0, 0, 0, 0.4)',
   },
 }));
 
-// Icon mapping for social media links
+// Icon mapping for social media links (using images)
 const iconMapping = {
-    facebook: <Facebook />,
-    twitter: <Twitter />,
-    instagram: <Instagram />,
-    linkedin: <LinkedIn />,
-    whatsapp: <WhatsApp />,
-    youtube: <YouTube />,
+  facebook: <img src={FacebookIcon} alt="Facebook" style={{ width: 24, height: 24 }} />,
+  twitter: <img src={TwitterIcon} alt="Twitter" style={{ width: 24, height: 24 }} />,
+  instagram: <img src={InstagramIcon} alt="Instagram" style={{ width: 24, height: 24 }} />,
+  linkedin: <img src={LinkedInIcon} alt="LinkedIn" style={{ width: 24, height: 24 }} />,
+  whatsapp: <img src={WhatsAppIcon} alt="WhatsApp" style={{ width: 24, height: 24 }} />,
+  youtube: <img src={YouTubeIcon} alt="YouTube" style={{ width: 24, height: 24 }} />,
 };
 
 const Profile = () => {
@@ -85,46 +92,104 @@ const Profile = () => {
     <Box sx={{ padding: 2 }}>
       <Grid container spacing={2} justifyContent="center">
         <Grid item xs={12} sm={6}>
-          <ProfileCard>
+          <ProfileCard >
+            <Typography variant="h4" color={colors.black}
+              sx={{
+                marginTop: '2px',
+                marginBottom: '15px',
+                textAlign: 'center',
+                overflowWrap: 'break-word', // Ajusta palabras largas
+                wordWrap: 'break-word',
+                whiteSpace: 'pre-wrap', // Preserva los saltos de línea
+              }}
+            >
+              {nombreEmpresa}
+            </Typography>
+
             <CardMedia
               component="img"
               image={imagen}
               alt={`${nombreEmpresa} logo`}
-              sx={{ height: 200, objectFit: 'contain' }}
+              sx={{
+                height: 200,
+                objectFit: 'contain',
+               
+                filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4))', // Filtro de sombra más natural
+               // Opcional: redondea bordes
+              }}
             />
             <CardContent>
-              <Typography variant="h4" color={colors.black}>
-                {nombreEmpresa}
-              </Typography>
-              <Typography variant="body1" color={colors.black}>
+
+              <Typography variant="body1" color={colors.black}
+                sx={{
+                  marginBottom: '15px',
+                  textAlign: 'center',
+                  overflowWrap: 'break-word', // Ajusta palabras largas
+                  wordWrap: 'break-word',
+                  whiteSpace: 'pre-wrap', // Preserva los saltos de línea
+                }}
+              >
                 {descripcion}
               </Typography>
+
               <Typography variant="h6" color={colors.primary}>
                 Misión
               </Typography>
-              <Typography variant="body2" color={colors.black}>
+              <Typography variant="body2" color={colors.black}
+                sx={{
+                  marginTop: '2px',
+                  marginBottom: '15px',
+                  overflowWrap: 'break-word', // Ajusta palabras largas
+                  wordWrap: 'break-word',
+                  whiteSpace: 'pre-wrap', // Preserva los saltos de línea
+                }}
+              >
                 {mision}
               </Typography>
               <Typography variant="h6" color={colors.primary}>
                 Visión
               </Typography>
-              <Typography variant="body2" color={colors.black}>
+              <Typography variant="body2" color={colors.black}
+                sx={{
+                  marginTop: '2px',
+                  marginBottom: '15px',
+                  overflowWrap: 'break-word', // Ajusta palabras largas
+                  wordWrap: 'break-word',
+                  whiteSpace: 'pre-wrap', // Preserva los saltos de línea
+                }}
+              >
                 {vision}
               </Typography>
               <Typography variant="h6" color={colors.primary}>
                 Objetivo
               </Typography>
-              <Typography variant="body2" color={colors.black}>
+              <Typography variant="body2" color={colors.black}
+                sx={{
+                  marginTop: '2px',
+                  marginBottom: '15px',
+                  overflowWrap: 'break-word', // Ajusta palabras largas
+                  wordWrap: 'break-word',
+                  whiteSpace: 'pre-wrap', // Preserva los saltos de línea
+                }}
+              >
                 {objetivo}
               </Typography>
               <Typography variant="h6" color={colors.primary}>
                 Dirección
               </Typography>
-              <Typography variant="body2" color={colors.black}>
+              <Typography variant="body2" color={colors.black}
+                sx={{
+                  marginTop: '2px',
+                  marginBottom: '15px',
+                  overflowWrap: 'break-word', // Ajusta palabras largas
+                  wordWrap: 'break-word',
+                  whiteSpace: 'pre-wrap', // Preserva los saltos de línea
+                }}
+              >
                 {direccion}
               </Typography>
               <Box mt={2}>
-                <Typography variant="h6" color={colors.primary}>
+                <Typography variant="h6" color={colors.primary} sx={{  textAlign: 'center'}}>
                   Redes Sociales
                 </Typography>
                 <Box display="flex" flexWrap="wrap" mt={1}>
@@ -140,6 +205,7 @@ const Profile = () => {
                           display: 'flex',
                           alignItems: 'center',
                           marginRight: 2,
+                          marginTop: '15px',
                           textDecoration: 'none',
                           '&:hover': {
                             color: colors.primary, // Change color on hover
