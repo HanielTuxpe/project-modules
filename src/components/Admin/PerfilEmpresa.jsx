@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, IconButton, Button, Avatar, Tooltip, Select, MenuItem, ListItem, List ,CardMedia} from '@mui/material';
+import { Box, Typography, TextField, IconButton, Button, Avatar, Tooltip, Select, MenuItem, ListItem, useTheme ,CardMedia} from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 
@@ -24,6 +24,8 @@ const PerfilEmpresa = () => {
     const [isEditingLink, setIsEditingLink] = useState(false);
     const [currentEditIndex, setCurrentEditIndex] = useState(null);
     const [editedLink, setEditedLink] = useState({ platform: '', url: '' });
+
+    const theme = useTheme();
 
     const cargarDatosEmpresa = async () => {
         try {
@@ -288,10 +290,15 @@ const PerfilEmpresa = () => {
 
     return (
         <Box sx={{ padding: 2 }}>
-            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+            <Box display="flex" justifyContent="center"     alignItems="center" height="100%">
                 <Typography variant="h4" color="primary" gutterBottom>
                     {isEditingNombre ? (
                         <TextField
+                        InputProps={{
+                            style: {
+                              color: 'text.primary', // Cambia el color del texto
+                            },
+                          }}
                             value={nuevoNombre}
                             onChange={(e) => setNuevoNombre(e.target.value)}
                             onBlur={handleEditNombre}
@@ -299,7 +306,9 @@ const PerfilEmpresa = () => {
                         />
                     ) : (
                         <Box display="flex" alignItems="center">
+                            <Typography variant='h4'>
                             {nombreEmpresa}
+                            </Typography>
                             <Tooltip title="Editar Nombre" arrow>
                                 <IconButton onClick={() => setIsEditingNombre(true)} color="primary" sx={{ ml: 1 }}>
                                     <EditIcon />
@@ -320,8 +329,7 @@ const PerfilEmpresa = () => {
               sx={{
                 width: '25%',
                 objectFit: 'contain',
-               
-                filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4))', // Filtro de sombra más natural
+                filter: theme.custom.dropShadow, 
                // Opcional: redondea bordes
               }}
             />
@@ -349,12 +357,18 @@ const PerfilEmpresa = () => {
             <Box mt={3}>
                 <Typography variant="h6">Dirección</Typography>
                 <TextField
+                   
                     value={direccion}
                     onChange={(e) => setDireccion(e.target.value)}
                     multiline
                     rows={2}
                     fullWidth
                     disabled={!isEditing}
+                    InputProps={{
+                        style: {
+                          color: 'text.primary', // Cambia el color del texto
+                        },
+                      }}
                 />
             </Box>
 
@@ -415,20 +429,22 @@ const PerfilEmpresa = () => {
                     <Select
                         value={selectedPlatform}
                         onChange={(e) => setSelectedPlatform(e.target.value)}
+                        
                         sx={{
                             mr: 2, // Margen derecho
                             width: '300px', // Ancho específico, ajusta según tus necesidades
+                            color: 'text.primary', 
                         }}
                     >
-                        <MenuItem value="">
+                        <MenuItem value=""sx={{color: 'text.primary'}}>
                             <em>Seleccionar Plataforma</em>
                         </MenuItem>
-                        <MenuItem value="Facebook">Facebook</MenuItem>
-                        <MenuItem value="WhatsApp">WhatsApp</MenuItem>
-                        <MenuItem value="Instagram">Instagram</MenuItem>
-                        <MenuItem value="YouTube">YouTube</MenuItem>
-                        <MenuItem value="Twitter">Twitter</MenuItem>
-                        <MenuItem value="LinkedIn">LinkedIn</MenuItem>
+                        <MenuItem value="Facebook" sx={{color: 'text.primary'}}>Facebook</MenuItem>
+                        <MenuItem value="WhatsApp" sx={{color: 'text.primary'}}>WhatsApp</MenuItem>
+                        <MenuItem value="Instagram" sx={{color: 'text.primary'}}>Instagram</MenuItem>
+                        <MenuItem value="YouTube" sx={{color: 'text.primary'}}>YouTube</MenuItem>
+                        <MenuItem value="Twitter" sx={{color: 'text.primary'}}>Twitter</MenuItem>
+                        <MenuItem value="LinkedIn" sx={{color: 'text.primary'}}>LinkedIn</MenuItem>
                     </Select>
                     <TextField
                         value={newLink}
@@ -458,6 +474,7 @@ const PerfilEmpresa = () => {
                                         <Box display="flex" alignItems="center" width="100%">
                                             <TextField
                                                 name="nombre"
+                                               
                                                 value={editedLink.nombre}
                                                 onChange={handleEditChange}
                                                 InputProps={{
@@ -466,6 +483,7 @@ const PerfilEmpresa = () => {
                                                 sx={{
                                                     mr: 2,
                                                     width: '300px',
+                                                    color: 'text.primary'
                                                 }}
                                                 fullWidth
                                             />
@@ -481,7 +499,7 @@ const PerfilEmpresa = () => {
                                         </Box>
                                     ) : (
                                         <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
-                                            <Typography>
+                                            <Typography variant='subtitle1'>
                                                 {link.nombre}: <a href={link.link} target="_blank" rel="noopener noreferrer">{link.link}</a>
                                             </Typography>
                                             <Box>

@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
+import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, useMediaQuery, Container, useTheme, Tooltip } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
@@ -11,27 +9,26 @@ import Home from '@mui/icons-material/Home';
 import MenuIcon from '@mui/icons-material/Menu'; // Icono para el menú
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/uthh.png';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import MenuPrincipal from './Admin/menu'; // Importa tu menú
 import { obtenerTipoUsuario } from './SessionService';
 
-
 const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const navigate = useNavigate();
-    const isMobile = useMediaQuery('(max-width: 600px)'); // Detecta si es un dispositivo móvil
     const [user, setUser] = useState(null);
     const [showMenu, setShowMenu] = useState(true); // Controla el estado de visibilidad del menú lateral
-  
-  
-    
-        // Cargar usuario inicial al montar el componente
-        useEffect(() => {
-            const savedUser = obtenerTipoUsuario();
-            if (savedUser) {
-                setUser(savedUser);
-            }
-        }, []);
-    
+
+    const tituloLargo = "Plataforma de Rendimiento Integral y Monitoreo Educativo de la UTHH";
+    const tituloCorto = "PRIME UTHH";
+
+    // Cargar usuario inicial al montar el componente
+    useEffect(() => {
+        const savedUser = obtenerTipoUsuario();
+        if (savedUser) {
+            setUser(savedUser);
+        }
+    }, []);
 
     const handleLoginClick = () => {
         navigate('/login');
@@ -56,44 +53,127 @@ const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
     };
 
     return (
-        <>
-            <AppBar position="static"
+        <Box component="header" bgcolor="primary.main" color="white" p={2}
+            position="static"
+            sx={{
+                display: "flex",
+                flexDirection: isSmallScreen ? 'column' : 'row', // Cambia la dirección a columna en pantallas pequeñas
+                alignItems: "center",
+                padding: 0,
+                boxShadow: theme.custom.boxShadow, // Aplica el boxShadow solo en modo oscuro
+            }}
+        >
+            <Container
+                maxWidth="lg"
                 sx={{
-                    mb: 2,
-                    backgroundColor: '#921F45',
-                    color: '#fff',
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexDirection: isSmallScreen ? 'row' : 'row', // Cambia la dirección a columna en pantallas pequeñas
+                    maxWidth: "none",
+                    alignItems: "center", // Centra el contenido verticalmente
+                    '@media (min-width: 600px)': {
+                        paddingLeft: 0, // Elimina el padding a partir de 600px
+                        paddingRight: 0, // Elimina el padding a partir de 600px
+                    },
+                    '@media (min-width: 1200px)': {
+                        maxWidth: "none",
+                    },
                 }}
             >
-                <Toolbar>
-                    <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-                        <img src={logo} alt="UTHH Logo" style={{ width: 32, height: 32, marginRight: 16 }} />
-                        <Typography variant="h6" component="div">
-                            {isMobile ? 'PODAI' : 'Portal Digital de Atención Integral a Estudiantes De La UTHH'} {/* Cambia el texto si es móvil */}
-                        </Typography>
-                    </Box>
-                    <IconButton color="inherit" onClick={toggleDarkMode}>
-                        {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
-                    </IconButton>
+                {/* Contenedor de Imagen (Logo) */}
+
+                <Box display="flex" alignItems="center" sx={{ flexGrow: 0, marginBottom: isSmallScreen ? '10px' : '0', }}>
+                    <img
+                        src={logo}
+                        alt="Logo"
+                        style={{
+                            maxWidth: "80px", height: "auto",
+                            marginRight: "10%", marginLeft: isSmallScreen ? '0' : '40%',
+                            filter: theme.custom.dropShadow,
+                        }}
+                    />
+                </Box>
+
+                {/* Contenedor Texto */}
+                <Box display="flex" alignItems="center" sx={{ flexGrow: 0, }}>
+                    {/* Contenedor de Título */}
+                    <Typography
+                        variant="h5"
+                      
+                        sx={{
+                            fontWeight: "bold",
+                            display: isSmallScreen ? 'none' : 'block',
+                            marginLeft: isSmallScreen ? '0' : '30px',
+                        }}
+                    >
+                        {tituloLargo}
+                    </Typography>
+                    <Typography
+                        variant="h5"
+                      
+                        sx={{
+                            fontWeight: "bold",
+                            display: isSmallScreen ? 'block' : 'none',
+                        }}
+                    >
+                        {tituloCorto}
+                    </Typography>
+                </Box>
+
+                {/* Contenedor de Funciones (Botones e Iconos) */}
+                <Box display="flex" alignItems="center" gap={2} sx={{ flexGrow: 0, marginRight: "2%", marginTop: isSmallScreen ? '10px' : '0' }}>
+                    <Tooltip title="Modo" arrow>
+                        <IconButton color="inherit" onClick={toggleDarkMode}
+                            sx={{
+                                display: isSmallScreen ? 'none' : 'block',
+                            }}
+                        >
+                            {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+                        </IconButton>
+                    </Tooltip>
                     {usuario ? (
-                        <IconButton color="inherit" onClick={handleLogoutClick}>
-                            <ExitToAppIcon />
-                        </IconButton>
+                        <Tooltip title="Exit" arrow>
+                            <IconButton color="inherit" onClick={handleLogoutClick}
+                                sx={{
+                                    display: isSmallScreen ? 'none' : 'block',
+                                }}
+                            >
+                                <ExitToAppIcon />
+                            </IconButton>
+                        </Tooltip>
                     ) : (
-                        <IconButton color="inherit" onClick={handleLoginClick}>
-                            <LoginIcon />
-                        </IconButton>
+                        <Tooltip title="Login" arrow>
+                            <IconButton color="inherit" onClick={handleLoginClick}
+                                sx={{
+                                    display: isSmallScreen ? 'none' : 'block',
+                                }}
+                            >
+                                <LoginIcon />
+                            </IconButton>
+                        </Tooltip>
+
                     )}
-                    <IconButton color="inherit" onClick={handleGoIndex}>
-                        <Home />
-                    </IconButton>
-                    <IconButton color="inherit" onClick={toggleMenu}>
-                        <MenuIcon />
-                    </IconButton>
-                </Toolbar>
-            </AppBar>
-            {/* Menú lateral */}
-            <MenuPrincipal open={showMenu} toggleMenu={toggleMenu} user={user} /> {/* Pasamos las props necesarias al MenuPrincipal */}
-        </>
+                    <Tooltip title="Home" arrow>
+                        <IconButton color="inherit" onClick={handleGoIndex}
+                            sx={{
+                                display: isSmallScreen ? 'none' : 'block',
+                            }}
+                        >
+                            <Home />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Menu" arrow>
+                        <IconButton color="inherit" onClick={toggleMenu}>
+                            <MenuIcon />
+                        </IconButton>
+                    </Tooltip>
+                    {/* Menú lateral */}
+                    <MenuPrincipal open={showMenu} toggleMenu={toggleMenu} user={user} onLogout={onLogout} toggleDarkMode={toggleDarkMode} darkMode={darkMode} usuario={usuario} />
+                </Box>
+            </Container>
+        </Box>
+
     );
 };
 

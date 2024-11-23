@@ -54,6 +54,10 @@ const App = () => {
                 onLogout={handleLogout}
                 toggleDarkMode={toggleDarkMode}
                 darkMode={darkMode}
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                }}
             />
             <Container component="main" sx={{ mt: 2, mb: 2, flexGrow: 1 }}>
                 {children}

@@ -1,57 +1,121 @@
-import React from 'react';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';  // Importa el componente Link
-import { useMediaQuery } from '@mui/material';
+import React, { useState } from "react";
+import { Box, Link, Typography, IconButton, useTheme, Container, useMediaQuery } from '@mui/material';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
-const Footer = () => {
-    const isMobile = useMediaQuery('(max-width: 600px)'); // Detecta si es un dispositivo móvil
+const ResponsiveFooter = () => {
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+    const [showLinks, setShowLinks] = useState(false);
+
+    const toggleLinks = () => {
+        setShowLinks((prev) => !prev);
+    };
 
     return (
         <Box
             component="footer"
+            bgcolor="primary.main"
+            color="white"
+            p={2}
+            mt={2}
+            textAlign="center"
             sx={{
-                py: 3,
-                px: 2,
-                mt: 'auto',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                textAlign: 'center',
-                backgroundColor: '#921F45',
-                color: '#fff',
-                bottom: 0,       
-                left: 0,
-                right: 0,
+                boxShadow: theme.custom.boxShadow, // Aplica el boxShadow solo en modo oscuro
             }}
         >
-            <Box 
-                sx={{ 
-                    display: 'flex',
-                    flexDirection: isMobile ? 'column' : 'row',
-                    justifyContent: 'space-between',
-                    gap: 2 
+            <Container maxWidth="lg"
+                sx={{
+                    '@media (min-width: 600px)': {
+                        paddingLeft: 0, // Elimina el padding a partir de 600px
+                        paddingRight: 0, // Elimina el padding a partir de 600px
+                    },
+                    '@media (min-width: 1200px)': {
+                        maxWidth: "none",
+                    },
                 }}
             >
-                <Link href="/privacy-policy" sx={{ color: '#fff', textDecoration: 'none' }}>
-                    Política de Privacidad
-                </Link>
-                <Link href="/terms-conditions" sx={{ color: '#fff', textDecoration: 'none' }}>
-                    Términos y Condiciones
-                </Link>
-                <Link href="/legal-disclaimer" sx={{ color: '#fff', textDecoration: 'none' }}>
-                    Deslinde Legal
-                </Link>
-                <Link href="/about" sx={{ color: '#fff', textDecoration: 'none' }}>
-                    Acerca de...
-                </Link>
-            </Box>
-            <Typography variant={isMobile ? 'body2' : 'body1'}>
-                Universidad Tecnológica de la Huasteca Hidalguense
-            </Typography>
-        </Box>
+                <Box>
+                    {isSmallScreen ? (
+                        <Box>
+                            {/* Texto y flecha */}
+                            <Box display="flex" alignItems="center" justifyContent="center">
+
+                                <Typography variant={"h7"}>
+                                    Universidad Tecnológica de la Huasteca Hidalguense
+                                </Typography>
+
+                                <IconButton onClick={toggleLinks} color="inherit">
+                                    {showLinks ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                </IconButton>
+                            </Box>
+                            {/* Enlaces en columna */}
+                            {showLinks && (
+                                <Box
+                                    display="flex"
+                                    flexDirection="column"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    gap={1}
+                                    mt={1}
+                                >
+                                    <Link href="/privacy-policy" variant={"h7"} sx={{ color: "#fff", textDecoration: "none" }}>
+                                        Política de Privacidad
+                                    </Link>
+                                    <Link href="/terms-conditions" variant={"h7"} sx={{ color: "#fff", textDecoration: "none" }}>
+                                        Términos y Condiciones
+                                    </Link>
+                                    <Link href="/legal-disclaimer" variant={"h7"} sx={{ color: "#fff", textDecoration: "none" }}>
+                                        Deslinde Legal
+                                    </Link>
+                                    <Link href="/about"  variant={"h7"} sx={{ color: "#fff", textDecoration: "none" }}>
+                                        Acerca de...
+                                    </Link>
+                                </Box>
+                            )}
+                        </Box>
+
+                    ) : (
+
+                        <Box
+                            display="flex"
+                            flexDirection={isSmallScreen ? "column" : "row"}
+                            justifyContent="space-between"
+                            alignItems="center"
+                            gap={1}
+                        >
+
+                            <Typography variant={"h7"}>
+                                Universidad Tecnológica de la Huasteca Hidalguense
+                            </Typography>
+
+
+                            <Box
+                                display="flex"
+                                flexDirection={isSmallScreen ? "column" : "row"}
+                                gap={1}
+                                alignItems="center"
+                            >
+                                <Link href="/privacy-policy" variant={"h7"} sx={{ color: '#fff', textDecoration: 'none' }}>
+                                    Política de Privacidad
+                                </Link>
+                                <Link href="/terms-conditions" variant={"h7"} sx={{ color: '#fff', textDecoration: 'none' }}>
+                                    Términos y Condiciones
+                                </Link>
+                                <Link href="/legal-disclaimer" variant={"h7"} sx={{ color: '#fff', textDecoration: 'none' }}>
+                                    Deslinde Legal
+                                </Link>
+                                <Link href="/about" variant={"h7"} sx={{ color: '#fff', textDecoration: 'none' }}>
+                                    Acerca de...
+                                </Link>
+                            </Box>
+                        </Box>
+                    )}
+                </Box>
+            </Container >
+        </Box >
+
     );
 };
 
-export default Footer;
+export default ResponsiveFooter;

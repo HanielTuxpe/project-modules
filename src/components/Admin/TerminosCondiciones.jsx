@@ -492,7 +492,7 @@ const PoliticasPrivacidad = () => {
                         }}
                     >
                         <CardContent>
-                            <Typography variant="h5" color="primary" gutterBottom>
+                            <Typography variant="h6" gutterBottom>
                                 {isEditing ? 'Editar Termino' : 'Agregar Nuevo Termino'}
                             </Typography>
                             <TextField
@@ -528,14 +528,18 @@ const PoliticasPrivacidad = () => {
                         }}
                     >
                         <CardContent>
-                            <Typography variant="h5" color="primary" gutterBottom>
+                            <Typography variant="h6" gutterBottom>
                                 Secciones
                             </Typography>
                             <List sx={{ marginTop: '20px' }}>
                                 {sections.map((section, index) => (
                                     <ListItem key={index}>
                                         <ListItemText
-                                            primary={`Titulo: ${section.titulo_seccion}`}
+                                            primary={
+                                                <Typography variant="body2" color="textSecondary" gutterBottom>
+                                                    Titulo: ${section.titulo_seccion}
+                                                </Typography>
+                                            }
                                             secondary={`Descripción: ${section.description}`}
                                         />
 
@@ -575,7 +579,11 @@ const PoliticasPrivacidad = () => {
                             <List>
                                 {newSectionList.map((item, index) => (
                                     <ListItem key={index}>
-                                        <ListItemText primary={item} />
+                                        <ListItemText primary={
+                                            <Typography variant="body2" color="textSecondary" gutterBottom>
+                                                ${item}
+                                            </Typography>
+                                        } />
 
 
                                         <Tooltip title="Editar Item" arrow>
@@ -602,7 +610,7 @@ const PoliticasPrivacidad = () => {
                                 fullWidth
                                 sx={{ marginBottom: '10px' }}
                             />
-                            <Button variant="contained" color="secondary" onClick={addListItem}>
+                            <Button variant="contained" color="primary" onClick={addListItem}>
                                 {editingListItemIndex !== null ? 'Actualizar Item' : 'Agregar Item'}
                             </Button>
                             <Button
@@ -620,9 +628,10 @@ const PoliticasPrivacidad = () => {
                             borderRadius: '16px',
                             boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
                             padding: '20px',
+                            marginTop: '2%',
                         }}
                     >
-                        <Typography variant="h5" color="primary" gutterBottom>
+                        <Typography variant="h6" gutterBottom>
                             Agregar Archivo De Terminos
                         </Typography>
 
@@ -673,7 +682,7 @@ const PoliticasPrivacidad = () => {
 
 
                 {/* vista de todas las políticas */}
-                <Box sx={{ flex: 1, overflowY: 'auto' }}>
+                <Box sx={{ flex: 1, overflowY: 'auto', marginLeft: '2%' }}>
                     <Card
                         sx={{
                             borderRadius: '16px',
@@ -681,7 +690,7 @@ const PoliticasPrivacidad = () => {
                         }}
                     >
                         <CardContent>
-                            <Typography variant="h5" color="primary" gutterBottom>
+                            <Typography variant="h6" gutterBottom>
                                 Terminos y Condiciones
                             </Typography>
                             <List>
@@ -744,7 +753,11 @@ const PoliticasPrivacidad = () => {
 
 
                                             <ListItemText
-                                                primary={policy.titulo_termino}
+                                                primary={
+                                                    <Typography variant="h6" >
+                                                        {policy.titulo_termino}
+                                                    </Typography>
+                                                }
                                                 secondary={
                                                     <Box>
                                                         {policy.secciones &&

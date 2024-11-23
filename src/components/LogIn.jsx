@@ -41,7 +41,7 @@ const Login = ({ onLogin }) => {
             });
 
             // Si el reCAPTCHA es exitoso, proceder a validar las credenciales de usuario
-            const loginResponse = await axios.post('https://prj-server.onrender.com/login', {
+            const loginResponse = await axios.post('http://localhost:3001/login', {
                 username,
                 password,
                 userType,
@@ -261,11 +261,11 @@ const Login = ({ onLogin }) => {
                         </Button>
 
                         <Typography variant="body2" align="center">
-                            <Link href="/forgot-password" sx={{ mr: 1, fontSize: 18, color: '#fff' }}>
+                            <Link href="/forgot-password" variant="h5" sx={{ mr: 1, fontSize: 18, color: '#fff' }}>
                                 ¿Olvidaste tu contraseña?
                             </Link>
                             O &nbsp;
-                            <Link href="/SignUp" sx={{ mr: 1, fontSize: 18, color: '#fff' }}>
+                            <Link href="/SignUp" variant="h5" sx={{ mr: 1, fontSize: 18, color: '#fff' }}>
                                 Regístrate
                             </Link>
                         </Typography>

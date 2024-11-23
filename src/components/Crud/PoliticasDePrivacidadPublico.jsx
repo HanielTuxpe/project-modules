@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
     Box,
+    CssBaseline,
     Card,
     CardContent,
     Typography,
@@ -8,12 +9,15 @@ import {
     ListItem,
     ListItemText,
     Button,
+    useTheme,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const PoliticasPublica = () => {
     const [items, setItems] = useState([]);
+    const theme = useTheme();
+
 
     // Obtener políticas desde la API
     useEffect(() => {
@@ -65,26 +69,32 @@ const PoliticasPublica = () => {
     };
 
     return (
+        
         <Box sx={{ flex: 1, overflowY: 'auto' }}>
-            <Card sx={{ borderRadius: '16px', boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)' }}>
+            <Card sx={{
+                borderRadius: '16px',
+                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease-in-out',
+                backgroundColor: theme.palette.paper, // Fondo dinámico
+            }}>
                 <CardContent>
-                    <Typography variant="h5" sx={{ color: 'black' }} gutterBottom>
+                    <Typography variant="h6" gutterBottom>
                         Políticas de Privacidad
                     </Typography>
                     <List>
                         {items.map((policy) => (
                             <ListItem key={policy._id} alignItems="flex-start">
                                 <Box sx={{ width: '100%' }}>
-                                    <Typography variant="subtitle1" sx={{ color: 'black' }} gutterBottom>
+                                    <Typography variant="subtitle1" gutterBottom>
                                         {policy.titulo_politica}
                                     </Typography>
                                     <Box>
                                         {policy.secciones && policy.secciones.map((section) => (
                                             <Box key={section._id} mb={2}>
-                                                <Typography variant="body1" sx={{ color: 'black', marginBottom: '10px' }}>
+                                                <Typography variant="body2" sx={{ marginBottom: '10px' }}>
                                                     Sección: {section.titulo_seccion}
                                                 </Typography>
-                                                <Typography variant="body1" sx={{ color: 'black', marginBottom: '10px' }}>
+                                                <Typography variant="body2" sx={{ marginBottom: '10px' }}>
                                                     Descripción: {section.description}
                                                 </Typography>
                                                 <List dense>
@@ -99,7 +109,7 @@ const PoliticasPublica = () => {
 
                                         {policy.Archivo && Array.isArray(policy.Archivo) && policy.Archivo[0] && (
                                             <Box>
-                                                <Typography variant="body2" sx={{ color: 'black' }}>
+                                                <Typography variant="body2" >
                                                     Archivo adjunto: {policy.Archivo[0].nombre}
                                                 </Typography>
                                                 <Box sx={{ display: 'flex', gap: '10px', marginTop: '10px' }}>

@@ -68,23 +68,23 @@ const PoliticasPublica = () => {
         <Box sx={{ flex: 1, overflowY: 'auto' }}>
             <Card sx={{ borderRadius: '16px', boxShadow: '0 6px 18px rgba(0, 0, 0, 0.1)' }}>
                 <CardContent>
-                    <Typography variant="h5" sx={{ color: 'black' }} gutterBottom>
+                    <Typography variant="h6" gutterBottom>
                     Deslinde Legal
                     </Typography>
                     <List>
                         {items.map((policy) => (
                             <ListItem key={policy._id} alignItems="flex-start">
                                 <Box sx={{ width: '100%' }}>
-                                    <Typography variant="subtitle1" sx={{ color: 'black' }} gutterBottom>
+                                    <Typography variant="subtitle1"  gutterBottom>
                                         {policy.titulo_deslinde}
                                     </Typography>
                                     <Box>
                                         {policy.secciones && policy.secciones.map((section) => (
                                             <Box key={section._id} mb={2}>
-                                                <Typography variant="body1" sx={{ color: 'black', marginBottom: '10px' }}>
+                                                <Typography variant="body2" sx={{ marginBottom: '10px' }}>
                                                     Sección: {section.titulo_seccion}
                                                 </Typography>
-                                                <Typography variant="body1" sx={{ color: 'black', marginBottom: '10px' }}>
+                                                <Typography variant="body2" sx={{ marginBottom: '10px' }}>
                                                     Descripción: {section.description}
                                                 </Typography>
                                                 <List dense>
@@ -99,7 +99,7 @@ const PoliticasPublica = () => {
 
                                         {policy.Archivo && Array.isArray(policy.Archivo) && policy.Archivo[0] && (
                                             <Box>
-                                                <Typography variant="body2" sx={{ color: 'black' }}>
+                                                <Typography variant="body2" >
                                                     Archivo adjunto: {policy.Archivo[0].nombre}
                                                 </Typography>
                                                 <Box sx={{ display: 'flex', gap: '10px', marginTop: '10px' }}>

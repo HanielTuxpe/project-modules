@@ -11,10 +11,6 @@ const Index = () => {
     const [usersConnected, setusersConnected] = useState(0); 
     const isMobile = useMediaQuery('(max-width: 600px)');
 
-    
-   
-
-
     useEffect(() => {
         // Cargar tema guardado en localStorage
         const savedTheme = localStorage.getItem('darkMode') === 'true';
@@ -32,38 +28,39 @@ const Index = () => {
     }, []);
 
     return (
-
         <Container
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
                 m: 0,
+                marginTop: '5%',
                 width: '100%',
-                maxWidth: '100vw', // Para asegurarse que no exceda el ancho de la ventana
+                maxWidth: '100vw', // No exceder el ancho de la ventana
             }}
         >
-           
+            {/* Contenedor del Banner */}
             <Box
                 sx={{
                     display: 'flex',
                     flexDirection: 'row',
                     alignItems: 'center',
                     width: '100%',
-                    height: 'auto',
                 }}
             >
                 <img
                     src={banner}
                     alt="Banner-PODAI"
                     style={{
-                        width: '100%',   // Ancho responsivo al 100% del contenedor padre
-                        maxWidth: '100vw', // No exceder el ancho de la ventana
-                        height: 'auto',  // Mantiene la proporción de la imagen
-                        boxShadow: '4px 10px 20px rgba(0, 0, 0, 0.9)', // Sombra
+                        width: '100%', // Ajusta al ancho del contenedor
+                        maxWidth: '100vw', // Restringe el ancho al tamaño de la ventana
+                        height: 'auto', // Mantiene las proporciones
+                        boxShadow: '4px 10px 20px rgba(0, 0, 0, 0.9)',
                         borderRadius: 10,
                     }}
                 />
             </Box>
+    
+            {/* Contenedores Responsivos */}
             <Box
                 sx={{
                     display: 'flex',
@@ -71,19 +68,20 @@ const Index = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     width: '100%',
-                    gap: isMobile ? 2 : 10,
+                    gap: isMobile ? 2 : 10, // Espaciado dinámico
+                    mt: 5,
                 }}
             >
+                {/* Contenedor: Visitas Totales */}
                 <Box
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        width: isMobile ? '70%' : '30%',
-                        height: isMobile ? '20vh' : '30vh',
+                        flex: isMobile ? '1 1 auto' : '0 1 30%', // Adaptación flexible
+                        padding: 2, // Espaciado interno dinámico
                         background: '#BC955B',
-                        mt: 5,
-                        boxShadow: '4px 10px 20px rgba(0, 0, 0, 0.9)', // Sombra
+                        boxShadow: '4px 10px 20px rgba(0, 0, 0, 0.9)',
                         borderRadius: 2,
                     }}
                 >
@@ -91,8 +89,7 @@ const Index = () => {
                         sx={{
                             color: '#fff',
                             fontSize: 20,
-                            margin: 2,
-                            textAlign: 'center'
+                            textAlign: 'center',
                         }}
                     >
                         Visitas totales desde su activación
@@ -100,22 +97,23 @@ const Index = () => {
                     <Typography
                         sx={{
                             color: '#fff',
-                            fontSize: 50, // Tamaño grande para resaltar la cantidad
+                            fontSize: 50,
                         }}
                     >
                         {visits}
                     </Typography>
                 </Box>
+    
+                {/* Contenedor: Usuarios Conectados */}
                 <Box
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        width: isMobile ? '70%' : '30%',
-                        height: isMobile ? '20vh' : '30vh',
+                        flex: isMobile ? '1 1 auto' : '0 1 30%', // Adaptación flexible
+                        padding: 2, // Espaciado interno dinámico
                         background: '#BC955B',
-                        mt: 5,
-                        boxShadow: '4px 10px 20px rgba(0, 0, 0, 0.9)', // Sombra
+                        boxShadow: '4px 10px 20px rgba(0, 0, 0, 0.9)',
                         borderRadius: 2,
                     }}
                 >
@@ -123,8 +121,7 @@ const Index = () => {
                         sx={{
                             color: '#fff',
                             fontSize: 20,
-                            margin: 2,
-                            textAlign: 'center'
+                            textAlign: 'center',
                         }}
                     >
                         Usuarios Conectados
@@ -141,6 +138,7 @@ const Index = () => {
             </Box>
         </Container>
     );
+    
 };
 
 export default Index;

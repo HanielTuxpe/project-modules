@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import { Drawer, List, ListItem, ListItemIcon, ListItemText, Typography, Box, IconButton, useTheme, useMediaQuery, Tooltip } from '@mui/material';
 import { TableChart } from '@mui/icons-material';
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import { obtenerTipoUsuario } from '../SessionService';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import LoginIcon from '@mui/icons-material/Login';
+import Home from '@mui/icons-material/Home';
 
 const drawerWidth = 240;
 
@@ -17,9 +22,11 @@ const StyledDrawer = styled(Drawer)(({ theme }) => ({
     },
 }));
 
-function SideMenu({ open, toggleMenu }) {
+function SideMenu({ open, toggleMenu, onLogout, toggleDarkMode, darkMode, usuario }) {
     const navigate = useNavigate();
     const [user, setUser] = useState(() => obtenerTipoUsuario()); // Inicializa el estado con el valor de la cookie
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
     useEffect(() => {
         // Ejecuta cada vez que el componente se renderiza
@@ -28,7 +35,25 @@ function SideMenu({ open, toggleMenu }) {
             setUser(savedUser); // Actualiza el estado solo si la cookie ha cambiado
         }
     }, [user]); // Se ejecuta siempre que el estado `user` cambie
-    
+
+
+    const handleLoginClick = () => {
+        navigate('/login');
+    };
+
+    const handleLogoutClick = () => {
+        onLogout();
+        navigate('/');
+    };
+
+    const handleGoIndex = () => {
+        // Verifica si hay un usuario almacenado
+        if (user) {
+            navigate('/index'); // Si hay usuario, navega a /index
+        } else {
+            navigate('/'); // Si no hay usuario, navega a /
+        }
+    };
 
     const handleCrudClick = () => {
         navigate('/Crud');
@@ -51,9 +76,55 @@ function SideMenu({ open, toggleMenu }) {
                         <ListItem>
                             <ListItemText primary="ADMINISTRADOR" style={{ color: '#ffffff' }} />
                         </ListItem>
+
                         <ListItem>
                             <ListItemText primary={`Bienvenido, ${user}`} style={{ color: '#ffffff' }} />
                         </ListItem>
+                        <Box display="flex" alignItems="center" justifyContent="center" gap={2} sx={{ flexGrow: 0, marginRight: "2%", }}>
+
+                            <Tooltip title="Modo" arrow>
+                                <IconButton color="inherit" onClick={toggleDarkMode}
+                                    sx={{
+                                        display: isSmallScreen ? 'block' : 'none',
+                                    }}
+                                >
+                                    {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+                                </IconButton>
+                            </Tooltip>
+
+
+                            {usuario ? (
+                                <Tooltip title="Exit" arrow>
+                                    <IconButton color="inherit" onClick={handleLogoutClick}
+                                        sx={{
+                                            display: isSmallScreen ? 'block' : 'none',
+                                        }}
+                                    >
+                                        <ExitToAppIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            ) : (
+                                <Tooltip title="Login" arrow>
+                                    <IconButton color="inherit" onClick={handleLoginClick}
+                                        sx={{
+                                            display: isSmallScreen ? 'block' : 'none',
+                                        }}
+                                    >
+                                        <LoginIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
+                            <Tooltip title="Home" arrow>
+                                <IconButton color="inherit" onClick={handleGoIndex}
+                                    sx={{
+                                        display: isSmallScreen ? 'block' : 'none',
+                                    }}
+                                >
+                                    <Home />
+                                </IconButton>
+                            </Tooltip>
+
+                        </Box>
                         <ListItem button onClick={handleCrudClick}>
                             <ListItemIcon>
                                 <TableChart style={{ color: '#c2c2c2' }} />
@@ -72,9 +143,60 @@ function SideMenu({ open, toggleMenu }) {
                         </ListItem>
                     </>
                 ) : (
-                    <ListItem>
-                        <ListItemText primary={`Por favor, inicie sesión${user ? `, ${user}` : ''}`} style={{ color: '#ffffff' }} />
-                    </ListItem>
+                    <>
+
+                        <ListItem>
+                            <ListItemText variant="body1" primary={`Por favor, inicie sesión${user ? `, ${user}` : ''}`} style={{ color: '#ffffff' }} />
+                        </ListItem>
+
+
+                        <Box display="flex" alignItems="center" justifyContent="center" gap={2} sx={{ flexGrow: 0, marginRight: "2%", }}>
+
+                            <Tooltip title="Modo" arrow>
+                                <IconButton color="inherit" onClick={toggleDarkMode}
+                                    sx={{
+                                        display: isSmallScreen ? 'block' : 'none',
+                                    }}
+                                >
+                                    {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+                                </IconButton>
+                            </Tooltip>
+
+
+                            {usuario ? (
+                                <Tooltip title="Exit" arrow>
+                                    <IconButton color="inherit" onClick={handleLogoutClick}
+                                        sx={{
+                                            display: isSmallScreen ? 'block' : 'none',
+                                        }}
+                                    >
+                                        <ExitToAppIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            ) : (
+                                <Tooltip title="Login" arrow>
+                                    <IconButton color="inherit" onClick={handleLoginClick}
+                                        sx={{
+                                            display: isSmallScreen ? 'block' : 'none',
+                                        }}
+                                    >
+                                        <LoginIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
+                            <Tooltip title="Home" arrow>
+                                <IconButton color="inherit" onClick={handleGoIndex}
+                                    sx={{
+                                        display: isSmallScreen ? 'block' : 'none',
+                                    }}
+                                >
+                                    <Home />
+                                </IconButton>
+                            </Tooltip>
+
+                        </Box>
+
+                    </>
                 )}
             </List>
         </StyledDrawer>

@@ -1,86 +1,229 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Box, Button, Card, CardContent, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, Typography, TextField, MenuItem, Grid } from '@mui/material';
+import { toast } from 'react-toastify';
+import { useTheme } from '@mui/material/styles';
 
 const BlockedUsers = () => {
-    const [usuariosBloqueados, setUsuariosBloqueados] = useState([]);
+    const [usuarios, setUsuarios] = useState([]);
+    const [filter, setFilter] = useState('all'); // Filtro: all, blocked, unblocked
+    const [config, setConfig] = useState(null); // Inicializar como null
+    const theme = useTheme(); // Obtén el tema global
 
+    // Obtener configuración global
     useEffect(() => {
-        // Función para obtener los datos de los usuarios bloqueados
-        const fetchBlockedUsers = async () => {
+        const fetchConfig = async () => {
             try {
-                const response = await axios.get(`https://prj-server.onrender.com/usuarios`); // Asegúrate de que tu API esté configurada
-                const blockedUsersData = response.data;
-                // Asignar los datos recibidos a los estados
-                setUsuariosBloqueados(blockedUsersData);
+                const response = await fetch('http://localhost:3001/GlobalConfiguracionUser');
+                if (!response.ok) {
+                    throw new Error('Error al obtener la configuración global');
+                }
+                const data = await response.json();
+                setConfig(data);
             } catch (error) {
-                console.error('Error al obtener los datos de usuarios bloqueados:', error);
+                toast.error('Error al obtener la configuración global');
+                //console.error(error);
             }
         };
 
-        fetchBlockedUsers();
+        fetchConfig();
     }, []);
 
-    // Haz que la función sea asincrónica
-    const resetIncidencias = async (usuarioId) => {
-        try {
-            const response = await fetch(`https://prj-server.onrender.com/usuarios/${usuarioId}/reset-intentos`, {
-                method: 'PATCH', // Método de la solicitud
-                headers: {
-                    'Content-Type': 'application/json', // Especifica el tipo de contenido
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`); // Manejo de errores si la respuesta no es exitosa
+    // Obtener lista de usuarios
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await fetch('http://localhost:3001/usuarios');
+                if (!response.ok) {
+                    throw new Error('Error al obtener los datos de usuarios');
+                }
+                const data = await response.json();
+                setUsuarios(data);
+            } catch (error) {
+                toast.error('Error al obtener los datos de usuarios');
+                //console.error(error);
             }
+        };
 
-            const data = await response.json(); // Parsear la respuesta como JSON
-            console.log('Usuario actualizado:', data);
-            // Aquí puedes actualizar el estado si es necesario
+        fetchUsers();
+    }, []);
+
+    // Guardar la configuración actualizada
+    const saveConfig = async () => {
+        try {
+            const response = await fetch('http://localhost:3001/GlobalConfiguracionUser', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(config),
+            });
+            if (!response.ok) {
+                throw new Error('Error al guardar la configuración');
+            }
+            toast.success('Configuración guardada con éxito');
         } catch (error) {
-            console.error('Error al actualizar el usuario:', error);
+            toast.error('Error al guardar la configuración');
+            //console.error(error);
         }
     };
 
-    return (
-        <>
-            <Box>
-                <Typography variant="h5" color="primary" gutterBottom>
-                    Usuarios Bloqueados
-                </Typography>
-            </Box>
+    // Desbloquear usuario manualmente
+    const desbloquearUsuario = async (usuarioId) => {
+        try {
+            const response = await fetch(`http://localhost:3001/usuarios/${usuarioId}/desbloquear`, {
+                method: 'PATCH',
+            });
+            if (!response.ok) {
+                throw new Error('Error al desbloquear el usuario');
+            }
+            toast.success('Usuario desbloqueado');
+            setUsuarios((prevUsuarios) =>
+                prevUsuarios.map((usuario) =>
+                    usuario._id === usuarioId ? { ...usuario, bloqueado: false, intentosFallidos: 0 } : usuario
+                )
+            );
+        } catch (error) {
+            toast.error('Error al desbloquear el usuario');
+            //console.error(error);
+        }
+    };
 
+    // Bloquear usuario manualmente
+    const bloquearUsuario = async (usuarioId) => {
+        try {
+            const response = await fetch(`http://localhost:3001/UsuarioBloqueado/${usuarioId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.mensaje || 'Error al bloquear el usuario');
+            }
+    
+            toast.success('usuario Bloqueado');
+    
+            // Actualizar el estado local
+            setUsuarios((prevUsuarios) =>
+                prevUsuarios.map((usuario) =>
+                    usuario._id === usuarioId ? { ...usuario, bloqueado: true } : usuario
+                )
+            );
+        } catch (error) {
+            toast.error(`Error al bloquear el usuario`);
+            //console.error('Detalles del error:', error);
+        }
+    };
+
+    // Filtrar usuarios
+    const handleFilterChange = (e) => setFilter(e.target.value);
+
+    const filteredUsers = usuarios.filter((usuario) => {
+        if (filter === 'blocked') return usuario.bloqueado;
+        if (filter === 'unblocked') return !usuario.bloqueado;
+        return true;
+    });
+
+    return (
+        <Box>
+            {/* Configuración de Seguridad */}
+            <Card sx={{ marginBottom: 3 }}>
+                <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                        Configuración de Seguridad
+                    </Typography>
+                    {config ? (
+                        <Box component="form" sx={{ display: 'flex', flexDirection: 'row', gap: 2 }}>
+                            <TextField
+                                label="Número máximo de intentos fallidos"
+                                type="number"
+                                value={config.maxIntentosFallidos}
+                                onChange={(e) =>
+                                    setConfig({ ...config, maxIntentosFallidos: parseInt(e.target.value, 10) })
+                                }
+                                InputProps={{ inputProps: { min: 1 } }}
+                                fullWidth
+                            />
+                            <TextField
+                                label="Tiempo de desbloqueo automático (minutos)"
+                                type="number"
+                                value={config.tiempoDesbloqueoAutomatico}
+                                onChange={(e) =>
+                                    setConfig({ ...config, tiempoDesbloqueoAutomatico: parseInt(e.target.value, 10) })
+                                }
+                                InputProps={{ inputProps: { min: 1 } }}
+                                fullWidth
+                            />
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={saveConfig}
+                                sx={{ alignSelf: 'flex-start' }}
+                                fullWidth
+                            >
+                                Guardar Configuración
+                            </Button>
+                            <TextField
+                                select
+                                label="Filtrar usuarios"
+                                value={filter}
+                                fullWidth
+                                onChange={handleFilterChange}
+                            >
+                                <MenuItem sx={{ color: theme.palette.text.primary }} value="all">Todos</MenuItem>
+                                <MenuItem  sx={{ color: theme.palette.text.primary }} value="blocked">Bloqueados</MenuItem>
+                                <MenuItem sx={{ color: theme.palette.text.primary }} value="unblocked">No bloqueados</MenuItem>
+                            </TextField>
+                        </Box>
+                    ) : (
+                        <Typography>Cargando configuración...</Typography>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* Lista de usuarios */}
             <Box>
-                {usuariosBloqueados.map((usuario) => (
+                <Typography variant="h6">Usuarios</Typography>
+                {filteredUsers.map((usuario) => (
                     <Card key={usuario._id} sx={{ marginBottom: 2 }}>
-                        <CardContent sx={{ backgroundColor: '#E1EDFF', borderRadius: 2 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <Box sx={{ flexGrow: 1 }}>
-                                    <Typography variant="h5" component="div" gutterBottom sx={{ color: 'black' }}>
-                                        Usuario: {usuario._doc.username} {/* Acceso a username */}
+                        <CardContent>
+                            <Grid container spacing={2} alignItems="center">
+                                <Grid item xs={4}>
+                                    <Typography variant="h6" gutterBottom>
+                                        Usuario: {usuario.username}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ color: 'black' }}>
-                                        Número de incidencias: {usuario._doc.intentosVerificacion} {/* Acceso a intentosVerificacion */}
+                                    <Typography variant="body2">Correo: {usuario.email}</Typography>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <Typography variant="body2">
+                                        Intentos fallidos: {usuario.intentosVerificacion}
                                     </Typography>
-                                </Box>
-                                <Box sx={{ flexGrow: 1 }}>
-                                    <Typography variant="h5" component="div" gutterBottom sx={{ color: 'black' }}>
-                                        Correo Electronico: {usuario._doc.email}
-                                    </Typography>
-                                </Box>
-                                <Button variant="contained" color="primary" onClick={() => {
-                                    console.log(usuario._doc._id); // Agrega este log para verificar el valor
-                                    resetIncidencias(usuario._doc._id);
-                                }}>
-                                    Resetear Contador
-                                </Button>
-                            </Box>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    {usuario.bloqueado ? (
+                                        <Button
+                                            variant="contained"
+                                            color="secondary"
+                                            onClick={() => desbloquearUsuario(usuario._id)}
+                                        >
+                                            Desbloquear Usuario
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            variant="contained"
+                                            color="error"
+                                            onClick={() => bloquearUsuario(usuario._id)}
+                                        >
+                                            Bloquear Usuario
+                                        </Button>
+                                    )}
+                                </Grid>
+                            </Grid>
                         </CardContent>
                     </Card>
                 ))}
             </Box>
-        </>
+        </Box>
     );
 };
 
