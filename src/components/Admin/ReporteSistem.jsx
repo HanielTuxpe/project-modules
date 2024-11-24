@@ -13,7 +13,7 @@ const ReportesErroresAdmin = () => {
   useEffect(() => {
     const fetchErrores = async () => {
       try {
-        const response = await fetch('http://localhost:3001/ReportesSystem');
+        const response = await fetch('https://prj-server.onrender.com/ReportesSystem');
         if (!response.ok) {
           throw new Error('Error al obtener los datos de la API.');
         }
@@ -43,7 +43,7 @@ const ReportesErroresAdmin = () => {
       >
         {/* Título */}
         <Typography variant="h4" textAlign="center" sx={{ mb: 2, color: theme.palette.text.primary }}>
-          Reportes de Errores del Sistema
+          Reportes del Sistema
         </Typography>
 
         {/* Carga de datos */}
@@ -85,7 +85,7 @@ const ReportesErroresAdmin = () => {
                     }}
                   >
                     <Typography variant="h6" color="error" fontWeight="bold">
-                      {`Error ${index + 1}`}
+                      {`Reporte ${index + 1}`}
                     </Typography>
                     <Typography
                       variant="subtitle2"
