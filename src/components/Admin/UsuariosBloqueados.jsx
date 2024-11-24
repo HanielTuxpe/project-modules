@@ -13,7 +13,7 @@ const BlockedUsers = () => {
     useEffect(() => {
         const fetchConfig = async () => {
             try {
-                const response = await fetch('http://localhost:3001/GlobalConfiguracionUser');
+                const response = await fetch('https://prj-server.onrender.com/GlobalConfiguracionUser');
                 if (!response.ok) {
                     throw new Error('Error al obtener la configuración global');
                 }
@@ -32,7 +32,7 @@ const BlockedUsers = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://localhost:3001/usuarios');
+                const response = await fetch('https://prj-server.onrender.com/usuarios');
                 if (!response.ok) {
                     throw new Error('Error al obtener los datos de usuarios');
                 }
@@ -50,7 +50,7 @@ const BlockedUsers = () => {
     // Guardar la configuración actualizada
     const saveConfig = async () => {
         try {
-            const response = await fetch('http://localhost:3001/GlobalConfiguracionUser', {
+            const response = await fetch('https://prj-server.onrender.com/GlobalConfiguracionUser', {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ const BlockedUsers = () => {
     // Desbloquear usuario manualmente
     const desbloquearUsuario = async (usuarioId) => {
         try {
-            const response = await fetch(`http://localhost:3001/usuarios/${usuarioId}/desbloquear`, {
+            const response = await fetch(`https://prj-server.onrender.com/usuarios/${usuarioId}/desbloquear`, {
                 method: 'PATCH',
             });
             if (!response.ok) {
@@ -91,7 +91,7 @@ const BlockedUsers = () => {
     // Bloquear usuario manualmente
     const bloquearUsuario = async (usuarioId) => {
         try {
-            const response = await fetch(`http://localhost:3001/UsuarioBloqueado/${usuarioId}`, {
+            const response = await fetch(`https://prj-server.onrender.com/UsuarioBloqueado/${usuarioId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
             });

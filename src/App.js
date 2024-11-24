@@ -6,6 +6,7 @@ import Registro from './components/SignUp';
 import Login from './components/LogIn';
 import Crud from './components/Admin/Crud';
 import Usuarios from './components/Admin/UsuariosBloqueados';
+import ReporteSistem from './components/Admin/ReporteSistem';
 import BuscarRuta from './components/Index';
 import ForgotPassword from './components/ForgotPassword';
 import Header from './components/Header';
@@ -82,6 +83,7 @@ const App = () => {
                         <Route path="/index" element={usuario ? <BuscarRuta /> : <Navigate to="/" />} />
                         <Route path="/Crud" element={usuario ? <Crud darkMode={darkMode} /> : <Navigate to="/" />} />
                         <Route path="/Usuarios" element={usuario ? <Usuarios darkMode={darkMode} /> : <Navigate to="/" />} />
+                        <Route path="/ReporteSistem" element={usuario ? <ReporteSistem darkMode={darkMode} /> : <Navigate to="/" />} />
 
                         {/* Páginas informativas públicas */}
                         <Route

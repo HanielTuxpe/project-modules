@@ -9,10 +9,11 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import LoginIcon from '@mui/icons-material/Login';
 import Home from '@mui/icons-material/Home';
+import { Business, People, Report } from '@mui/icons-material';
 
 const drawerWidth = 240;
 
-const StyledDrawer = styled(Drawer)(({ theme }) => ({
+const StyledDrawer = styled(Drawer)(() => ({
     width: drawerWidth,
     flexShrink: 0,
     '& .MuiDrawer-paper': {
@@ -61,6 +62,10 @@ function SideMenu({ open, toggleMenu, onLogout, toggleDarkMode, darkMode, usuari
 
     const handleUsuariosClick = () => {
         navigate('/Usuarios');
+    };
+
+    const handleReporteSistemClick = () => {
+        navigate('/ReporteSistem');
     };
 
     return (
@@ -125,22 +130,34 @@ function SideMenu({ open, toggleMenu, onLogout, toggleDarkMode, darkMode, usuari
                             </Tooltip>
 
                         </Box>
+
                         <ListItem button onClick={handleCrudClick}>
                             <ListItemIcon>
-                                <TableChart style={{ color: '#c2c2c2' }} />
+                                <Business style={{ color: '#c2c2c2' }} />
                             </ListItemIcon>
                             <Typography>
                                 INFORMACIÓN DE LA EMPRESA
                             </Typography>
                         </ListItem>
+
                         <ListItem button onClick={handleUsuariosClick}>
                             <ListItemIcon>
-                                <TableChart style={{ color: '#c2c2c2' }} />
+                                <People style={{ color: '#c2c2c2' }} />
                             </ListItemIcon>
                             <Typography>
                                 USUARIOS
                             </Typography>
                         </ListItem>
+
+                        <ListItem button onClick={handleReporteSistemClick}>
+                            <ListItemIcon>
+                                <Report style={{ color: '#c2c2c2' }} />
+                            </ListItemIcon>
+                            <Typography>
+                                REPORTES DE SISTEMA
+                            </Typography>
+                        </ListItem>
+
                     </>
                 ) : (
                     <>
