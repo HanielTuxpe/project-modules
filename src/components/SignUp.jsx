@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Box, IconButton } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, IconButton, Checkbox, FormControlLabel, LinearProgress } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -18,16 +18,57 @@ const Registro = () => {
     const [isRegistered, setIsRegistered] = useState(false);
     const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
     const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Estado para mostrar/ocultar confirmación de contraseña
+    const [acceptPolicies, setAcceptPolicies] = useState(false); // Estado para el checkbox
     const navigate = useNavigate();
     const isMobile = useMediaQuery('(max-width: 600px)');
 
     const passwordStrength = zxcvbn(password);
+    const strengthPercent = (passwordStrength.score / 4) * 100; // Convertir la puntuación a porcentaje
+
+    // Función para calcular el progreso de la fortaleza de la contraseña
+    const calculatePasswordProgress = () => {
+        let progress = 0;
+
+        // Validación de longitud mínima
+        if (password.length >= 8) progress += 20;
+
+        // Validación de al menos una letra
+        if (/[a-z]/.test(password)) progress += 20;
+
+        // Validación de al menos una letra Mayuscula
+        if (/[A-Z]/.test(password)) progress += 20;
+
+        // Validación de al menos un número
+        if (/\d/.test(password)) progress += 20;
+
+        // Validación de al menos un carácter especial
+        if (/[!@#$%^&*()_+.,;:]/.test(password)) progress += 20;
+
+        return progress;
+    };
+
+    const passwordProgress = calculatePasswordProgress();
+
+    const getProgressColor = () => {
+        if (passwordProgress === 0) return '#FFFFFF'; // Blanco
+        if (passwordProgress === 20) return '#FF0000'; // Rojo
+        if (passwordProgress === 40) return '#FFFF00'; // Amarillo
+        if (passwordProgress === 60) return '#FFA500'; // Entre amarillo y anaranjado
+        if (passwordProgress === 80) return '#FF7F50'; // Anaranjado
+        if (passwordProgress === 100) return '#00FF00'; // Verde
+        return '#FFFFFF'; // Color por defecto
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!username.trim() || !password.trim() || !email.trim() || !confirmPassword.trim()) {
             toast.warning('Por favor, complete todos los campos.');
+            return;
+        }
+
+        if (!acceptPolicies) {
+            toast.warning('Debes aceptar las políticas de privacidad para continuar.');
             return;
         }
 
@@ -93,14 +134,6 @@ const Registro = () => {
                 toast.warning(error.response.data.message);
             }
         }
-    };
-
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
-    };
-
-    const toggleConfirmPasswordVisibility = () => {
-        setShowConfirmPassword(!showConfirmPassword);
     };
 
     return (
@@ -197,59 +230,70 @@ const Registro = () => {
                                     margin="normal"
                                     required
                                     fullWidth
-                                    name="password"
                                     label="Contraseña"
                                     type={showPassword ? 'text' : 'password'}
-                                    id="password"
-                                    autoComplete="current-password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     InputProps={{
                                         endAdornment: (
-                                            <IconButton onClick={togglePasswordVisibility} edge="end">
+                                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                                                 {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                                             </IconButton>
                                         )
                                     }}
                                 />
+                                <LinearProgress
+                                    variant="determinate"
+                                    value={passwordProgress}
+                                    sx={{
+                                        height: 10,
+                                        borderRadius: 5,
+                                        mt: 2,
+                                        backgroundColor: '#E0E0E0',
+                                        '& .MuiLinearProgress-bar': {
+                                            backgroundColor: getProgressColor(),
+                                        },
+                                    }}
+                                />
+                                <Typography variant="body1" sx={{ mt: 1 }}>
+                                    {passwordProgress === 0 && ''}
+                                    {passwordProgress === 20 && 'Muy débil'}
+                                    {passwordProgress === 40 && 'Débil'}
+                                    {passwordProgress === 60 && 'Moderada'}
+                                    {passwordProgress === 80 && 'Fuerte'}
+                                    {passwordProgress === 100 && 'Contraseña segura'}
+                                </Typography>
                                 <TextField
                                     variant="outlined"
                                     margin="normal"
                                     required
                                     fullWidth
-                                    name="confirmPassword"
                                     label="Confirmar Contraseña"
                                     type={showConfirmPassword ? 'text' : 'password'}
-                                    id="confirmPassword"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     InputProps={{
                                         endAdornment: (
-                                            <IconButton onClick={toggleConfirmPasswordVisibility} edge="end">
+                                            <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
                                                 {showConfirmPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                                             </IconButton>
                                         )
                                     }}
                                 />
-                                <Typography
-                                    variant="body2"
-                                    sx={{
-                                        fontSize: 18,
-                                        color: 
-                                            passwordStrength.score === 0 ? 'red' :
-                                            passwordStrength.score === 1 ? 'orange' :
-                                            passwordStrength.score === 2 ? 'yellow' :
-                                            passwordStrength.score === 3 ? 'green' :
-                                            passwordStrength.score === 4 ? 'darkgreen' :
-                                            'text.secondary'
-                                    }}
-                                >
-                                    {passwordStrength.score === 0 && 'Muy débil'}
-                                    {passwordStrength.score === 1 && 'Débil'}
-                                    {passwordStrength.score === 2 && 'Moderada'}
-                                    {passwordStrength.score === 3 && 'Fuerte'}
-                                    {passwordStrength.score === 4 && 'Muy fuerte'}
-                                </Typography>
+
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={acceptPolicies}
+                                            onChange={(e) => setAcceptPolicies(e.target.checked)}
+                                        />
+                                    }
+                                    label={
+                                        <Typography variant="body1" >
+                                            Acepto las <a href="/privacy-policy">Políticas de Privacidad</a>.
+                                        </Typography>
+                                    }
+                                />
 
                                 <Button
                                     type="submit"

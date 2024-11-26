@@ -3,6 +3,8 @@ import { Box, Button, Card, CardContent, Typography, TextField, MenuItem, Grid }
 import { toast } from 'react-toastify';
 import { useTheme } from '@mui/material/styles';
 
+import DOMPurify from 'dompurify';
+
 const BlockedUsers = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [filter, setFilter] = useState('all'); // Filtro: all, blocked, unblocked
@@ -50,13 +52,21 @@ const BlockedUsers = () => {
     // Guardar la configuración actualizada
     const saveConfig = async () => {
         try {
+            // Sanitizar cada clave-valor dentro del objeto 'config'
+            const sanitizedConfig = {};
+            Object.keys(config).forEach((key) => {
+                const value = config[key];
+                sanitizedConfig[key] = typeof value === 'string' ? DOMPurify.sanitize(value) : value;
+            });
+    
             const response = await fetch('https://prj-server.onrender.com/GlobalConfiguracionUser', {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(config),
+                body: JSON.stringify(sanitizedConfig), // Enviar configuración sanitizada
             });
+    
             if (!response.ok) {
                 throw new Error('Error al guardar la configuración');
             }

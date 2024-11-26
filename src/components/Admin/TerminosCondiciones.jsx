@@ -6,6 +6,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DownloadIcon from '@mui/icons-material/Download';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import DOMPurify from 'dompurify';
 
 import { toast } from 'react-toastify';
 import { useReducer } from 'react';
@@ -110,45 +111,56 @@ const PoliticasPrivacidad = () => {
     };
 
     const addPolicy = async () => {
-        if (newPolicy.trim() === '' || sections.length === 0) {
-            toast.warning('Por favor, ingresa un nombre para el terminos y agrega al menos una sección.');
+        // Sanitizar los valores de entrada
+        const sanitizedPolicyName = DOMPurify.sanitize(newPolicy.trim());
+        const sanitizedSections = sections.map(section => ({
+            ...section,
+            titulo_seccion: DOMPurify.sanitize(section.titulo_seccion.trim()), // Sanitiza el título de la sección
+            description: DOMPurify.sanitize(section.description.trim()), // Sanitiza la descripción
+            list: section.list.map(item => DOMPurify.sanitize(item.trim())), // Sanitiza cada elemento de la lista
+        }));
+    
+        // Validación
+        if (sanitizedPolicyName === '' || sanitizedSections.length === 0) {
+            toast.warning('Por favor, ingresa un nombre para el termino y agrega al menos una sección.');
             return;
         }
-
-        const countResponse = await fetch(`${API_URL}/count`); // Endpoint para contar políticas
-        const { count } = await countResponse.json();
-        const version = count + 1;
-
-
-        // Crear un objeto FormData para enviar tanto texto como archivo
-        const formData = new FormData();
-        formData.append('titulo_termino', newPolicy);
-        formData.append('secciones', JSON.stringify(sections));
-
-        // Configura los campos adicionales
-        formData.append('fechaSubida', new Date().toISOString()); // Fecha actual en formato ISO
-        formData.append('version', version); // Puedes ajustar la versión inicial
-        formData.append('estadoVigencia', true); // Estado de vigencia por defecto
-        formData.append('estado', true); // Estado por defecto
-
-        // Verificar si se ha seleccionado un archivo para agregarlo
-        if (file) {
-            formData.append('archivo', file); // 'Archivo' es el nombre del campo que el servidor espera
-        }
-
+    
         try {
+            // Contar políticas existentes
+            const countResponse = await fetch(`${API_URL}/count`); // Endpoint para contar políticas
+            const { count } = await countResponse.json();
+            const version = count + 1;
+    
+            // Crear un objeto FormData para enviar tanto texto como archivo
+            const formData = new FormData();
+            formData.append('titulo_termino', sanitizedPolicyName);
+            formData.append('secciones', JSON.stringify(sanitizedSections));
+    
+            // Configura los campos adicionales
+            formData.append('fechaSubida', new Date().toISOString()); // Fecha actual en formato ISO
+            formData.append('version', version); // Versión de la política
+            formData.append('estadoVigencia', true); // Estado de vigencia
+            formData.append('estado', true); // Estado general
+    
+            // Verificar si se ha seleccionado un archivo para agregarlo
+            if (file) {
+                formData.append('archivo', file); // 'Archivo' es el nombre del campo que el servidor espera
+            }
+    
+            // Enviar la solicitud al servidor
             const response = await fetch(API_URL, {
                 method: 'POST',
                 body: formData, // Enviar formData en lugar de JSON
             });
-
+    
             if (response.ok) {
                 const createdPolicy = await response.json();
                 setItems((prevItems) => [...prevItems, createdPolicy]);
                 clearForm();
-                toast.success('Terminos Agregado');
+                toast.success('Termino Agregado');
             } else {
-                toast.warning('Error al agregar el Terminos.');
+                toast.warning('Error al agregar el Termino.');
             }
         } catch (error) {
             toast.error('Hubo un problema con la solicitud.');
@@ -391,51 +403,54 @@ const PoliticasPrivacidad = () => {
 
     const updatePolicy = async () => {
         if (editingPolicyId === null) return;
-
+    
         try {
-            // Create a FormData instance to handle both text and optional file data
+            // Sanitizar los datos antes de agregarlos a FormData
+            const sanitizedPolicyTitle = DOMPurify.sanitize(newPolicy);
+            const sanitizedSections = DOMPurify.sanitize(JSON.stringify(sections));
+    
+            // Crear una instancia de FormData para manejar tanto texto como archivo opcional
             const formData = new FormData();
-            formData.append('titulo_termino', newPolicy);
-            formData.append('secciones', JSON.stringify(sections));
+            formData.append('titulo_termino', sanitizedPolicyTitle);
+            formData.append('secciones', sanitizedSections);
             formData.append('fechaSubida', new Date().toISOString()); // Fecha actual en formato ISO
-            // Check if a file is selected; if so, include it in the request
+    
+            // Verificar si un archivo fue seleccionado; si es así, incluirlo en la solicitud
             if (file) {
                 formData.append('archivo', file);
-
             }
-
+    
             const response = await fetch(`${API_URL}/${editingPolicyId}`, {
                 method: 'PATCH',
-                body: formData, // Use FormData as the body when sending
+                body: formData, // Usar FormData como el cuerpo al enviar
             });
-
-
-
+    
             if (!response.ok) {
                 console.error(`Error: ${response.status} - ${response.statusText}`);
                 toast.warning(`Error ${response.status}: ${response.statusText}`);
             } else {
-                response.json().then(data => {
-
-                    toast.success('Termino Actualizado con exito');
-                }).catch(error => {
-
-                    toast.warning('Error al obtener la respuesta');
-                });
+                response.json()
+                    .then((data) => {
+                        toast.success('Operación exitosa');
+                    })
+                    .catch((error) => {
+                        toast.warning('Error al obtener la respuesta');
+                    });
             }
-
+    
             const updatedPolicy = await response.json();
             const updatedItems = items.map((item, index) =>
                 index === editingIndex ? updatedPolicy : item
             );
-
+    
             setItems(updatedItems);
             clearForm();
             toast.success('Termino Actualizado con exito');
         } catch (error) {
-
+            //console.error('Error al actualizar la política:', error);
+            //toast.error('Ocurrió un error inesperado.');
         }
-    };;
+    };
 
     const saveChanges = async () => {
         if (isEditing) {
@@ -463,7 +478,6 @@ const PoliticasPrivacidad = () => {
         const updatedArchivos = newArchivos.filter((_, i) => i !== index);
         setNewArchivos(updatedArchivos);
     };
-
 
     return (
         <Box>
@@ -837,8 +851,6 @@ const PoliticasPrivacidad = () => {
             </Box>
         </Box>
     );
-
-
 
 };
 

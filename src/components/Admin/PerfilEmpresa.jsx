@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, IconButton, Button, Avatar, Tooltip, Select, MenuItem, ListItem, useTheme ,CardMedia} from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { toast } from 'react-toastify';
+import DOMPurify from 'dompurify';
+
 
 const PerfilEmpresa = () => {
     const [nombreEmpresa, setNombreEmpresa] = useState('Nombre de la Empresa');
@@ -155,79 +157,88 @@ const PerfilEmpresa = () => {
     };
 
 
-
-
-
     const handleEditNombre = () => {
-
-        if (nuevoNombre.trim() === '') {
-            toast.error('El campo Nombre no puede estar vacío,');
+        // Eliminar espacios en blanco y sanitizar el valor
+        const sanitizedNombre = DOMPurify.sanitize(nuevoNombre.trim());
+    
+        if (sanitizedNombre === '') {
+            toast.error('El campo Nombre no puede estar vacío.');
         } else {
-            actualizarEmpresa('nombreEmpresa', nuevoNombre);
+            actualizarEmpresa('nombreEmpresa', sanitizedNombre); // Usa el valor sanitizado
             setIsEditingNombre(false);
+            toast.success('Nombre actualizado con éxito.');
         }
-
-
     };
 
     const toggleEditing = () => {
         if (isEditing) {
-            // Verifica que todos los campos tengan contenido antes de guardar
+            // Sanitiza los campos
+            const sanitizedNombreEmpresa = DOMPurify.sanitize(nombreEmpresa.trim());
+            const sanitizedDescripcion = DOMPurify.sanitize(descripcion.trim());
+            const sanitizedMision = DOMPurify.sanitize(mision.trim());
+            const sanitizedVision = DOMPurify.sanitize(vision.trim());
+            const sanitizedDireccion = DOMPurify.sanitize(direccion.trim());
+            const sanitizedObjetivo = DOMPurify.sanitize(objetivo.trim());
+            const sanitizedImagen = DOMPurify.sanitize(imagen.trim());
+    
+            // Verifica que no estén vacíos después de la sanitización
             if (
-                nombreEmpresa.trim() === '' ||
-                descripcion.trim() === '' ||
-                mision.trim() === '' ||
-                vision.trim() === '' ||
-                direccion.trim() === '' ||
-                objetivo.trim() === '' ||
-                imagen.trim() === ''
+                sanitizedNombreEmpresa === '' ||
+                sanitizedDescripcion === '' ||
+                sanitizedMision === '' ||
+                sanitizedVision === '' ||
+                sanitizedDireccion === '' ||
+                sanitizedObjetivo === '' ||
+                sanitizedImagen === ''
             ) {
                 toast.warning('Todos los campos deben estar completos antes de guardar.');
-
-                return; // No guarda si algún campo está vacío
+                return;
             }
-
-            // Guardar los cambios en todos los campos editados
-            actualizarEmpresa('nombreEmpresa', nombreEmpresa);
-            actualizarEmpresa('descripcion', descripcion);
-            actualizarEmpresa('mision', mision);
-            actualizarEmpresa('vision', vision);
-            actualizarEmpresa('direccion', direccion);
-            actualizarEmpresa('objetivo', objetivo);
-            
-            toast.success('Informacion actualizada con éxito');
-           
+    
+            // Guardar los campos sanitizados
+            actualizarEmpresa('nombreEmpresa', sanitizedNombreEmpresa);
+            actualizarEmpresa('descripcion', sanitizedDescripcion);
+            actualizarEmpresa('mision', sanitizedMision);
+            actualizarEmpresa('vision', sanitizedVision);
+            actualizarEmpresa('direccion', sanitizedDireccion);
+            actualizarEmpresa('objetivo', sanitizedObjetivo);
+            actualizarEmpresa('imagen', sanitizedImagen);
+    
+            toast.success('Información actualizada con éxito');
         }
-
-        // Alterna entre modo de edición y visualización
+    
         setIsEditing(!isEditing);
     };
 
 
     const handleAddLink = () => {
         if (selectedPlatform && newLink) {
+            // Sanitizar el enlace antes de usarlo
+            const sanitizedLink = DOMPurify.sanitize(newLink.trim());
+    
             // Verificar que el enlace comience con "https://"
             const urlPattern = /^https:\/\/.+/;
-            if (!urlPattern.test(newLink)) {
+            if (!urlPattern.test(sanitizedLink)) {
                 toast.warning("El enlace debe comenzar con 'https://'.");
                 return; // No continúa si el enlace no es válido
             }
-
+    
             // Crear el nuevo enlace
-            const newSocialLink = { nombre: selectedPlatform, link: newLink };
-
+            const newSocialLink = { nombre: selectedPlatform, link: sanitizedLink };
+    
             // Asegurarse de que socialLinks sea un arreglo antes de concatenar
             const updatedLinks = Array.isArray(socialLinks) ? [...socialLinks, newSocialLink] : [newSocialLink];
-
+    
             // Actualizar el estado
             setSocialLinks(updatedLinks);
-
+    
             // Actualizar en la base de datos
             actualizarEmpresa('redesSociales', updatedLinks);
-
+    
             // Limpiar el formulario
             setNewLink('');
             setSelectedPlatform('');
+            toast.success("Enlace añadido con éxito.");
         } else {
             toast.warning("Debe completar todos los campos.");
         }
@@ -258,22 +269,38 @@ const PerfilEmpresa = () => {
 
     const handleUpdateLink = () => {
         if (currentEditIndex !== null) {
+            // Sanitizar los valores del enlace editado
+            const sanitizedPlatform = DOMPurify.sanitize(editedLink.platform.trim());
+            const sanitizedUrl = DOMPurify.sanitize(editedLink.url.trim());
+    
+            // Validar que el enlace comience con "https://"
+            const urlPattern = /^https:\/\/.+/;
+            if (!urlPattern.test(sanitizedUrl)) {
+                toast.warning("El enlace debe comenzar con 'https://'.");
+                return; // No continuar si la URL no es válida
+            }
+    
             // Crea una copia del estado actual de socialLinks
             const updatedLinks = [...socialLinks];
-
+    
             // Actualiza el enlace en el índice correspondiente
-            updatedLinks[currentEditIndex] = editedLink;
-
+            updatedLinks[currentEditIndex] = {
+                platform: sanitizedPlatform,
+                url: sanitizedUrl,
+            };
+    
             // Actualiza el estado de socialLinks con el nuevo arreglo
             setSocialLinks(updatedLinks);
-
+    
             // Llama a la función para actualizar la empresa en el backend
             actualizarEmpresa('redesSociales', updatedLinks);
-
+    
             // Restablece el estado de edición y el formulario
             setIsEditingLink(false);
             setEditedLink({ platform: '', url: '' }); // Limpia los valores del formulario
             setCurrentEditIndex(null); // Reinicia el índice de edición
+    
+            toast.success("Enlace actualizado con éxito.");
         } else {
             console.error('Error: No se puede actualizar el enlace, índice no válido.');
         }
