@@ -17,7 +17,7 @@ const Header = ({ usuario, onLogout, toggleDarkMode, darkMode }) => {
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
-    const [showMenu, setShowMenu] = useState(true); // Controla el estado de visibilidad del menú lateral
+    const [showMenu, setShowMenu] = useState(false); // Controla el estado de visibilidad del menú lateral
 
     const tituloLargo = "Plataforma de Rendimiento Integral y Monitoreo Educativo de la UTHH";
     const tituloCorto = "PRIME UTHH";

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Box , LinearProgress,IconButton } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, LinearProgress, IconButton } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import banner from '../assets/banner-login.png'; 
+import banner from '../assets/banner-login.png';
 import { useMediaQuery } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -16,13 +16,13 @@ const ForgotPassword = () => {
     const [isCodeVerified, setIsCodeVerified] = useState(false);
     const [newPassword, setNewPassword] = useState('');
     const [token, setToken] = useState('');
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
 
     const isMobile = useMediaQuery('(max-width: 600px)');
 
-     // Función para calcular el progreso de la fortaleza de la contraseña
-     const calculatePasswordProgress = () => {
+    // Función para calcular el progreso de la fortaleza de la contraseña
+    const calculatePasswordProgress = () => {
         let progress = 0;
 
         // Validación de longitud mínima
@@ -126,21 +126,33 @@ const ForgotPassword = () => {
         }
 
         try {
-            console.log(token)
-            const response = await axios.post('https://prj-server.onrender.com/reset-password', {
-                token: token,
-                newPassword,
+
+            // Realizar la solicitud con fetch
+            const response = await fetch('https://prj-server.onrender.com/reset-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    token,
+                    newPassword,
+                }),
             });
 
-            if (response.status === 200) {
-                toast.success('Contraseña restablecida correctamente.');
+            // Parsear la respuesta
+            const data = await response.json();
+
+            console.log(data);
+
+            if (response.ok) { // `response.ok` es equivalente a verificar si el status es 200-299
+                toast.success(data.message);
                 navigate('/login');
             } else {
-                toast.warning(response.data);
+                toast.warning(data.message || 'Error inesperado');
             }
         } catch (error) {
             toast.error('Error al restablecer la contraseña.');
-            console.log(error)
+            console.error('Error:', error);
         }
     };
 
@@ -173,7 +185,7 @@ const ForgotPassword = () => {
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
-                        width: isMobile ? '80%' : '70%', // Ajustar para móvil
+                        width: isMobile ? '100%' : '100%', // Ajustar para móvil
                         alignItems: 'center',
                         backgroundColor: '#921F45',
                         borderRadius: '10px 0 0 10px',
@@ -198,7 +210,7 @@ const ForgotPassword = () => {
                         backgroundColor: '#BC955B',
                         borderRadius: '0 10px 10px 0',
                         padding: 1,
-                        width: '50%',
+                        width: '100%',
                     }}
                 >
                     <Typography component="h1" variant="h5">
@@ -277,27 +289,27 @@ const ForgotPassword = () => {
                                     )
                                 }}
                             />
-                              <LinearProgress
-                                    variant="determinate"
-                                    value={passwordProgress}
-                                    sx={{
-                                        height: 10,
-                                        borderRadius: 5,
-                                        mt: 2,
-                                        backgroundColor: '#E0E0E0',
-                                        '& .MuiLinearProgress-bar': {
-                                            backgroundColor: getProgressColor(),
-                                        },
-                                    }}
-                                />
-                                <Typography variant="body1" sx={{ mt: 1 }}>
-                                    {passwordProgress === 0 && ''}
-                                    {passwordProgress === 20 && 'Muy débil'}
-                                    {passwordProgress === 40 && 'Débil'}
-                                    {passwordProgress === 60 && 'Moderada'}
-                                    {passwordProgress === 80 && 'Fuerte'}
-                                    {passwordProgress === 100 && 'Contraseña segura'}
-                                </Typography>
+                            <LinearProgress
+                                variant="determinate"
+                                value={passwordProgress}
+                                sx={{
+                                    height: 10,
+                                    borderRadius: 5,
+                                    mt: 2,
+                                    backgroundColor: '#E0E0E0',
+                                    '& .MuiLinearProgress-bar': {
+                                        backgroundColor: getProgressColor(),
+                                    },
+                                }}
+                            />
+                            <Typography variant="body1" sx={{ mt: 1 }}>
+                                {passwordProgress === 0 && ''}
+                                {passwordProgress === 20 && 'Muy débil'}
+                                {passwordProgress === 40 && 'Débil'}
+                                {passwordProgress === 60 && 'Moderada'}
+                                {passwordProgress === 80 && 'Fuerte'}
+                                {passwordProgress === 100 && 'Contraseña segura'}
+                            </Typography>
                             <Button
                                 type="submit"
                                 fullWidth
@@ -309,7 +321,7 @@ const ForgotPassword = () => {
                             </Button>
                         </Box>
                     )}
-                 </Box>
+                </Box>
             </Box>
         </Container>
     );
